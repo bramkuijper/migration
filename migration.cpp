@@ -90,7 +90,7 @@ void init_population()
     }
 }
 
-
+// the dynamics of the population at the wintering ground
 void winter_dynamics()
 {
     // individuals forage
