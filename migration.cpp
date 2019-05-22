@@ -479,6 +479,11 @@ void winter_dynamics(int t)
         // and reduce it by time of arrival
         // TODO think more about this function
         SummerPop[i].resources -= arrival_resource_decay * t;
+
+        if (SummerPop[i].resources < 0)
+        {
+            SummerPop[i].resources = 0;
+        }
     }
 }
 
