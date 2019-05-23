@@ -72,7 +72,7 @@ double sdmu_phi = 0.0;
 int tmax = 10;
 int seed = 0;
 
-int skip = 10;
+int skip = 1;
 
 // keep track of the current number of 
 // individuals signaling to disperse
@@ -150,34 +150,34 @@ void init_arguments(int argc, char **argv)
 void write_parameters()
 {
     DataFile << endl << endl
-            << "init_theta_a" << init_theta_a << endl
-            << "init_theta_b" << init_theta_b << endl
-            << "init_phi_a" << init_phi_a << endl
-            << "init_phi_b" << init_phi_b << endl
-            << "pmort" << pmort << endl
-            << "pgood_init" << pgood_init << endl
-            << "decay_good" << decay_good << endl
-            << "rgood" << rgood << endl
-            << "rbad" << rbad << endl
-            << "arrival_resource_decay" << arrival_resource_decay << endl
-            << "resource_reproduce_threshold" << resource_reproduce_threshold << endl
-            << "mu_theta" << mu_theta << endl
-            << "mu_phi" << mu_phi << endl
-            << "sdmu_theta" << sdmu_theta << endl
-            << "sdmu_phi" << sdmu_phi << endl
-            << "tmax" << tmax << endl
-            << "N" << N << endl
-            << "seed" << seed << endl;
+            << "init_theta_a;" << init_theta_a << endl
+            << "init_theta_b;" << init_theta_b << endl
+            << "init_phi_a;" << init_phi_a << endl
+            << "init_phi_b;" << init_phi_b << endl
+            << "pmort;" << pmort << endl
+            << "pgood_init;" << pgood_init << endl
+            << "decay_good;" << decay_good << endl
+            << "rgood;" << rgood << endl
+            << "rbad;" << rbad << endl
+            << "arrival_resource_decay;" << arrival_resource_decay << endl
+            << "resource_reproduce_threshold;" << resource_reproduce_threshold << endl
+            << "mu_theta;" << mu_theta << endl
+            << "mu_phi;" << mu_phi << endl
+            << "sdmu_theta;" << sdmu_theta << endl
+            << "sdmu_phi;" << sdmu_phi << endl
+            << "tmax;" << tmax << endl
+            << "N;" << N << endl
+            << "seed;" << seed << endl;
 }
 
 // list of the data headers at the start of the file
 void write_data_headers()
 {
-    DataFile << "mean_theta_a;mean_theta_b;mean_phi_a;mean_phi_b;mean_resources;var_theta_a;var_theta_b;var_phi_a;var_phi_b;var_resources;nwinter;nstaging;nsummer;nkids;" << endl;
+    DataFile << "generation;time;mean_theta_a;mean_theta_b;mean_phi_a;mean_phi_b;mean_resources;var_theta_a;var_theta_b;var_phi_a;var_phi_b;var_resources;nwinter;nstaging;nsummer;nkids;" << endl;
 }
 
 // write data both for winter and summer populations
-void write_stats()
+void write_stats(int generation, int timestep)
 {
     double mean_theta_a = 0.0;
     double ss_theta_a = 0.0;
@@ -247,6 +247,8 @@ void write_stats()
     double var_resources = ss_resources - mean_resources * mean_resources;
 
     DataFile 
+        << generation << ";"
+        << timestep << ";"
         << mean_theta_a << ";"
         << mean_theta_b << ";"
         << mean_phi_a << ";"
@@ -798,6 +800,8 @@ int main(int argc, char **argv)
 
     write_data_headers();
 
+    init_population();
+
     for (int generation = 0; generation < number_generations; ++generation)
     {
         // time during winter (i.e., days)
@@ -806,7 +810,7 @@ int main(int argc, char **argv)
         {
             winter_dynamics(t);
         }
-
+        
         // all individuals that wanted to migrate have migrated now
         // all remainers are going to stay at wintering ground
         clear_staging_pool();
@@ -835,7 +839,7 @@ int main(int argc, char **argv)
 
         if (generation % skip == 0)
         {
-            write_stats();
+            write_stats(generation, 2);
         }
     }
 

@@ -1,2 +1,2 @@
 xmigration : migration.cpp auxiliary.h
-	g++ -Wall -O3 migration.cpp -o xmigration -lm -lrt -lgsl -lgslcblas
+	g++ -Wall -O3 -ggdb migration.cpp -o xmigration -lm -lrt -lgsl -lgslcblas

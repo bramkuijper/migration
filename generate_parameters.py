@@ -17,7 +17,7 @@ rgood = [ 1 ]
 rbad = [ 0.5 ]
 
 arrival_resource_decay = [0.1, 0.5]
-resource_reproduce_threshold = [ 1 ]
+resource_reproduction_threshold = [ 1 ]
 
 mu_theta = 0.01
 mu_phi = 0.01
@@ -30,7 +30,7 @@ counter = 0
 
 for pmort_i in pmort:
     for pgood_init_i in pgood_init:
-        for decay_good_in decay_good:
+        for decay_good_i in decay_good:
             for rgood_i in rgood:
                 for rbad_i in rbad:
                     for arrival_resource_decay_i in arrival_resource_decay:
@@ -53,9 +53,13 @@ for pmort_i in pmort:
                                     + str(decay_good_i) + " "
                                     + str(rgood_i) + " "
                                     + str(rbad_i) + " "
-                                    + str(arrival_resource_decay) + " "
-
-
+                                    + str(arrival_resource_decay_i) + " "
+                                    + str(resource_reproduction_threshold_i) + " "
+                                    + str(mu_theta) + " "
+                                    + str(mu_phi) + " "
+                                    + str(sdmu_theta) + " "
+                                    + str(sdmu_phi) + " "
+                                    + str(tmax))
 
 
 
