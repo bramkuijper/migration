@@ -227,6 +227,3 @@ int main()
         write_stats();
     }
 }
-
-
-
