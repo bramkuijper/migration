@@ -80,14 +80,16 @@ dat = pd.read_csv(sys.argv[1],
 #########################################
 
 # initialize the figure
-fig = plt.figure(figsize=(10,15))
+fig = plt.figure(figsize=(10,50))
 
 # generate the grid of the graph
 # see: 
 widths = [ 1 ]
-heights = [ 1, 1, 1, 1, 1]
+heights = [ 1 for x in range(10)]
 numrows = len(heights)
 numcols  = len(widths)
+
+rowctr= 0
 
 # make the grid
 gs = gridspec.GridSpec(
@@ -97,9 +99,52 @@ gs = gridspec.GridSpec(
         height_ratios=heights)
 
 
+# plot the resulting joining probability 
+ax = plt.subplot(gs[rowctr,0])
+
+# make a range of resources
+resources = list(np.arange(0,100,1))
+
+# now calculate the corresponding signal probability for each resource level
+# based on the evolved values of the reaction norm for signaling
+psignal = [ float(dat["mean_theta_a"][-1:]) + float(dat["mean_theta_b"][-1:]) * x for x in resources]
+
+ax.plot(
+        resources
+        ,psignal
+        ,label=r"reaction norm")
+
+ax.set_ylabel(r"Willingness 2 disperse")
+ax.set_xlabel(r"Resource level")
+ax.set_ylim(0,1)
+
+rowctr +=1
+
+# plot the resulting migration probz
+ax = plt.subplot(gs[rowctr,0])
+
+# make a range of resources
+group_size = list(np.arange(0,5000,1))
+
+
+# now calculate the corresponding signal probability for each resource level
+# based on the evolved values of the reaction norm for signaling
+pdisperse = [ float(dat["mean_phi_a"][-1:]) + float(dat["mean_phi_b"][-1:]) * x for x in group_size]
+
+ax.plot(
+        group_size 
+        ,pdisperse
+        ,label=r"reaction norm")
+
+ax.set_ylabel(r"Group size dispersal")
+ax.set_xlabel(r"Group size")
+ax.set_ylim(0,1)
+
+rowctr +=1
+
 # start next entry of the graph
 # the number of acts * their efficiency
-ax = plt.subplot(gs[0,0])
+ax = plt.subplot(gs[rowctr,0])
 
 ax.plot(
         dat["generation"],
@@ -120,7 +165,8 @@ ax.tick_params(
         which="both",
         labelbottom=False)
 
-ax = plt.subplot(gs[1,0])
+rowctr +=1
+ax = plt.subplot(gs[rowctr,0])
 
 
 ax.plot(
@@ -137,7 +183,9 @@ ax.legend()
 
 ax.set_ylabel(r"Slope, $b$")
 
-ax = plt.subplot(gs[2,0])
+rowctr +=1
+
+ax = plt.subplot(gs[rowctr,0])
 
 
 ax.plot(
@@ -165,7 +213,9 @@ ax.legend()
 ax.set_ylabel(r"Popsize")
 
 
-ax = plt.subplot(gs[3,0])
+rowctr +=1
+
+ax = plt.subplot(gs[rowctr,0])
 
 
 ax.plot(
@@ -175,6 +225,35 @@ ax.plot(
 
 ax.set_ylabel(r"Resources")
 ax.set_xlabel(r"Generation")
+
+rowctr +=1
+
+ax = plt.subplot(gs[rowctr,0])
+
+
+ax.plot(
+        dat["generation"],
+        dat["mean_staging_size_summer"],
+        label=r"$N_{\mathrm{staging,summer}}i$")
+
+ax.plot(
+        dat["generation"],
+        dat["mean_staging_size_winter"],
+        label=r"$N_{\mathrm{staging,winter}}i$")
+
+ax.plot(
+        dat["generation"],
+        dat["mean_flock_size_winter"],
+        label=r"$N_{\mathrm{flock,winter}}i$")
+
+ax.plot(
+        dat["generation"],
+        dat["mean_flock_size_summer"],
+        label=r"$N_{\mathrm{flock,summer}}i$")
+
+ax.set_ylabel(r"Flock, Staging size")
+ax.set_xlabel(r"Generation")
+ax.legend()
 
 format = "pdf"
 

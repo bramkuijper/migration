@@ -28,6 +28,13 @@ executable = "./xmigration"
 
 counter = 0
 
+background = True
+
+backgroundstr = ""
+
+if background:
+    backgroundstr = "&"
+
 for pmort_i in pmort:
     for pgood_init_i in pgood_init:
         for decay_good_i in decay_good:
@@ -59,7 +66,7 @@ for pmort_i in pmort:
                                     + str(mu_phi) + " "
                                     + str(sdmu_theta) + " "
                                     + str(sdmu_phi) + " "
-                                    + str(tmax))
+                                    + str(tmax) + " " + backgroundstr)
 
 
 

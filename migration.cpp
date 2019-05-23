@@ -35,7 +35,7 @@ gsl_rng *rng_r; // gnu scientific rng
 const int N = 5000;
 
 // number of generations
-long int number_generations = 10;
+long int number_generations = 50000;
 
 // initial values for phi and theta
 double init_theta_a = 0.0; 
@@ -72,7 +72,13 @@ double sdmu_phi = 0.0;
 int tmax = 10;
 int seed = 0;
 
-int skip = 1;
+int skip = 10;
+
+// stats of flock size and staging
+double mean_flock_size_winter = 0.0;
+double mean_staging_size_winter = 0.0;
+double mean_flock_size_summer = 0.0;
+double mean_staging_size_summer = 0.0;
 
 // keep track of the current number of 
 // individuals signaling to disperse
@@ -173,7 +179,7 @@ void write_parameters()
 // list of the data headers at the start of the file
 void write_data_headers()
 {
-    DataFile << "generation;time;mean_theta_a;mean_theta_b;mean_phi_a;mean_phi_b;mean_resources;var_theta_a;var_theta_b;var_phi_a;var_phi_b;var_resources;nwinter;nstaging;nsummer;nkids;" << endl;
+    DataFile << "generation;time;mean_theta_a;mean_theta_b;mean_phi_a;mean_phi_b;mean_resources;var_theta_a;var_theta_b;var_phi_a;var_phi_b;var_resources;nwinter;nstaging;nsummer;nkids;mean_flock_size_summer;mean_flock_size_winter;mean_staging_size_winter;mean_staging_size_summer;" << endl;
 }
 
 // write data both for winter and summer populations
@@ -263,6 +269,10 @@ void write_stats(int generation, int timestep)
         << NStaging << ";"
         << NSummer << ";" 
         << NKids << ";" 
+        << mean_flock_size_winter << ";" 
+        << mean_flock_size_summer << ";" 
+        << mean_staging_size_winter << ";" 
+        << mean_staging_size_summer << ";" 
         << endl;
 
 
@@ -434,6 +444,8 @@ void winter_dynamics(int t)
 
     double pdisperse = 0.0;
 
+    int NStaging_start = NStaging;
+
     // actual dispersal
     for (int i = 0; i < NStaging; ++i)
     {
@@ -442,7 +454,7 @@ void winter_dynamics(int t)
         // within the staging pool
 
         pdisperse = 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1])
-            + 0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) * NStaging;
+            + 0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) * NStaging_start;
 
         // yes individual goes
         if (gsl_rng_uniform(rng_r) < pdisperse)
@@ -487,7 +499,11 @@ void winter_dynamics(int t)
             SummerPop[i].resources = 0;
         }
     }
-}
+
+    // add current dispersal flock size to stats
+    mean_flock_size_winter += NFlock;
+    mean_staging_size_winter += NStaging_start;
+} // end winter_dynamics
 
 // mutation of a certain allele with value val
 // given mutation rate mu and mutational distribution stdev sdmu
@@ -741,6 +757,8 @@ void summer_dynamics(int t)
 
     double pdisperse = 0.0;
 
+    int NStaging_start = NStaging;
+
     // actual dispersal
     for (int i = 0; i < NStaging; ++i)
     {
@@ -749,7 +767,7 @@ void summer_dynamics(int t)
         // within the staging pool
 
         pdisperse = 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1])
-            + 0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) * NStaging;
+            + 0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) * NStaging_start;
 
         // yes individual goes
         if (gsl_rng_uniform(rng_r) < pdisperse)
@@ -789,6 +807,10 @@ void summer_dynamics(int t)
         // TODO think more about this function
         WinterPop[i].resources -= arrival_resource_decay * t;
     }
+    
+    // add current dispersal flock size to stats
+    mean_flock_size_summer += NFlock;
+    mean_staging_size_summer += NStaging_start;
 }
 
 
@@ -804,12 +826,19 @@ int main(int argc, char **argv)
 
     for (int generation = 0; generation < number_generations; ++generation)
     {
+        mean_flock_size_winter = 0.0;
+        mean_staging_size_winter = 0.0;
+
         // time during winter (i.e., days)
         // during which individuals forage
         for (int t = 0; t < tmax; ++t)
         {
             winter_dynamics(t);
         }
+
+        // now take averages over all timesteps that individuals can join groups
+        mean_flock_size_winter /= tmax;
+        mean_staging_size_winter /= tmax;
         
         // all individuals that wanted to migrate have migrated now
         // all remainers are going to stay at wintering ground
@@ -821,6 +850,10 @@ int main(int argc, char **argv)
 
         // have individuals reproduce after they migrated to the summer spot
         summer_reproduction();
+        
+        // set flock size stats to 0 before summer dynamics starts
+        mean_flock_size_summer = 0.0;
+        mean_staging_size_summer = 0.0;
 
         // time during summer (i.e., days)
         // during which individuals forage
@@ -828,6 +861,10 @@ int main(int argc, char **argv)
         {
             summer_dynamics(t);
         }
+        
+        // now take averages over all timesteps that individuals can join groups
+        mean_flock_size_summer /= tmax;
+        mean_staging_size_summer /= tmax;
 
 
         // all individuals who remain at the summer ground die
