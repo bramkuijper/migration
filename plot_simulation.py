@@ -22,8 +22,6 @@ import matplotlib.gridspec as gridspec
 from matplotlib.ticker import AutoMinorLocator
 from matplotlib import cm
 
-plt.style.use('base')
-
 # some stuff to render fonts in graphs
 rcParams['axes.labelsize'] = 15
 rcParams['text.usetex'] = True
@@ -66,6 +64,11 @@ def find_parameter_linenum(filename):
 #########################################
 #           read in the data
 #########################################
+
+if len(sys.argv) < 2:
+    print("plz provide a filename")
+    sys.exit()
+
 line_num_params = find_parameter_linenum(sys.argv[1])
 
 dat = pd.read_csv(sys.argv[1],
