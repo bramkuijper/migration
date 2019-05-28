@@ -1,32 +1,11 @@
 #ifndef DISTREADER_H_
 #define DISTREADER_H_
 
-#include <ctime>
-#include <sys/time.h>
 #include <string>
 #include <iostream>
 #include <sstream>
-#include <cmath>
+#include <chrono>
 
-//#define WINDOWS_32_Q
-#define NOGSL
-
-#include <ctime>
-#include <string>
-
-#ifdef _WIN32
-#include <windows.h>
-#define NOGSL
-#endif
-#
-#ifdef __MACH__
-#include <mach/clock.h>
-#include <mach/mach.h>
-#endif
-
-#ifndef NOGSL
-#include <gsl/gsl_cdf.h>
-#endif 
 // convert from integer to string
 std::string itos(int j)
 {
@@ -44,44 +23,22 @@ std::string dtos(double j)
     return s.str();
 }
 
-unsigned get_nanoseconds()
+int get_nanoseconds()
 {
-#ifndef _WIN32
+    using namespace std::chrono;
 
-	timespec ts;
+// https://stackoverflow.com/questions/31255486/c-how-do-i-convert-a-stdchronotime-point-to-long-and-back 
+    auto now = time_point_cast<nanoseconds>(system_clock::now());
 
-    #ifdef __MACH__ // OS X does not have clock_gettime, use clock_get_time
-    clock_serv_t cclock;
-    mach_timespec_t mts;
-    host_get_clock_service(mach_host_self(), CALENDAR_CLOCK, &cclock);
-    clock_get_time(cclock, &mts);
-    mach_port_deallocate(mach_task_self(), cclock);
-    ts.tv_sec = mts.tv_sec;
-    ts.tv_nsec = mts.tv_nsec;
+    auto integral_duration = now.time_since_epoch();
 
-    #else
-	if (0!=clock_gettime(CLOCK_REALTIME,&ts))
-	{
-		throw "error in getting the real time stamp in nanosecs, quitting!";
-	}
-    #endif
+    int duration = integral_duration.count();
 
-
-	return(ts.tv_nsec);
-
-#endif
-
-#ifdef _WIN32
-	SYSTEMTIME SystemTime;
-
-	GetSystemTime(&SystemTime);
-
-	return(SystemTime.wMilliseconds);
-#endif
+    return(duration);
 }
 
 
-std::string create_filename(std::string filename)
+void create_filename(std::string &filename)
 {
 	time_t timep = time(NULL);
 
@@ -121,8 +78,6 @@ std::string create_filename(std::string filename)
 	// now we are going to insert microsecs
 	// to obtain unique filename
 	filename.append(itos(get_nanoseconds()));
-
-	return(filename);
 }
 
 int linear_search(const int list[], const int maxsize, int value)
@@ -143,93 +98,6 @@ int linear_search(const int list[], const int maxsize, int value)
     }
 
     return(position);
-}
-
-struct Stats
-{
-    double mean;
-    double mean_ci;
-    double sumsquares;
-    double var;
-    double sumthirds;
-    double skew;
-    double sumfourths;
-    double kurt;
-    double sample;
-};
-
-struct JointStats
-{
-    double cov;
-    double sum12;
-    double sample;
-};
-
-void stat_reset(Stats &results)
-{
-    results.mean = 0;
-    results.mean_ci = 0;
-    results.sumsquares = 0;
-    results.var = 0;
-    results.sumthirds = 0;
-    results.skew = 0;
-    results.sumfourths = 0;
-    results.kurt = 0;
-    results.sample = 0;
-}
-
-
-void stat_addval(Stats &results, const double traitvalue)
-{
-    results.mean += traitvalue;   
-    results.sumsquares += pow(traitvalue,2);
-    results.sumthirds += pow(traitvalue,3);
-    results.sumfourths += pow(traitvalue,4);
-    ++results.sample;
-}
-
-void jstat_reset(JointStats &results)
-{
-    results.sum12 = 0;
-    results.sample = 0;
-}
-
-void jstat_addval(JointStats &results, const double trait1, const double trait2)
-{
-    results.sum12+=trait1*trait2;
-    ++results.sample;
-}
-
-void jstat_finalize(JointStats &results, const double mean1, const double mean2)
-{
-    results.cov = results.sum12 / results.sample - mean1 * mean2;
-}
-
-void stat_finalize(Stats &results)
-{
-    if (results.sample == 0)
-    {
-        results.mean = 0;
-        results.var = 0;
-        results.mean_ci = 0;
-        results.skew = 0;
-        results.kurt = 0;
-    }
-    else
-    { 
-        results.mean /= results.sample;
-        results.var = results.sumsquares == 0 ? 0 : results.sumsquares / results.sample - pow(results.mean,2);
-#ifdef _WIN32 
-        results.mean_ci = 0;
-#endif
-
-#ifndef NOGSL
-        results.mean_ci = gsl_cdf_tdist_Qinv(0.025,results.sample - 1) * results.var / sqrt(results.sample);
-#endif
-        results.skew = results.sumthirds / results.sample - 3 * results.mean * results.sumsquares / results.sample + 2 * pow(results.mean,3);
-        results.kurt = (double) (results.sumfourths / results.sample - 4 * results.sumthirds / results.sample * results.mean + 6 * pow(results.mean,2) * results.sumsquares / results.sample - 3 * pow(results.mean,4));
-
-    }
 }
 
 #endif

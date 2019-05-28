@@ -9,6 +9,7 @@
 #include <iomanip>
 #include <cassert>
 #include <vector>
+#include <cmath>
 
 // random number generation
 #include <gsl/gsl_rng.h>
@@ -87,11 +88,6 @@ int NWinter = 0;
 int NSummer = 0;
 int NKids = 0;
 
-string filename("sim_migration");
-string filename_new(create_filename(filename));
-
-ofstream DataFile(filename_new.c_str());  // output file 
-
 
 struct Individual {
     
@@ -153,7 +149,7 @@ void init_arguments(int argc, char **argv)
 }
 
 // write down all parameters in the file
-void write_parameters()
+void write_parameters(ofstream &DataFile)
 {
     DataFile << endl << endl
             << "init_theta_a;" << init_theta_a << endl
@@ -177,13 +173,13 @@ void write_parameters()
 }
 
 // list of the data headers at the start of the file
-void write_data_headers()
+void write_data_headers(ofstream &DataFile)
 {
     DataFile << "generation;time;mean_theta_a;mean_theta_b;mean_phi_a;mean_phi_b;mean_resources;var_theta_a;var_theta_b;var_phi_a;var_phi_b;var_resources;nwinter;nstaging;nsummer;nkids;mean_flock_size_summer;mean_flock_size_winter;mean_staging_size_winter;mean_staging_size_summer;" << endl;
 }
 
 // write data both for winter and summer populations
-void write_stats(int generation, int timestep)
+void write_stats(ofstream &DataFile, int generation, int timestep)
 {
     double mean_theta_a = 0.0;
     double ss_theta_a = 0.0;
@@ -570,7 +566,7 @@ void create_offspring(Individual &mother, Individual &father, Individual &offspr
 
 // in summery they reproduce dependent on 
 // resources and arrival time
-void summer_reproduction()
+void summer_reproduction(ofstream &DataFile)
 {
     // auxiliary variables storing current mom and dad
     Individual mother, father;
@@ -587,7 +583,7 @@ void summer_reproduction()
     if (NSummer == 1)
     {
         // quit if extinct 
-        write_parameters();
+        write_parameters(DataFile);
         exit(1);
     }
 
@@ -818,9 +814,13 @@ void summer_dynamics(int t)
 // accepting command line arguments
 int main(int argc, char **argv)
 {
+    string filename = "sim_migration";
+    create_filename(filename);
+    ofstream DataFile(filename.c_str());  // output file 
+
     init_arguments(argc, argv);
 
-    write_data_headers();
+    write_data_headers(DataFile);
 
     init_population();
 
@@ -849,7 +849,7 @@ int main(int argc, char **argv)
 
 
         // have individuals reproduce after they migrated to the summer spot
-        summer_reproduction();
+        summer_reproduction(DataFile);
         
         // set flock size stats to 0 before summer dynamics starts
         mean_flock_size_summer = 0.0;
@@ -876,9 +876,9 @@ int main(int argc, char **argv)
 
         if (generation % skip == 0)
         {
-            write_stats(generation, 2);
+            write_stats(DataFile, generation, 2);
         }
     }
 
-    write_parameters();
+    write_parameters(DataFile);
 }
