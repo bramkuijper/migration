@@ -69,6 +69,13 @@ double mu_phi = 0.0;
 double sdmu_theta = 0.0;
 double sdmu_phi = 0.0;
 
+// migration cost function
+double max_migration_cost = 0.0;
+double min_migration_cost = 0.0;
+double migration_cost_decay = 0.0;
+double migration_cost_nonlinear_decay =  0.0;
+double migration_cost_power = 0.0;
+
 // max number of days / season
 int tmax = 10;
 int seed = 0;
@@ -87,7 +94,6 @@ int NStaging = 0;
 int NWinter = 0;
 int NSummer = 0;
 int NKids = 0;
-
 
 struct Individual {
     
@@ -135,7 +141,12 @@ void init_arguments(int argc, char **argv)
     mu_phi = atof(argv[13]);
     sdmu_theta = atof(argv[14]);
     sdmu_phi = atof(argv[15]);
-    tmax = atoi(argv[16]);
+    max_migration_cost = atof(argv[16]);
+    min_migration_cost = atof(argv[17]);
+    migration_cost_decay = atof(argv[18]);
+    migration_cost_nonlinear_decay = atof(argv[19]);
+    migration_cost_power = atof(argv[20]);
+    tmax = atoi(argv[21]);
 
     // set the random seed
 	seed = get_nanoseconds();
@@ -169,6 +180,11 @@ void write_parameters(ofstream &DataFile)
             << "sdmu_phi;" << sdmu_phi << endl
             << "tmax;" << tmax << endl
             << "N;" << N << endl
+            << "max_migration_cost;" << max_migration_cost << endl
+            << "min_migration_cost;" << min_migration_cost << endl
+            << "migration_cost_decay;" << migration_cost_decay << endl
+            << "migration_cost_nonlinear_decay;" << migration_cost_nonlinear_decay << endl
+            << "migration_cost_power;" << migration_cost_power << endl
             << "seed;" << seed << endl;
 }
 
@@ -478,13 +494,25 @@ void winter_dynamics(int t)
         }
     }
 
+    double total_migration_cost;
+
     // update resource levels for all new individuals that have just
     // been added to the summer pool dependent on their flock size
     for (int i = NSummer_old; i < NSummer; ++i)
     {
-        // TODO: think about relationship between flock size and
-        // resource reduction
-        SummerPop[i].resources -= 1.0 / NFlock;
+        total_migration_cost = max_migration_cost - migration_cost_decay * NFlock - migration_cost_nonlinear_decay * pow(NFlock,migration_cost_power);
+
+        if (total_migration_cost < min_migration_cost)
+        {
+            total_migration_cost = min_migration_cost;
+        }
+
+        assert(total_migration_cost >= 0.0);
+        assert(total_migration_cost <= 1.0);
+
+        // resources are reduced due to migration,
+        // yet this depends on group size in a curvilinear fashion
+        SummerPop[i].resources = SummerPop[i].resources * total_migration_cost;
 
         // and reduce it by time of arrival
         // TODO think more about this function
