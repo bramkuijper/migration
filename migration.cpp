@@ -87,6 +87,10 @@ double mean_flock_size_winter = 0.0;
 double mean_staging_size_winter = 0.0;
 double mean_flock_size_summer = 0.0;
 double mean_staging_size_summer = 0.0;
+double var_flock_size_winter = 0.0;
+double var_staging_size_winter = 0.0;
+double var_flock_size_summer = 0.0;
+double var_staging_size_summer = 0.0;
 
 // keep track of the current number of 
 // individuals signaling to disperse
@@ -191,7 +195,7 @@ void write_parameters(ofstream &DataFile)
 // list of the data headers at the start of the file
 void write_data_headers(ofstream &DataFile)
 {
-    DataFile << "generation;time;mean_theta_a;mean_theta_b;mean_phi_a;mean_phi_b;mean_resources;var_theta_a;var_theta_b;var_phi_a;var_phi_b;var_resources;nwinter;nstaging;nsummer;nkids;mean_flock_size_summer;mean_flock_size_winter;mean_staging_size_winter;mean_staging_size_summer;" << endl;
+    DataFile << "generation;time;mean_theta_a;mean_theta_b;mean_phi_a;mean_phi_b;mean_resources;var_theta_a;var_theta_b;var_phi_a;var_phi_b;var_resources;nwinter;nstaging;nsummer;nkids;mean_flock_size_summer;mean_flock_size_winter;mean_staging_size_winter;mean_staging_size_summer;var_flock_size_summer;var_flock_size_winter;var_staging_size_winter;var_staging_size_summer" << endl;
 }
 
 // write data both for winter and summer populations
@@ -284,12 +288,15 @@ void write_stats(ofstream &DataFile, int generation, int timestep)
         << mean_flock_size_winter << ";" 
         << mean_flock_size_summer << ";" 
         << mean_staging_size_winter << ";" 
-        << mean_staging_size_summer << ";" 
+        << mean_staging_size_summer << ";"
+		<< var_flock_size_winter << ";"
+		<< var_flock_size_summer << ";"
+		<< var_staging_size_winter << ";"
+		<< var_staging_size_summer << ";"			
         << endl;
 
-
-
 }
+
 
 // initialize the population at the start of the simulation
 void init_population()
@@ -393,7 +400,7 @@ void winter_dynamics(int t)
             WinterPop[i].resources += rbad;
         }
     
-    } // ok resource dynamic done
+    } // ok, resource dynamic done
 
 
     // foraging of individuals who are already at the staging site
@@ -527,6 +534,9 @@ void winter_dynamics(int t)
     // add current dispersal flock size to stats
     mean_flock_size_winter += NFlock;
     mean_staging_size_winter += NStaging_start;
+	
+	ss_flock_size_winter += NFlock * NFlock;
+	ss_staging_size_winter += NStaging_start * NStaging_start
 } // end winter_dynamics
 
 // mutation of a certain allele with value val
@@ -592,7 +602,7 @@ void create_offspring(Individual &mother, Individual &father, Individual &offspr
 
 
 
-// in summery they reproduce dependent on 
+// in summary, they reproduce dependent on 
 // resources and arrival time
 void summer_reproduction(ofstream &DataFile)
 {
@@ -604,7 +614,7 @@ void summer_reproduction(ofstream &DataFile)
     int resource_integer;
 
     /// auxilary variable specifying the id of the randomly sampled
-    // fater
+    // father
     int father_id;
 
     // see if population is extinct
@@ -835,6 +845,9 @@ void summer_dynamics(int t)
     // add current dispersal flock size to stats
     mean_flock_size_summer += NFlock;
     mean_staging_size_summer += NStaging_start;
+	
+	ss_flock_size_summmer += NFlock * NFlock;
+	ss_staging_size_summer += NStaging_start * NStaging_start
 }
 
 
@@ -856,6 +869,8 @@ int main(int argc, char **argv)
     {
         mean_flock_size_winter = 0.0;
         mean_staging_size_winter = 0.0;
+		var_flock_size_winter = 0.0;
+		var_staging_size_winter = 0.0
 
         // time during winter (i.e., days)
         // during which individuals forage
@@ -867,6 +882,10 @@ int main(int argc, char **argv)
         // now take averages over all timesteps that individuals can join groups
         mean_flock_size_winter /= tmax;
         mean_staging_size_winter /= tmax;
+		
+		// now record variance in flock size and staging size over the season
+		var_flock_size_winter = (ss_flock_size_winter / tmax) - (mean_flock_size_winter * mean_flock_size_winter);
+		var_staging_size_winter = (ss_staging_size_winter / tmax) - (mean_staging_size_winter * mean_staging_size_winter);	
         
         // all individuals that wanted to migrate have migrated now
         // all remainers are going to stay at wintering ground
@@ -893,6 +912,10 @@ int main(int argc, char **argv)
         // now take averages over all timesteps that individuals can join groups
         mean_flock_size_summer /= tmax;
         mean_staging_size_summer /= tmax;
+		
+		// now record variance in summer flock size and staging size over the season
+		var_flock_size_summer = (ss_flock_size_summer / tmax) - (mean_flock_size_summer * mean_flock_size_summer);
+		var_staging_size_summer = (ss_staging_size_summer / tmax) - (mean_staging_size_summer * mean_staging_size_summer);
 
 
         // all individuals who remain at the summer ground die
