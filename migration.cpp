@@ -535,8 +535,8 @@ void winter_dynamics(int t)
     mean_flock_size_winter += NFlock;
     mean_staging_size_winter += NStaging_start;
 	
-	ss_flock_size_winter += NFlock * NFlock;
-	ss_staging_size_winter += NStaging_start * NStaging_start
+	var_flock_size_winter += NFlock * NFlock;
+	var_staging_size_winter += NStaging_start * NStaging_start;
 } // end winter_dynamics
 
 // mutation of a certain allele with value val
@@ -846,8 +846,8 @@ void summer_dynamics(int t)
     mean_flock_size_summer += NFlock;
     mean_staging_size_summer += NStaging_start;
 	
-	ss_flock_size_summmer += NFlock * NFlock;
-	ss_staging_size_summer += NStaging_start * NStaging_start
+	var_flock_size_summer += NFlock * NFlock;
+	var_staging_size_summer += NStaging_start * NStaging_start;
 }
 
 
@@ -870,7 +870,7 @@ int main(int argc, char **argv)
         mean_flock_size_winter = 0.0;
         mean_staging_size_winter = 0.0;
 		var_flock_size_winter = 0.0;
-		var_staging_size_winter = 0.0
+		var_staging_size_winter = 0.0;
 
         // time during winter (i.e., days)
         // during which individuals forage
@@ -884,8 +884,8 @@ int main(int argc, char **argv)
         mean_staging_size_winter /= tmax;
 		
 		// now record variance in flock size and staging size over the season
-		var_flock_size_winter = (ss_flock_size_winter / tmax) - (mean_flock_size_winter * mean_flock_size_winter);
-		var_staging_size_winter = (ss_staging_size_winter / tmax) - (mean_staging_size_winter * mean_staging_size_winter);	
+		var_flock_size_winter = (var_flock_size_winter / tmax) - (mean_flock_size_winter * mean_flock_size_winter);
+		var_staging_size_winter = (var_staging_size_winter / tmax) - (mean_staging_size_winter * mean_staging_size_winter);	
         
         // all individuals that wanted to migrate have migrated now
         // all remainers are going to stay at wintering ground
@@ -914,8 +914,8 @@ int main(int argc, char **argv)
         mean_staging_size_summer /= tmax;
 		
 		// now record variance in summer flock size and staging size over the season
-		var_flock_size_summer = (ss_flock_size_summer / tmax) - (mean_flock_size_summer * mean_flock_size_summer);
-		var_staging_size_summer = (ss_staging_size_summer / tmax) - (mean_staging_size_summer * mean_staging_size_summer);
+		var_flock_size_summer = (var_flock_size_summer / tmax) - (mean_flock_size_summer * mean_flock_size_summer);
+		var_staging_size_summer = (var_staging_size_summer / tmax) - (mean_staging_size_summer * mean_staging_size_summer);
 
 
         // all individuals who remain at the summer ground die
