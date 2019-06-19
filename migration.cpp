@@ -195,7 +195,7 @@ void write_parameters(ofstream &DataFile)
 // list of the data headers at the start of the file
 void write_data_headers(ofstream &DataFile)
 {
-    DataFile << "generation;time;mean_theta_a;mean_theta_b;mean_phi_a;mean_phi_b;mean_resources;var_theta_a;var_theta_b;var_phi_a;var_phi_b;var_resources;nwinter;nstaging;nsummer;nkids;mean_flock_size_summer;mean_flock_size_winter;mean_staging_size_winter;mean_staging_size_summer;var_flock_size_summer;var_flock_size_winter;var_staging_size_winter;var_staging_size_summer" << endl;
+    DataFile << "generation;time;mean_theta_a;mean_theta_b;mean_phi_a;mean_phi_b;mean_resources;var_theta_a;var_theta_b;var_phi_a;var_phi_b;var_resources;nwinter;nstaging;nsummer;nkids;mean_flock_size_summer;mean_flock_size_winter;mean_staging_size_winter;mean_staging_size_summer;var_flock_size_summer;var_flock_size_winter;var_staging_size_winter;var_staging_size_summer;" << endl;
 }
 
 // write data both for winter and summer populations
