@@ -7,7 +7,7 @@ init_theta_b = 0.0
 init_phi_a = 0.05
 init_phi_b = 0.0
 
-tmax = 20
+tmax = 1000
 
 pmort = [ 0.05, 0.1, 0.2 ]
 pgood_init = [ 1.0, 0.5 ]

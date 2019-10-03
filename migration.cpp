@@ -33,12 +33,13 @@ gsl_rng *rng_r; // gnu scientific rng
 // parameters & variables:
 
 // number of individuals in population
-const int N = 5000;
+const int N = 500;
 
 // number of generations
 long int number_generations = 50000;
 
-// initial values for phi and theta
+// initial values for phi (social dependency) and theta (resource dependency)
+// a is an intercept, b is a gradient
 double init_theta_a = 0.0; 
 double init_theta_b = 0.0;
 double init_phi_a = 0.0;
@@ -76,8 +77,9 @@ double migration_cost_decay = 0.0;
 double migration_cost_nonlinear_decay =  0.0;
 double migration_cost_power = 0.0;
 
-// max number of days / season
-int tmax = 10;
+// max number of days / season (two seasons: summer, winter)
+int tmax = 1000;
+
 int seed = 0;
 
 int skip = 10;
@@ -108,7 +110,7 @@ struct Individual {
     // elevation (baseline leaving rate) 
     double theta_a[2];
 
-    // reaction norm, slope on the amount of resources
+    // reaction norm, dependency on the amount of resources
     double theta_b[2];
 
     // collective dispersal reaction norm 
@@ -117,7 +119,7 @@ struct Individual {
     // collective dispersal elevation
     double phi_a[2];
 
-    // collective dispersal slope
+    // collective dispersal slope, dependency on number of individuals
     double phi_b[2];
 };
 
