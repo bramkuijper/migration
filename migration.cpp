@@ -154,6 +154,7 @@ void init_arguments(int argc, char **argv)
     migration_cost_nonlinear_decay = atof(argv[19]);
     migration_cost_power = atof(argv[20]);
     tmax = atoi(argv[21]);
+    resource_function_type = atoi(argv[22]);
 
     // set the random seed
 	seed = get_nanoseconds();

@@ -31,6 +31,10 @@ migration_cost_decay = [ 0 ] # just only nonlinear terms for now
 migration_cost_nonlinear_decay = [ 0.05 ]  
 migration_cost_power = [ 0.5 ]
 
+# whether the resource decay function
+# is linear (0), accelerating (1) or decelerating (2)
+resource_function_type = [ 0,1 ]
+
 executable = "./xmigration"
 
 counter = 0
@@ -58,6 +62,7 @@ for pmort_i in pmort:
                                     for migration_cost_decay_i in migration_cost_decay:
                                         for migration_cost_nonlinear_decay_i in migration_cost_nonlinear_decay:
                                             for migration_cost_power_i in migration_cost_power:
+                                                for resource_function_type_i in resource_function_type:
 
                                                 # increment the counter for the number of 
                                                 # runs
@@ -87,7 +92,9 @@ for pmort_i in pmort:
                                                         + str(migration_cost_decay_i) + " "
                                                         + str(migration_cost_nonlinear_decay_i) + " "
                                                         + str(migration_cost_power_i) + " "
-                                                        + str(tmax) + " " + backgroundstr)
+                                                        + str(tmax) + " " 
+                                                        + str(resource_function_type_i) + " "
+                                                        + backgroundstr)
 
 
 
