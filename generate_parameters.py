@@ -19,6 +19,7 @@ rbad = [ 0.5 ]
 arrival_resource_decay = [0.1, 0.5]
 resource_reproduction_threshold = [ 1 ]
 
+# mutation rates (I fix those and they are not varying)
 mu_theta = 0.01
 mu_phi = 0.01
 sdmu_theta = 0.01

@@ -31,6 +31,8 @@ gsl_rng_type const * T; // gnu scientific library rng type
 gsl_rng *rng_r; // gnu scientific rng 
 
 // parameters & variables:
+// values of the most of these are overridden in the init_arguments()
+// function
 
 // number of individuals in population
 const int N = 500;
