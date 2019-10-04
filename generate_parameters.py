@@ -7,11 +7,11 @@ init_theta_b = 0.0
 init_phi_a = 0.05
 init_phi_b = 0.0
 
-tmax = 20
+tmax = 1000
 
 pmort = [ 0.05, 0.1, 0.2 ]
 pgood_init = [ 1.0, 0.5 ]
-decay_good = [ 1.0/tmax ]
+t_good_ends = [ 300 ]
 
 rgood = [ 1 ]
 rbad = [ 0.5 ]
@@ -35,7 +35,11 @@ executable = "./xmigration"
 
 counter = 0
 
-background = False
+# should jobs run on the background
+# only do this if the number of jobs is smaller
+# than the number of cores you have 
+# do not do this on the carson cluster
+background =  False
 
 backgroundstr = ""
 
@@ -44,7 +48,7 @@ if background:
 
 for pmort_i in pmort:
     for pgood_init_i in pgood_init:
-        for decay_good_i in decay_good:
+        for t_good_ends_i in t_good_ends:
             for rgood_i in rgood:
                 for rbad_i in rbad:
                     for arrival_resource_decay_i in arrival_resource_decay:
@@ -69,7 +73,7 @@ for pmort_i in pmort:
                                                         + str(init_theta_b) + " "
                                                         + str(pmort_i) + " "
                                                         + str(pgood_init_i) + " "
-                                                        + str(decay_good_i) + " "
+                                                        + str(t_good_ends_i) + " "
                                                         + str(rgood_i) + " "
                                                         + str(rbad_i) + " "
                                                         + str(arrival_resource_decay_i) + " "

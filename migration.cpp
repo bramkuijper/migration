@@ -33,10 +33,10 @@ gsl_rng *rng_r; // gnu scientific rng
 // parameters & variables:
 
 // number of individuals in population
-const int N = 5000;
+const int N = 500;
 
 // number of generations
-long int number_generations = 50000;
+long int number_generations = 5;
 
 // initial values for phi and theta
 double init_theta_a = 0.0; 
@@ -50,8 +50,9 @@ double pmort = 0.0;
 // initial probability per season to encounter a good resource patch
 double pgood_init = 0.0;
 
-// the rate at which this probability decays over time
-double decay_good = 0.0;
+// the time point at which 
+// the probability of encountering a good environment becomes 0
+int t_good_ends = 0.0;
 
 // how much resources individuals obtain on a good vs bad patch
 double rgood = 0.0;
@@ -132,7 +133,7 @@ void init_arguments(int argc, char **argv)
     init_phi_b = atof(argv[4]);
     pmort = atof(argv[5]);
     pgood_init = atof(argv[6]);
-    decay_good = atof(argv[7]);
+    t_good_ends = atoi(argv[7]);
     rgood = atof(argv[8]);
     rbad = atof(argv[9]);
     arrival_resource_decay = atof(argv[10]);
@@ -169,7 +170,7 @@ void write_parameters(ofstream &DataFile)
             << "init_phi_b;" << init_phi_b << endl
             << "pmort;" << pmort << endl
             << "pgood_init;" << pgood_init << endl
-            << "decay_good;" << decay_good << endl
+            << "t_good_ends;" << t_good_ends << endl
             << "rgood;" << rgood << endl
             << "rbad;" << rbad << endl
             << "arrival_resource_decay;" << arrival_resource_decay << endl
@@ -372,7 +373,9 @@ void winter_dynamics(int t)
     // individuals make dispersal decisions
 
     // probability of encountering a good resource
-    double pgood = pgood_init - decay_good * t;
+    // decays with time until hits time t = t_good_ends 
+    // when pgood = 0
+    double pgood = pgood_init - pgood_init / t_good_ends * t;
 
     // set lower boundary to the probability
     if (pgood <= 0)
@@ -518,9 +521,12 @@ void winter_dynamics(int t)
         // TODO think more about this function
         SummerPop[i].resources -= arrival_resource_decay * t;
 
+        // death due to starvation
         if (SummerPop[i].resources < 0)
         {
-            SummerPop[i].resources = 0;
+            SummerPop[i] = SummerPop[NSummer - 1];
+            --NSummer;
+            --i;
         }
     }
 
@@ -702,9 +708,14 @@ void summer_reproduction(ofstream &DataFile)
 // & fly back
 void summer_dynamics(int t)
 {
-
     // probability of encountering a good resource
-    double pgood = pgood_init - decay_good * t;
+    double pgood = pgood_init - pgood_init / t_good_ends * t;
+
+    // set lower boundary to the probability
+    if (pgood <= 0)
+    {
+        pgood = 0;
+    }
 
     // foraging of individuals who are just at the wintering site
     // and who have yet to decide to go to the staging site
@@ -741,6 +752,8 @@ void summer_dynamics(int t)
     assert(NSummer>= 0);
 
     double psignal = 0.0;
+
+
     // individuals decide whether to go to staging site
     // i.e., prepare for dispersal
     // signal to disperse
@@ -819,17 +832,38 @@ void summer_dynamics(int t)
         }
     }
 
+    double total_migration_cost = 0.0;
+
     // update resource levels for all new individuals that have just
     // been added to the pool dependent on their flock size
     for (int i = NWinter_old; i < NWinter; ++i)
     {
-        // TODO: think about relationship between flock size and
-        // resource reduction
-        WinterPop[i].resources -= 1.0 / NFlock;
+        total_migration_cost = max_migration_cost - migration_cost_decay * NFlock - migration_cost_nonlinear_decay * pow(NFlock,migration_cost_power);
+
+        if (total_migration_cost < min_migration_cost)
+        {
+            total_migration_cost = min_migration_cost;
+        }
+
+        assert(total_migration_cost >= 0.0);
+        assert(total_migration_cost <= 1.0);
+
+        // resources are reduced due to migration,
+        // yet this depends on group size in a curvilinear fashion
+        SummerPop[i].resources = SummerPop[i].resources * total_migration_cost;
 
         // and reduce it by time of arrival
         // TODO think more about this function
         WinterPop[i].resources -= arrival_resource_decay * t;
+
+        // death due to starvation
+        if (WinterPop[i].resources < 0)
+        {
+            WinterPop[i] = WinterPop[NWinter - 1];
+            --NWinter;
+            --i;
+        }
+
     }
     
     // add current dispersal flock size to stats
