@@ -38,7 +38,7 @@ gsl_rng *rng_r; // gnu scientific rng
 const int N = 500;
 
 // number of generations
-long int number_generations = 5;
+long int number_generations = 50000;
 
 // initial values for phi (social dependency) and theta (resource dependency)
 // a is an intercept, b is a gradient
@@ -79,7 +79,6 @@ double min_migration_cost = 0.0;
 double migration_cost_decay = 0.0;
 double migration_cost_nonlinear_decay =  0.0;
 double migration_cost_power = 0.0;
-double resource_function = 0.0;
 
 // max number of days / season (two seasons: summer, winter)
 int tmax = 1000;
@@ -157,7 +156,6 @@ void init_arguments(int argc, char **argv)
     migration_cost_nonlinear_decay = atof(argv[19]);
     migration_cost_power = atof(argv[20]);
     tmax = atoi(argv[21]);
-    resource_function = atoi(argv[22]);
 
     // set the random seed
 	seed = get_nanoseconds();
@@ -196,7 +194,6 @@ void write_parameters(ofstream &DataFile)
             << "migration_cost_decay;" << migration_cost_decay << endl
             << "migration_cost_nonlinear_decay;" << migration_cost_nonlinear_decay << endl
             << "migration_cost_power;" << migration_cost_power << endl
-			<< "resource_function" << resource_function << endl
             << "seed;" << seed << endl;
 }
 
