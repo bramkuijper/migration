@@ -79,6 +79,7 @@ double min_migration_cost = 0.0;
 double migration_cost_decay = 0.0;
 double migration_cost_nonlinear_decay =  0.0;
 double migration_cost_power = 0.0;
+double resource_function = 0.0;
 
 // max number of days / season (two seasons: summer, winter)
 int tmax = 1000;
@@ -156,7 +157,7 @@ void init_arguments(int argc, char **argv)
     migration_cost_nonlinear_decay = atof(argv[19]);
     migration_cost_power = atof(argv[20]);
     tmax = atoi(argv[21]);
-    resource_function_type = atoi(argv[22]);
+    resource_function = atoi(argv[22]);
 
     // set the random seed
 	seed = get_nanoseconds();
@@ -195,6 +196,7 @@ void write_parameters(ofstream &DataFile)
             << "migration_cost_decay;" << migration_cost_decay << endl
             << "migration_cost_nonlinear_decay;" << migration_cost_nonlinear_decay << endl
             << "migration_cost_power;" << migration_cost_power << endl
+			<< "resource_function" << resource_function << endl
             << "seed;" << seed << endl;
 }
 
@@ -531,7 +533,7 @@ void winter_dynamics(int t)
 
         // and reduce it by time of arrival
         // TODO think more about this function
-        SummerPop[i].resources -= arrival_resource_decay * t;
+        SummerPop[i].resources = arrival_resource_decay * t;
 
         // death due to starvation
         if (SummerPop[i].resources < 0)
