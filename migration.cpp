@@ -79,6 +79,7 @@ double min_migration_cost = 0.0;
 double migration_cost_decay = 0.0;
 double migration_cost_nonlinear_decay =  0.0;
 double migration_cost_power = 0.0;
+int migration_cost_function = 1;  // linear by default
 
 // max number of days / season (two seasons: summer, winter)
 int tmax = 1000;
@@ -156,6 +157,7 @@ void init_arguments(int argc, char **argv)
     migration_cost_nonlinear_decay = atof(argv[19]);
     migration_cost_power = atof(argv[20]);
     tmax = atoi(argv[21]);
+	migration_cost_function = atoi(argv[22]);
 
     // set the random seed
 	seed = get_nanoseconds();
@@ -514,7 +516,21 @@ void winter_dynamics(int t)
     // been added to the summer pool dependent on their flock size
     for (int i = NSummer_old; i < NSummer; ++i)
     {
-        total_migration_cost = max_migration_cost - migration_cost_decay * NFlock - migration_cost_nonlinear_decay * pow(NFlock,migration_cost_power);
+        switch (migration_cost_function){
+        	case 0:
+			return (migration_cost_decay = 0, migration_cost_nonlinear_decay = 1.2e-12, migration_cost_power = 3.2);
+			break;
+			
+			case 1:
+			return (migration_cost_decay = 2e-4, migration_cost_nonlinear_decay = 0, migration_cost_power = 1);
+			break;
+			
+			case 2:
+			return (migration_cost_decay = -3e-4, migration_cost_nonlinear_decay = 1.2e-2, migration_cost_power = 0.62);
+			break;
+		}
+		
+		total_migration_cost = max_migration_cost - migration_cost_decay * NFlock - migration_cost_nonlinear_decay * pow(NFlock,migration_cost_power);
 
         if (total_migration_cost < min_migration_cost)
         {
