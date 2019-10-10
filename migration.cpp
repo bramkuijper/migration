@@ -10,11 +10,7 @@
 #include <cassert>
 #include <vector>
 #include <cmath>
-
-// random number generation
-#include <gsl/gsl_rng.h>
-#include <gsl/gsl_randist.h>
-
+#include <random>
 
 // various functions, such as unique filename creation
 #include "auxiliary.h"
@@ -24,11 +20,11 @@
 // standard namespace
 using namespace std;
 
+// set random seed etc
+int seed = get_nanoseconds();
+mt19937 rng_r{static_cast<long unsigned int>(seed)};
+uniform_real_distribution<> uniform(0.0,1.0);
 
-// random number generator 
-// see http://www.gnu.org/software/gsl/manual/html_node/Random-Number-Generation.html#Random-Number-Generation 
-gsl_rng_type const * T; // gnu scientific library rng type
-gsl_rng *rng_r; // gnu scientific rng 
 
 // parameters & variables:
 // values of the most of these are overridden in the init_arguments()
@@ -77,14 +73,10 @@ double sdmu_phi = 0.0;
 double max_migration_cost = 0.0;
 double min_migration_cost = 0.0;
 double migration_cost_decay = 0.0;
-double migration_cost_nonlinear_decay =  0.0;
 double migration_cost_power = 0.0;
-int migration_cost_function = 1;  // linear by default
 
 // max number of days / season (two seasons: summer, winter)
 int tmax = 1000;
-
-int seed = 0;
 
 int skip = 10;
 
@@ -154,20 +146,8 @@ void init_arguments(int argc, char **argv)
     max_migration_cost = atof(argv[16]);
     min_migration_cost = atof(argv[17]);
     migration_cost_decay = atof(argv[18]);
-    migration_cost_nonlinear_decay = atof(argv[19]);
-    migration_cost_power = atof(argv[20]);
-    tmax = atoi(argv[21]);
-	migration_cost_function = atoi(argv[22]);
-
-    // set the random seed
-	seed = get_nanoseconds();
-
-    // set up the random number generators
-    // (from the gnu gsl library)
-    gsl_rng_env_setup();
-    T = gsl_rng_default;
-    rng_r = gsl_rng_alloc(T);
-    gsl_rng_set(rng_r, seed);
+    migration_cost_power = atof(argv[19]);
+    tmax = atoi(argv[20]);
 }
 
 // write down all parameters in the file
@@ -194,7 +174,6 @@ void write_parameters(ofstream &DataFile)
             << "max_migration_cost;" << max_migration_cost << endl
             << "min_migration_cost;" << min_migration_cost << endl
             << "migration_cost_decay;" << migration_cost_decay << endl
-            << "migration_cost_nonlinear_decay;" << migration_cost_nonlinear_decay << endl
             << "migration_cost_power;" << migration_cost_power << endl
             << "seed;" << seed << endl;
 }
@@ -340,7 +319,7 @@ void mortality()
     for (int i = 0; i < NWinter;++i)
     {
         // individual dies; replace with end of the stack individual
-        if (gsl_rng_uniform(rng_r) < pmort)
+        if (uniform(rng_r) < pmort)
         {
             WinterPop[i] = WinterPop[NWinter - 1];
             --NWinter;
@@ -351,7 +330,7 @@ void mortality()
     for (int i = 0; i < NSummer;++i)
     {
         // individual dies; replace with end of the stack individual
-        if (gsl_rng_uniform(rng_r) < pmort)
+        if (uniform(rng_r) < pmort)
         {
             SummerPop[i] = SummerPop[NSummer - 1];
             --NSummer;
@@ -378,6 +357,23 @@ void clear_staging_pool()
     NStaging = 0;
 }
 
+double get_migration_cost(int const flock_size)
+{
+    double total_migration_cost = max_migration_cost - migration_cost_decay * 
+            pow((double) flock_size / N, migration_cost_power);
+
+    if (total_migration_cost < min_migration_cost)
+    {
+        total_migration_cost = min_migration_cost;
+    }
+
+    assert(total_migration_cost >= 0.0);
+    assert(total_migration_cost <= 1.0);
+
+    return(total_migration_cost);
+}
+
+
 // the dynamics of the population at the wintering ground
 void winter_dynamics(int t)
 {
@@ -400,7 +396,7 @@ void winter_dynamics(int t)
     // and who have yet to decide to go to the staging site
     for (int i = 0; i < NWinter; ++i)
     {
-        if (gsl_rng_uniform(rng_r) < pgood) // good resource chosen
+        if (uniform(rng_r) < pgood) // good resource chosen
         {
             WinterPop[i].resources += rgood;
         }
@@ -417,7 +413,7 @@ void winter_dynamics(int t)
     { 
         // indivuals who are already at the staging site
         // continue to forage at the staging site
-        if (gsl_rng_uniform(rng_r) < pgood) // good resource chosen
+        if (uniform(rng_r) < pgood) // good resource chosen
         {
             StagingPool[i].resources += rgood;
         }
@@ -444,7 +440,7 @@ void winter_dynamics(int t)
             + 0.5 * (WinterPop[i].theta_b[0] + WinterPop[i].theta_b[1]) * WinterPop[i].resources;
 
         // does individual want to signal to others to be ready for departure?
-        if (gsl_rng_uniform(rng_r) < psignal)
+        if (uniform(rng_r) < psignal)
         {
             // add individual to the staging pool
             StagingPool[NStaging] = WinterPop[i];
@@ -485,7 +481,7 @@ void winter_dynamics(int t)
             + 0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) * NStaging_start;
 
         // yes individual goes
-        if (gsl_rng_uniform(rng_r) < pdisperse)
+        if (uniform(rng_r) < pdisperse)
         {
             SummerPop[NSummer] = StagingPool[i];
             ++NSummer;
@@ -516,29 +512,9 @@ void winter_dynamics(int t)
     // been added to the summer pool dependent on their flock size
     for (int i = NSummer_old; i < NSummer; ++i)
     {
-        switch (migration_cost_function){
-        	case 0:
-			return (migration_cost_decay = 0, migration_cost_nonlinear_decay = 1.2e-12, migration_cost_power = 3.2);
-			break;
-			
-			case 1:
-			return (migration_cost_decay = 2e-4, migration_cost_nonlinear_decay = 0, migration_cost_power = 1);
-			break;
-			
-			case 2:
-			return (migration_cost_decay = -3e-4, migration_cost_nonlinear_decay = 1.2e-2, migration_cost_power = 0.62);
-			break;
-		}
-		
-		total_migration_cost = max_migration_cost - migration_cost_decay * NFlock - migration_cost_nonlinear_decay * pow(NFlock,migration_cost_power);
+		total_migration_cost = get_migration_cost(NFlock);
 
-        if (total_migration_cost < min_migration_cost)
-        {
-            total_migration_cost = min_migration_cost;
-        }
 
-        assert(total_migration_cost >= 0.0);
-        assert(total_migration_cost <= 1.0);
 
         // resources are reduced due to migration,
         // yet this depends on group size in a curvilinear fashion
@@ -569,9 +545,10 @@ void winter_dynamics(int t)
 // given mutation rate mu and mutational distribution stdev sdmu
 double mutation(double val, double mu, double sdmu)
 {
-    if (gsl_rng_uniform(rng_r) < mu)
+    if (uniform(rng_r) < mu)
     {
-        val += gsl_ran_gaussian(rng_r, sdmu);
+        normal_distribution<> allelic_dist(0,sdmu);
+        val += allelic_dist(rng_r);
     }
 
     return(val);
@@ -580,27 +557,29 @@ double mutation(double val, double mu, double sdmu)
 // create a new offspring
 void create_offspring(Individual &mother, Individual &father, Individual &offspring)
 {
+    bernoulli_distribution allele_sample(0.5);
+
     offspring.resources = 0.0;
 
     // inherit theta loci
 
     // each parental allele has probability 0.5 to make it into offspring
-    offspring.theta_a[0] = mutation(mother.theta_a[gsl_rng_uniform_int(rng_r,2)], mu_theta, sdmu_theta);
+    offspring.theta_a[0] = mutation(mother.theta_a[allele_sample(rng_r)], mu_theta, sdmu_theta);
 
-    offspring.theta_a[1] = mutation(father.theta_a[gsl_rng_uniform_int(rng_r,2)], mu_theta, sdmu_theta);
-
-    
+    offspring.theta_a[1] = mutation(father.theta_a[allele_sample(rng_r)], mu_theta, sdmu_theta);
 
     
-    offspring.theta_b[0] = mutation(mother.theta_b[gsl_rng_uniform_int(rng_r,2)], mu_theta, sdmu_theta);
-    offspring.theta_b[1] = mutation(father.theta_b[gsl_rng_uniform_int(rng_r,2)], mu_theta, sdmu_theta);
+
+    
+    offspring.theta_b[0] = mutation(mother.theta_b[allele_sample(rng_r)], mu_theta, sdmu_theta);
+    offspring.theta_b[1] = mutation(father.theta_b[allele_sample(rng_r)], mu_theta, sdmu_theta);
 
     // inherit phi loci
-    offspring.phi_a[0] = mutation(mother.phi_a[gsl_rng_uniform_int(rng_r,2)], mu_phi, sdmu_phi);
-    offspring.phi_a[1] = mutation(father.phi_a[gsl_rng_uniform_int(rng_r,2)], mu_phi, sdmu_phi);
+    offspring.phi_a[0] = mutation(mother.phi_a[allele_sample(rng_r)], mu_phi, sdmu_phi);
+    offspring.phi_a[1] = mutation(father.phi_a[allele_sample(rng_r)], mu_phi, sdmu_phi);
     
-    offspring.phi_b[0] = mutation(mother.phi_b[gsl_rng_uniform_int(rng_r,2)], mu_phi, sdmu_phi);
-    offspring.phi_b[1] = mutation(father.phi_b[gsl_rng_uniform_int(rng_r,2)], mu_phi, sdmu_phi);
+    offspring.phi_b[0] = mutation(mother.phi_b[allele_sample(rng_r)], mu_phi, sdmu_phi);
+    offspring.phi_b[1] = mutation(father.phi_b[allele_sample(rng_r)], mu_phi, sdmu_phi);
 
     for (int allele_i = 0; allele_i < 2; ++allele_i)
     {
@@ -654,6 +633,7 @@ void summer_reproduction(ofstream &DataFile)
     // use a flexible array for the kids
     vector<Individual> Kids;
 
+    uniform_int_distribution<> summer_sample(0, NSummer - 1);
     // mating dynamic. Presumes that there an even 
     // number of individuals
     // so we just discard the last individual
@@ -673,7 +653,7 @@ void summer_reproduction(ofstream &DataFile)
         do {
             // sample integer uniformly between 0 and NSummer
             // (not including NSummer itself)
-            father_id = gsl_rng_uniform_int(rng_r, NSummer);
+            father_id = summer_sample(rng_r);
         }
         while (father_id == i);
 
@@ -686,7 +666,7 @@ void summer_reproduction(ofstream &DataFile)
 
         // TODO (slightly digressing): can we come up with an analytical 
         // description of this rounding process of w into integer values?
-        if (gsl_rng_uniform(rng_r) < mother.resources - resource_integer)
+        if (uniform(rng_r) < mother.resources - resource_integer)
         {
             // make an additional offspring
             ++resource_integer;
@@ -721,14 +701,16 @@ void summer_reproduction(ofstream &DataFile)
         {
             break;
         }
-
-        random_kid = gsl_rng_uniform_int(rng_r, Kids.size());
+        
+        uniform_int_distribution<> kids_sample(0, Kids.size() - 1);
+        
+        random_kid = kids_sample(rng_r);
 
         // add random kid to population
         SummerPop[NSummer++] = Kids[random_kid];
 
         //  delete random kid as it has been sampled
-        Kids[random_kid] = Kids[Kids.size()];
+        Kids[random_kid] = Kids[Kids.size() - 1];
 
         Kids.pop_back();
     }
@@ -751,7 +733,7 @@ void summer_dynamics(int t)
     // and who have yet to decide to go to the staging site
     for (int i = 0; i < NSummer; ++i)
     {
-        if (gsl_rng_uniform(rng_r) < pgood) // good resource chosen
+        if (uniform(rng_r) < pgood) // good resource chosen
         {
             SummerPop[i].resources += rgood;
         }
@@ -768,7 +750,7 @@ void summer_dynamics(int t)
     { 
         // indivuals who are already at the staging site
         // continue to forage at the staging site
-        if (gsl_rng_uniform(rng_r) < pgood) // good resource chosen
+        if (uniform(rng_r) < pgood) // good resource chosen
         {
             StagingPool[i].resources += rgood;
         }
@@ -796,7 +778,7 @@ void summer_dynamics(int t)
             + 0.5 * (SummerPop[i].theta_b[0] + SummerPop[i].theta_b[1]) * SummerPop[i].resources;
 
         // does individual want to signal to others to be ready for departure?
-        if (gsl_rng_uniform(rng_r) < psignal)
+        if (uniform(rng_r) < psignal)
         {
             // add individual to the staging pool
             StagingPool[NStaging] = SummerPop[i];
@@ -837,7 +819,7 @@ void summer_dynamics(int t)
             + 0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) * NStaging_start;
 
         // yes individual goes
-        if (gsl_rng_uniform(rng_r) < pdisperse)
+        if (uniform(rng_r) < pdisperse)
         {
             WinterPop[NWinter] = StagingPool[i];
             ++NWinter;
@@ -868,7 +850,7 @@ void summer_dynamics(int t)
     // been added to the pool dependent on their flock size
     for (int i = NWinter_old; i < NWinter; ++i)
     {
-        total_migration_cost = max_migration_cost - migration_cost_decay * NFlock - migration_cost_nonlinear_decay * pow(NFlock,migration_cost_power);
+        total_migration_cost = get_migration_cost(NFlock);
 
         if (total_migration_cost < min_migration_cost)
         {

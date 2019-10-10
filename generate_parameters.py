@@ -28,10 +28,9 @@ sdmu_phi = 0.01
     # migration cost parameters
 max_migration_cost = [ 1.0 ]
 min_migration_cost = [ 0.1 ]
-migration_cost_decay = [ 0 ] # just only nonlinear terms for now
-migration_cost_nonlinear_decay = [ 0.05 ]  
+migration_cost_decay = [ 0.25,0.5,1.0,2.0 ] # just only nonlinear terms for now
 migration_cost_power = [ 0.5, 1, 2 ]
-migration_cost_function = [0, 1, 2]  # O is accelerating cost, 1 is linear, 2 is decelerating cost
+
 
 executable = "./xmigration"
 
@@ -58,41 +57,37 @@ for pmort_i in pmort:
                             for max_migration_cost_i in max_migration_cost:
                                 for min_migration_cost_i in min_migration_cost:
                                     for migration_cost_decay_i in migration_cost_decay:
-                                        for migration_cost_nonlinear_decay_i in migration_cost_nonlinear_decay:
-                                            for migration_cost_power_i in migration_cost_power:
-                                                for migration_cost_function:
+                                        for migration_cost_power_i in migration_cost_power:
 
-                                                    # increment the counter for the number of 
-                                                    # runs
-                                                    counter += 1
+                                                # increment the counter for the number of 
+                                                # runs
+                                                counter += 1
 
-                                                    print("echo " + str(counter))
+                                                print("echo " + str(counter))
 
 
-                                                    print(executable + " " 
-                                                            + str(init_phi_a) + " "
-                                                            + str(init_phi_b) + " "
-                                                            + str(init_theta_a) + " "
-                                                            + str(init_theta_b) + " "
-                                                            + str(pmort_i) + " "
-                                                            + str(pgood_init_i) + " "
-                                                            + str(t_good_ends_i) + " "
-                                                            + str(rgood_i) + " "
-                                                            + str(rbad_i) + " "
-                                                            + str(arrival_resource_decay_i) + " "
-                                                            + str(resource_reproduction_threshold_i) + " "
-                                                            + str(mu_theta) + " "
-                                                            + str(mu_phi) + " "
-                                                            + str(sdmu_theta) + " "
-                                                            + str(sdmu_phi) + " "
-                                                            + str(max_migration_cost_i) + " "
-                                                            + str(min_migration_cost_i) + " "
-                                                            + str(migration_cost_decay_i) + " "
-                                                            + str(migration_cost_nonlinear_decay_i) + " "
-                                                            + str(migration_cost_power_i) + " "
-                                                            + str(migration_cost_function_i) + " "
-                                                            + str(tmax) + " " 
-                                                            + backgroundstr)
+                                                print(executable + " " 
+                                                        + str(init_phi_a) + " "
+                                                        + str(init_phi_b) + " "
+                                                        + str(init_theta_a) + " "
+                                                        + str(init_theta_b) + " "
+                                                        + str(pmort_i) + " "
+                                                        + str(pgood_init_i) + " "
+                                                        + str(t_good_ends_i) + " "
+                                                        + str(rgood_i) + " "
+                                                        + str(rbad_i) + " "
+                                                        + str(arrival_resource_decay_i) + " "
+                                                        + str(resource_reproduction_threshold_i) + " "
+                                                        + str(mu_theta) + " "
+                                                        + str(mu_phi) + " "
+                                                        + str(sdmu_theta) + " "
+                                                        + str(sdmu_phi) + " "
+                                                        + str(max_migration_cost_i) + " "
+                                                        + str(min_migration_cost_i) + " "
+                                                        + str(migration_cost_decay_i) + " "
+                                                        + str(migration_cost_power_i) + " "
+                                                        + str(tmax) + " " 
+                                                        + backgroundstr)
 
 
 
