@@ -4,31 +4,51 @@ library("lattice")
 # relating flock size with 
 # survival cost of migration
 
-N <- seq(0,5000,10)
-
-pow <- 3.2
-
-max_migration_cost <- 1.0
-migration_cost_decay <- 0
-migration_cost_nonlinear_decay <- 0.0000000000012
-
-power.shizzle <- max_migration_cost - migration_cost_decay * N - migration_cost_nonlinear_decay * N^pow
-
-print(
-        xyplot(power.shizzle ~ N
-                ,type="l"
-                ,ylim=c(0,1)))
-                
-
-pow <- 0.62
+parameters <- as.data.frame(expand.grid(
+        rel_pop=seq(0,1,0.01)
+        ,slope=c(2.0,1.0,0.5,0.25)
+        ,power=c(1.0,2.0,0.5)))
 
 max_migration_cost <- 1.0
-migration_cost_decay <- -0.0003
-migration_cost_nonlinear_decay <- 0.012
 
-power.shizzle <- max_migration_cost - migration_cost_decay * N - migration_cost_nonlinear_decay * N^pow
+calc_mort_prob <- function(x) {
+    val <- with(data=as.list(x) 
+            ,expr= 1.0 
+                    - slope * (rel_pop)^power)
 
+    if (val > 1.0)
+    {
+        val <- 1.0
+    } else if (val < 0.0)
+    {
+        val <- 0.0
+    }
+
+    return(val)
+}
+
+# calculate mortality probability for all parameter values
+parameters[,"mortality_prob"] <- apply(
+        X=parameters
+        ,MARGIN=1
+        ,FUN=calc_mort_prob)
+
+# sort on population size to draw straightish lines
+# rather than lots of tangled up lines
+parameters <- parameters[order(parameters$rel_pop),]
+
+pdf("example_lines.pdf")
 print(
-        xyplot(power.shizzle ~ N
+        xyplot(mortality_prob ~ rel_pop | power
                 ,type="l"
-                ,ylim=c(0,1)))                
+                ,data=parameters
+                ,groups=slope
+                ,auto.key=T
+                ,xlab="Ngroup/Ngroupmax"
+                ,ylab="mortality prob"
+                ,strip=function(strip.levels,...) { strip.default(strip.levels=T,...) }
+                ,ylim=c(-0.1,1.1)))
+
+dev.off()
+
+
