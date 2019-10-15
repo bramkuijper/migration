@@ -75,7 +75,7 @@ double min_migration_cost = 0.0;
 double migration_cost_decay = 0.0;
 double migration_cost_power = 0.0;
 
-// max number of days / season (two seasons: summer, winter)
+// max number of intervals / season (two seasons: summer, winter)
 int tmax = 1000;
 
 int skip = 10;
@@ -94,8 +94,10 @@ double var_staging_size_summer = 0.0;
 // individuals signaling to disperse
 int NStaging = 0;
 int NWinter = 0;
+int NSpring_migrant = 0;
 int NSummer = 0;
 int NKids = 0;
+int NAutumn_migrant = 0;
 
 struct Individual {
     
@@ -181,7 +183,7 @@ void write_parameters(ofstream &DataFile)
 // list of the data headers at the start of the file
 void write_data_headers(ofstream &DataFile)
 {
-    DataFile << "generation;time;mean_theta_a;mean_theta_b;mean_phi_a;mean_phi_b;mean_resources;var_theta_a;var_theta_b;var_phi_a;var_phi_b;var_resources;nwinter;nstaging;nsummer;nkids;mean_flock_size_summer;mean_flock_size_winter;mean_staging_size_winter;mean_staging_size_summer;var_flock_size_summer;var_flock_size_winter;var_staging_size_winter;var_staging_size_summer;" << endl;
+    DataFile << "generation;time;mean_theta_a;mean_theta_b;mean_phi_a;mean_phi_b;mean_resources;var_theta_a;var_theta_b;var_phi_a;var_phi_b;var_resources;nwinter;nstaging;nspring_migrant;nsummer;nkids;nautumn_migrant;mean_flock_size_summer;mean_flock_size_winter;mean_staging_size_winter;mean_staging_size_summer;var_flock_size_summer;var_flock_size_winter;var_staging_size_winter;var_staging_size_summer;" << endl;
 }
 
 // write data both for winter and summer populations
@@ -269,9 +271,11 @@ void write_stats(ofstream &DataFile, int generation, int timestep)
         << var_resources << ";"
         << NWinter << ";"
         << NStaging << ";"
+		<< NSpring_migrant << ";"
         << NSummer << ";" 
         << NKids << ";" 
-        << mean_flock_size_winter << ";" 
+		<< NAutumn_migrant << ";"
+		<< mean_flock_size_winter << ";" 
         << mean_flock_size_summer << ";" 
         << mean_staging_size_winter << ";" 
         << mean_staging_size_summer << ";"
@@ -354,7 +358,7 @@ void clear_staging_pool()
     // just double check that NWinter does not exceed max population size
     assert(NWinter <= N);
 
-    NStaging = 0;
+    NStaging = 0;  // Is this the problem? NStaging is defined to be 0
 }
 
 double get_migration_cost(int const flock_size)
@@ -495,6 +499,10 @@ void winter_dynamics(int t)
             // decrement the number of individuals in the staging population
             --NStaging;
             --i;
+			
+			// but increment the number of individuals recorded as spring migrants
+			++NSpring_migrant;
+			++i;
 
             assert(NStaging <= N);
             assert(NStaging >= 0);
@@ -533,12 +541,20 @@ void winter_dynamics(int t)
         }
     }
 
-    // add current dispersal flock size to stats
-    mean_flock_size_winter += NFlock;
-    mean_staging_size_winter += NStaging_start;
+    // add current dispersal flock size to stats...IF =/= 0
+    if (NFlock > 0)
+	{
+		mean_flock_size_winter += NFlock;
+	    mean_staging_size_winter += NStaging_start;
 	
-	var_flock_size_winter += NFlock * NFlock;
-	var_staging_size_winter += NStaging_start * NStaging_start;
+		var_flock_size_winter += NFlock * NFlock;
+		var_staging_size_winter += NStaging_start * NStaging_start;
+	}
+	
+	if (NFlock <= 0)
+	{
+		
+	}		
 } // end winter_dynamics
 
 // mutation of a certain allele with value val
@@ -729,7 +745,8 @@ void summer_dynamics(int t)
         pgood = 0;
     }
 
-    // foraging of individuals who are just at the wintering site
+    // foraging of individuals who are just at the breeding (Bram: am I correct that 
+	// this should be breeding rather than winter?) site
     // and who have yet to decide to go to the staging site
     for (int i = 0; i < NSummer; ++i)
     {
@@ -787,10 +804,10 @@ void summer_dynamics(int t)
             assert(NStaging <= N);
             assert(NStaging >= 0);
 
-            // delete this individual from the winter population
+            // delete this individual from the summer population
             SummerPop[i] = SummerPop[NSummer - 1];
 
-            // decrement the number of individuals in the winter population
+            // decrement the number of individuals in the summer population
             --NSummer;
             --i;
         }
