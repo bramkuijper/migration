@@ -96,6 +96,7 @@ int NStaging = 0;
 int NWinter = 0;
 int NSpring_migrant = 0;
 int NSummer = 0;
+int NBreeders = 0;
 int NKids = 0;
 int NAutumn_migrant = 0;
 
@@ -273,6 +274,7 @@ void write_stats(ofstream &DataFile, int generation, int timestep)
         << NStaging << ";"
 		<< NSpring_migrant << ";"
         << NSummer << ";" 
+		<< NBreeders << ";"
         << NKids << ";" 
 		<< NAutumn_migrant << ";"
 		<< mean_flock_size_winter << ";" 
@@ -502,7 +504,6 @@ void winter_dynamics(int t)
 			
 			// but increment the number of individuals recorded as spring migrants
 			++NSpring_migrant;
-			++i;
 
             assert(NStaging <= N);
             assert(NStaging >= 0);
@@ -532,13 +533,21 @@ void winter_dynamics(int t)
         // TODO think more about this function
         SummerPop[i].resources = arrival_resource_decay * t;
 
-        // death due to starvation
+		// Surviving spring migrants are added to the count of breeders
+		if (SummerPop[i].resources >= resource_reproduce_threshold)
+		{
+			++NBreeders;
+		}
+        
+		// death due to starvation
         if (SummerPop[i].resources < 0)
         {
             SummerPop[i] = SummerPop[NSummer - 1];
             --NSummer;
             --i;
         }
+		
+		
     }
 
     // add current dispersal flock size to stats...IF =/= 0
@@ -549,11 +558,6 @@ void winter_dynamics(int t)
 	
 		var_flock_size_winter += NFlock * NFlock;
 		var_staging_size_winter += NStaging_start * NStaging_start;
-	}
-	
-	if (NFlock <= 0)
-	{
-		
 	}		
 } // end winter_dynamics
 
@@ -850,6 +854,10 @@ void summer_dynamics(int t)
             // decrement the number of individuals in the staging population
             --NStaging;
             --i;
+			
+			// but increment the number of individuals recorded as autumn migrants
+			++NSpring_migrant;
+			++i;
 
             assert(NStaging <= N);
             assert(NStaging >= 0);
