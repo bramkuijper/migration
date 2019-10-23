@@ -21,8 +21,8 @@
 using namespace std;
 
 // set random seed etc
-int seed = get_nanoseconds();
-mt19937 rng_r{static_cast<long unsigned int>(seed)};
+unsigned int seed = get_nanoseconds();
+mt19937 rng_r{seed};
 uniform_real_distribution<> uniform(0.0,1.0);
 
 
