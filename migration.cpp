@@ -53,11 +53,11 @@ double pgood_init = 0.0;
 // the probability of encountering a good environment becomes 0
 int t_good_ends = 0.0;
 
-// how much resources individuals obtain on a good vs bad patch
+// how much resource individuals obtain on a good vs bad patch
 double rgood = 0.0;
 double rbad = 0.0;
 
-// minimum level of resources necessary to reproduce 
+// minimum resource level necessary to reproduce 
 double resource_reproduce_threshold = 0.0; 
 
 // how quickly resources decay per day arriving later than 0
@@ -75,7 +75,7 @@ double min_migration_cost = 0.0;
 double migration_cost_decay = 0.0;
 double migration_cost_power = 0.0;
 
-// max number of intervals / season (two seasons: summer, winter)
+// max number of intervals per season (two seasons: summer, winter)
 int tmax = 1000;
 
 int skip = 10;
@@ -91,7 +91,7 @@ double var_flock_size_summer = 0.0;
 double var_staging_size_summer = 0.0;
 
 // keep track of the current number of 
-// individuals signaling to disperse
+// individuals in various seasons/demographics
 int NStaging = 0;
 int NWinter = 0;
 int NSpring_migrant = 0;
@@ -104,7 +104,7 @@ struct Individual {
     
     double resources;
 
-    // resource reaction norm (determines entry into staging pool)
+    // RESOURCE SENSITIVITY reaction norm (determines entry into staging pool)
     //
     // elevation (baseline leaving rate) 
     double theta_a[2];
@@ -112,7 +112,7 @@ struct Individual {
     // reaction norm, dependency on the amount of resources
     double theta_b[2];
 
-    // collective dispersal reaction norm 
+    // COLLECTIVE DISPERSAL reaction norm 
     // determines migration dependent on number of individuals
     //
     // collective dispersal elevation
@@ -203,9 +203,13 @@ void write_stats(ofstream &DataFile, int generation, int timestep)
     double mean_resources = 0.0;
     double ss_resources = 0.0;
     
-    for (int i = 0; i < NWinter; ++i)
+    for (int i = 0; i < NWinter; ++i)  // So here we are cycling one by one through the winter population
     {
-        mean_theta_a += 0.5 * (WinterPop[i].theta_a[0] + WinterPop[i].theta_a[1]);
+        // each character (elevation and slope of the 
+		// two reaction norms) is genetically controlled
+		// by a single gene (diploid) exhibiting incomplete dominance
+		// (hence *0.5)
+		mean_theta_a += 0.5 * (WinterPop[i].theta_a[0] + WinterPop[i].theta_a[1]);
         mean_theta_b += 0.5 * (WinterPop[i].theta_b[0] + WinterPop[i].theta_b[1]);
         
         ss_theta_a += 0.5 * (WinterPop[i].theta_a[0] + WinterPop[i].theta_a[1]) * 0.5 * (WinterPop[i].theta_a[0] + WinterPop[i].theta_a[1]);
@@ -217,11 +221,11 @@ void write_stats(ofstream &DataFile, int generation, int timestep)
         ss_phi_a += 0.5 * (WinterPop[i].phi_a[0] + WinterPop[i].phi_a[1]) * 0.5 * (WinterPop[i].phi_a[0] + WinterPop[i].phi_a[1]);
         ss_phi_b += 0.5 * (WinterPop[i].phi_b[0] + WinterPop[i].phi_b[1]) * 0.5 * (WinterPop[i].phi_b[0] + WinterPop[i].phi_b[1]);
 
-        mean_resources += WinterPop[i].resources;
+        mean_resources += WinterPop[i].resources;  // the resource level of individual i 
         ss_resources += WinterPop[i].resources * WinterPop[i].resources;
     }
 
-    for (int i = 0; i < NSummer; ++i)
+    for (int i = 0; i < NSummer; ++i)  // for each individual in the summer population:
     {
         mean_theta_a += 0.5 * (SummerPop[i].theta_a[0] + SummerPop[i].theta_a[1]);
         mean_theta_b += 0.5 * (SummerPop[i].theta_b[0] + SummerPop[i].theta_b[1]);
@@ -239,7 +243,8 @@ void write_stats(ofstream &DataFile, int generation, int timestep)
         ss_resources += SummerPop[i].resources * SummerPop[i].resources;
     }
 
-    mean_theta_a /= NSummer + NWinter;
+    // Here we are gathering the average over the two populations (i.e., summer AND winter) WHY DO WE DO THIS?
+	mean_theta_a /= NSummer + NWinter;
     mean_theta_b /= NSummer + NWinter;
     mean_phi_a /= NSummer + NWinter;
     mean_phi_b /= NSummer + NWinter;
@@ -286,7 +291,7 @@ void write_stats(ofstream &DataFile, int generation, int timestep)
 		<< var_staging_size_winter << ";"
 		<< var_staging_size_summer << ";"			
         << endl;
-
+// ENDS: write data both for winter and summer populations
 }
 
 
@@ -297,7 +302,7 @@ void init_population()
     // and give them values
     for (int i = 0; i < N; ++i)
     {
-        WinterPop[i].resources = 0.0;
+        WinterPop[i].resources = 0.0;  // at start of simulation, initial resource level for all individuals is 0
 
         for (int j = 0; j < 2; ++j)
         {
@@ -312,6 +317,7 @@ void init_population()
     }
 
     NWinter = N;
+// ENDS: initialize the population at the start of the simulation
 }
 
 // individuals in both summer and winter populations
@@ -363,6 +369,7 @@ void clear_staging_pool()
     NStaging = 0;  // Is this the problem? NStaging is defined to be 0
 }
 
+// MIGRATION COST
 double get_migration_cost(int const flock_size)
 {
     double total_migration_cost = max_migration_cost - migration_cost_decay * 
@@ -494,16 +501,15 @@ void winter_dynamics(int t)
             
             assert(NSummer <= N);
 
-
+			// increment the number of individuals recorded as spring migrants
+			++NSpring_migrant;  // Could also be NSpring_migrant+1
+			
             // delete this individual from the staging population
             StagingPool[i] = StagingPool[NStaging - 1];
 
             // decrement the number of individuals in the staging population
             --NStaging;
             --i;
-			
-			// but increment the number of individuals recorded as spring migrants
-			++NSpring_migrant;
 
             assert(NStaging <= N);
             assert(NStaging >= 0);
@@ -513,6 +519,16 @@ void winter_dynamics(int t)
             
             assert(NFlock <= N);
         }
+		
+	    // add current dispersal flock size to stats...IF it is not 0 (moved this here on 29th Oct 2019)
+	    if (NFlock > 0)
+		{
+			mean_flock_size_winter += NFlock;
+		    mean_staging_size_winter += NStaging_start;
+	
+			var_flock_size_winter += NFlock * NFlock;
+			var_staging_size_winter += NStaging_start * NStaging_start;
+		}	
     }
 
     double total_migration_cost;
@@ -550,15 +566,7 @@ void winter_dynamics(int t)
 		
     }
 
-    // add current dispersal flock size to stats...IF =/= 0
-    if (NFlock > 0)
-	{
-		mean_flock_size_winter += NFlock;
-	    mean_staging_size_winter += NStaging_start;
 	
-		var_flock_size_winter += NFlock * NFlock;
-		var_staging_size_winter += NStaging_start * NStaging_start;
-	}		
 } // end winter_dynamics
 
 // mutation of a certain allele with value val
@@ -856,7 +864,7 @@ void summer_dynamics(int t)
             --i;
 			
 			// but increment the number of individuals recorded as autumn migrants
-			++NSpring_migrant;
+			++NAutumn_migrant;
 			++i;
 
             assert(NStaging <= N);
@@ -867,6 +875,16 @@ void summer_dynamics(int t)
             
             assert(NFlock <= N);
         }
+	    
+		// add current flock size to flock size stats...IF it is not 0
+	    if (NFlock > 0)
+		{
+			mean_flock_size_summer += NFlock;
+		    mean_staging_size_summer += NStaging_start;
+	
+			var_flock_size_summer += NFlock * NFlock;
+			var_staging_size_summer += NStaging_start * NStaging_start;
+		}
     }
 
     double total_migration_cost = 0.0;
@@ -933,7 +951,9 @@ int main(int argc, char **argv)
 		var_flock_size_winter = 0.0;
 		var_staging_size_winter = 0.0;
 
-        // time during winter (i.e., days)
+        NStaging = 0.0;  // Set staging population count to zero before winter dynamics
+		
+		// time during winter (i.e., days)
         // during which individuals forage
         for (int t = 0; t < tmax; ++t)
         {
@@ -954,7 +974,8 @@ int main(int argc, char **argv)
 
         // let individuals die with a certain probability 
         mortality();
-
+		
+		NSummer = 0.0;  // So summer population is counted after mortality event (because population size is otherwise the same as spring migrant population size)
 
         // have individuals reproduce after they migrated to the summer spot
         summer_reproduction(DataFile);
