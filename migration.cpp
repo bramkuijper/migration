@@ -31,10 +31,10 @@ uniform_real_distribution<> uniform(0.0,1.0);
 // function
 
 // number of individuals in population
-const int N = 5000; //5000
+const int N = 5000;
 
 // number of generations
-long int number_generations = 50000; // 50000;
+long int number_generations = 50000;
 
 // initial values for phi (social dependency) and theta (resource dependency)
 // a is an intercept, b is a gradient
@@ -419,7 +419,7 @@ void winter_dynamics(int t)
         else
         {
             WinterPop[i].resources += rbad;
-        }
+        } // ENDS winter foraging loop
     
     } // ok, resource dynamic done
 
@@ -437,7 +437,7 @@ void winter_dynamics(int t)
         {
             StagingPool[i].resources += rbad;
         }
-    }
+    } // ENDS staging site foraging loop
 
     assert(NWinter <= N);
     assert(NWinter >= 0);
@@ -521,30 +521,29 @@ void winter_dynamics(int t)
             ++NFlock;
             
             assert(NFlock <= N);
-        }
-		
-	    // add current dispersal flock size to stats...IF it is not 0 (moved this here on 29th Oct 2019)
-	    if (NFlock > 0)
-		{
+        
 			mean_flock_size_winter += NFlock;
 		    mean_staging_size_winter += NStaging_start;
 	
 			var_flock_size_winter += NFlock * NFlock;
 			var_staging_size_winter += NStaging_start * NStaging_start;
 			
-			++ Flock_count_winter;
-		}	
+			
+		} // ENDS: yes individual goes
+		
+    } // ENDS ACTUAL DISPERSAL
+	
+	double total_migration_cost;
+
+    if (NSummer_old < NSummer){
+    	++ Flock_count_winter;
     }
-
-    double total_migration_cost;
-
-    // update resource levels for all new individuals that have just
+	
+	// update resource levels for all new individuals that have just
     // been added to the summer pool dependent on their flock size
     for (int i = NSummer_old; i < NSummer; ++i)
     {
 		total_migration_cost = get_migration_cost(NFlock);
-
-
 
         // resources are reduced due to migration,
         // yet this depends on group size in a curvilinear fashion
@@ -566,13 +565,11 @@ void winter_dynamics(int t)
             SummerPop[i] = SummerPop[NSummer - 1];
             --NSummer;
             --i;
-        }
+        } // ends: death dure to starvation
 		
-		
-    }
-
+    } // ENDS: updating resources of migrants
 	
-} // ENDS WINTER DYNAMICS
+} // ENDS WINTER DYNAMICS (looping through t)
 
 // mutation of a certain allele with value val
 // given mutation rate mu and mutational distribution stdev sdmu
@@ -882,22 +879,21 @@ void summer_dynamics(int t)
             ++NFlock;
             
             assert(NFlock <= N);
-        }
+        } // Ends: individual goes
 	    
-		// add current flock size to flock size stats...IF it is not 0
-	    if (NFlock > 0)
-		{
 			mean_flock_size_summer += NFlock;
 		    mean_staging_size_summer += NStaging_start;
 	
 			var_flock_size_summer += NFlock * NFlock;
 			var_staging_size_summer += NStaging_start * NStaging_start;
-			
-			++Flock_count_summer;
-		}
-    }
-
+ 
+    } // ENDS: Summer dispersal
+	
     double total_migration_cost = 0.0;
+	
+    if (NWinter_old < NWinter){
+    	++ Flock_count_summer;
+    }
 
     // update resource levels for all new individuals that have just
     // been added to the pool dependent on their flock size
@@ -971,6 +967,7 @@ int main(int argc, char **argv)
         for (int t = 0; t < tmax; ++t)
         {
             winter_dynamics(t);
+			
         }
 
         // now take averages over all timesteps that individuals did (can) join groups
@@ -1005,6 +1002,7 @@ int main(int argc, char **argv)
         for (int t = 0; t < tmax; ++t)
         {
             summer_dynamics(t);
+			
         }
         
         // now take averages over all timesteps that individuals did (can) join groups
@@ -1027,7 +1025,7 @@ int main(int argc, char **argv)
         {
             write_stats(DataFile, generation, 2);
         }
-    }
+    } // ENDS: GENERATION
 
     write_parameters(DataFile);
 }
