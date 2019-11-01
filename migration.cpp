@@ -99,8 +99,8 @@ int NSummer = 0;
 int NBreeders = 0;
 int NKids = 0;
 int NAutumn_migrant = 0;
-int Flock_count_winter = 0;  // recording the number of spring flocks (tmax - n(unusued departure intervals))
-int Flock_count_summer = 0;
+int Flock_count_winter = tmax;  // recording the number of spring flocks (tmax - n(unusued departure intervals))
+int Flock_count_summer = tmax;
 
 struct Individual {
     
@@ -528,16 +528,15 @@ void winter_dynamics(int t)
 			var_flock_size_winter += NFlock * NFlock;
 			var_staging_size_winter += NStaging_start * NStaging_start;
 			
-			
 		} // ENDS: yes individual goes
 		
     } // ENDS ACTUAL DISPERSAL
 	
 	double total_migration_cost;
 
-    if (NSummer_old < NSummer){
-    	++ Flock_count_winter;
-    }
+    // if (NSummer_old < NSummer){
+    //	++ Flock_count_winter;
+    // }
 	
 	// update resource levels for all new individuals that have just
     // been added to the summer pool dependent on their flock size
@@ -891,9 +890,9 @@ void summer_dynamics(int t)
 	
     double total_migration_cost = 0.0;
 	
-    if (NWinter_old < NWinter){
-    	++ Flock_count_summer;
-    }
+    // if (NWinter_old < NWinter){
+    // 	++ Flock_count_summer;
+    // }
 
     // update resource levels for all new individuals that have just
     // been added to the pool dependent on their flock size
@@ -958,7 +957,7 @@ int main(int argc, char **argv)
         mean_staging_size_winter = 0.0;
 		var_flock_size_winter = 0.0;
 		var_staging_size_winter = 0.0;
-		Flock_count_winter = 0.0;
+		Flock_count_winter = tmax;
 
         NStaging = 0.0;  // Set staging population count to zero before winter dynamics
 		
@@ -995,7 +994,7 @@ int main(int argc, char **argv)
         mean_staging_size_summer = 0.0;
 		var_flock_size_summer = 0.0;
 		var_staging_size_summer = 0.0;
-		Flock_count_summer = 0.0;
+		Flock_count_summer = tmax; //0.0;
 
         // time during summer (i.e., days)
         // during which individuals forage
