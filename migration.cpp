@@ -942,6 +942,7 @@ void summer_dynamics(int t)
 // accepting command line arguments
 int main(int argc, char **argv)
 {
+    cout << seed << endl;
     string filename = "sim_migration";
     create_filename(filename);
     ofstream DataFile(filename.c_str());  // output file 
