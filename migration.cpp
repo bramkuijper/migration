@@ -358,7 +358,9 @@ void mortality()
 // back in the original population
 void clear_staging_pool()
 {
-    // put individuals from staging pool (which haven't migrated) 
+    cout << "At start of staging pool clearance";
+	
+	// put individuals from staging pool (which haven't migrated) 
     // back in the original population
     for (int i = 0; i < NStaging; ++i)
     {
@@ -367,7 +369,8 @@ void clear_staging_pool()
     }
 
     // just double check that NWinter does not exceed max population size
-    assert(NWinter <= N);
+    cout << "At end of staging pool clearance";
+	assert(NWinter <= N);
 
     NStaging = 0;
 }  // ENDS STAGING POOL CLEARANCE
@@ -393,7 +396,8 @@ double get_migration_cost(int const flock_size)
 // the dynamics of the population at the wintering ground
 void winter_dynamics(int t)
 {
-    // individuals forage
+    cout << "At start of winter dynamics";
+	// individuals forage
     // individuals accumulate resources
     // individuals make dispersal decisions
 
@@ -529,6 +533,8 @@ void winter_dynamics(int t)
 			var_staging_size_winter += NStaging_start * NStaging_start;
 			
 		} // ENDS: yes individual goes
+	
+		cout << "End of actual dispersal";
 		
     } // ENDS ACTUAL DISPERSAL
 	
@@ -567,6 +573,8 @@ void winter_dynamics(int t)
         } // ends: death dure to starvation
 		
     } // ENDS: updating resources of migrants
+	
+	cout << "At end of winter dynamics";
 	
 } // ENDS WINTER DYNAMICS (looping through t)
 
