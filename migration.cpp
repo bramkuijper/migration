@@ -992,7 +992,7 @@ int main(int argc, char **argv)
         // let individuals die with a certain probability 
         mortality();
 		
-		NSummer = 0.0;  // So summer population is counted after mortality event (because population size is otherwise the same as spring migrant population size)
+		// NSummer = 0.0;  // So summer population is counted after mortality event (because population size is otherwise the same as spring migrant population size)
 
         // have individuals reproduce after they migrated to the summer spot
         summer_reproduction(DataFile);
