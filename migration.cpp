@@ -34,7 +34,7 @@ uniform_real_distribution<> uniform(0.0,1.0);
 const int N = 1000;  // 1000 for trial, 5000 for full simulation
 
 // number of generations
-long int number_generations = 200;  // 200 for trial, 50000 for full simulation
+long int number_generations = 5000;  // 200 for trial, 50000 for full simulation
 
 // initial values for phi (social dependency) and theta (resource dependency)
 // a is an intercept, b is a gradient
@@ -193,7 +193,7 @@ void write_parameters(ofstream &DataFile)
 // list of the data headers at the start of the file
 void write_data_headers(ofstream &DataFile)
 {
-    DataFile << "Generation;Time_interval;mean_theta_a;mean_theta_b;mean_phi_a;mean_phi_b;var_theta_a;var_theta_b;var_phi_a;var_phi_b;mean_resources;var_resources;winter_pop;mean_spring_staging_size;var_spring_staging_size;spring_migrant_pop;n_spring_flocks;mean_spring_flock_size;var_spring_flock_size;breeder_pop;offspring_pop;mean_autumn_staging_size;var_autumn_flock_staging;autumn_migrant_pop;n_autumn_flocks;mean_autumn_flock_size;var_autumn_flock_size;" << endl;
+    DataFile << "Generation;Time_interval;mean_theta_a;mean_theta_b;mean_phi_a;mean_phi_b;var_theta_a;var_theta_b;var_phi_a;var_phi_b;mean_resources;var_resources;winter_pop;mean_spring_staging_size;var_spring_staging_size;spring_migrant_pop;n_spring_flocks;mean_spring_flock_size;var_spring_flock_size;breeder_pop;offspring_pop;mean_autumn_staging_size;var_autumn_staging_size;autumn_migrant_pop;n_autumn_flocks;mean_autumn_flock_size;var_autumn_flock_size;" << endl;
 }
 
 // write data both for winter and summer populations
@@ -257,20 +257,20 @@ void write_stats(ofstream &DataFile, int generation, int timestep)
     mean_theta_b /= summer_pop + winter_pop;
     mean_phi_a /= summer_pop + winter_pop;
     mean_phi_b /= summer_pop + winter_pop;
+	mean_resources /= summer_pop + winter_pop;
 
     
     ss_theta_a /= summer_pop + winter_pop;
     ss_theta_b /= summer_pop + winter_pop;
     ss_phi_a /= summer_pop + winter_pop;
     ss_phi_b /= summer_pop + winter_pop;
-    //ss_resources /= summer_pop + winter_pop;
+    ss_resources /= summer_pop + winter_pop;
 
     double var_theta_a = ss_theta_a - mean_theta_a * mean_theta_a;
     double var_theta_b = ss_theta_b - mean_theta_b * mean_theta_b;
     double var_phi_a = ss_phi_a - mean_phi_a * mean_phi_a;
     double var_phi_b = ss_phi_b - mean_phi_b * mean_phi_b;
-    double var_resources = ss_resources - (mean_resources * mean_resources)/(summer_pop + winter_pop);
-	mean_resources /= summer_pop + winter_pop;
+	double var_resources = ss_resources - mean_resources * mean_resources;
 
     DataFile 
         << generation << ";"
@@ -874,7 +874,7 @@ void summer_dynamics(int t)
 			
 			// but increment the number of individuals recorded as autumn migrants
 			++autumn_migrant_pop;
-			// ++i;  deleted this because I think it's a mistake (30 Oct 2019)
+			//++i;  // deleted this because I think it's a mistake (30 Oct 2019)
 
             assert(staging_pop <= N);
             assert(staging_pop >= 0);
@@ -888,6 +888,11 @@ void summer_dynamics(int t)
     } // ENDS: Autumn dispersal
 	
     double total_migration_cost = 0.0;
+	
+	mean_autumn_flock_size += NFlock;
+	ss_autumn_flock_size += NFlock * NFlock;
+	mean_autumn_staging_size += staging_pop_start;
+	ss_autumn_staging_size += staging_pop_start * staging_pop_start;
 	
     if (winter_pop_old < winter_pop){
 		++ n_autumn_flocks;
@@ -965,13 +970,13 @@ int main(int argc, char **argv)
 		
 		spring_migrant_pop = mean_spring_flock_size;
 		
-		// now record variance in flock size and staging size over the season
-		var_spring_flock_size = ss_spring_flock_size - ((mean_spring_flock_size * mean_spring_flock_size) / n_spring_flocks);
-		var_spring_staging_size = ss_spring_staging_size - ((mean_spring_staging_size * mean_spring_staging_size) / tmax);	
-		
         // now take averages over all timesteps that individuals did (can) join groups
         mean_spring_flock_size /= n_spring_flocks;
 		mean_spring_staging_size /= tmax;
+		
+		// now record variance in flock size and staging size over the season
+		var_spring_flock_size = (ss_spring_flock_size / n_spring_flocks) - (mean_spring_flock_size * mean_spring_flock_size);
+		var_spring_staging_size = (ss_spring_staging_size / tmax) - (mean_spring_staging_size * mean_spring_staging_size);	
         
         // all individuals that wanted to migrate have migrated now
         // all remainers are going to stay at wintering ground
@@ -1003,19 +1008,14 @@ int main(int argc, char **argv)
             summer_dynamics(t);
 			
         }
-		
-		mean_autumn_flock_size += NFlock;
-		ss_autumn_flock_size += NFlock * NFlock;
-		mean_autumn_staging_size += staging_pop_start;
-		ss_autumn_staging_size += staging_pop_start * staging_pop_start;
         
-		// now record variance in summer flock size and staging size over the season
-		var_autumn_flock_size = ss_autumn_migrant_pop - ((mean_autumn_flock_size * mean_autumn_flock_size) / n_autumn_flocks);
-		var_autumn_staging_size = ss_autumn_staging_size - ((mean_autumn_staging_size * mean_autumn_staging_size) / tmax);
-
         // now take averages over all timesteps that individuals did (can) join groups
         mean_autumn_flock_size /= n_autumn_flocks;
         mean_autumn_staging_size /= tmax;
+		
+		// now record variance in autumn flock size and staging size over the season
+		var_autumn_flock_size = (ss_autumn_flock_size / n_autumn_flocks) - (mean_autumn_flock_size * mean_autumn_flock_size);
+		var_autumn_staging_size = (ss_autumn_staging_size / tmax) - (mean_autumn_staging_size * mean_autumn_staging_size);
         
 		if (generation % skip == 0)
         {
