@@ -193,7 +193,7 @@ void write_parameters(ofstream &DataFile)
 // list of the data headers at the start of the file
 void write_data_headers(ofstream &DataFile)
 {
-    DataFile << "Generation;Time_interval;mean_theta_a;mean_theta_b;mean_phi_a;mean_phi_b;var_theta_a;var_theta_b;var_phi_a;var_phi_b;mean_resources;var_resources;winter_pop;mean_spring_staging_size;var_spring_staging_size;spring_migrant_pop;n_spring_flocks;mean_spring_flock_size;var_spring_flock_size;breeder_pop;offspring_pop;mean_autumn_staging_size;var_autumn_staging_size;autumn_migrant_pop;n_autumn_flocks;mean_autumn_flock_size;var_autumn_flock_size;" << endl;
+    DataFile << "generation;time_interval;mean_theta_a;mean_theta_b;mean_phi_a;mean_phi_b;var_theta_a;var_theta_b;var_phi_a;var_phi_b;mean_resources;var_resources;winter_pop;mean_spring_staging_size;var_spring_staging_size;spring_migrant_pop;n_spring_flocks;mean_spring_flock_size;var_spring_flock_size;breeder_pop;offspring_pop;mean_autumn_staging_size;var_autumn_staging_size;autumn_migrant_pop;n_autumn_flocks;mean_autumn_flock_size;var_autumn_flock_size;" << endl;
 }
 
 // write data both for winter and summer populations
