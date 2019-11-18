@@ -34,7 +34,7 @@ uniform_real_distribution<> uniform(0.0,1.0);
 const int N = 1000;  // 1000 for trial, 5000 for full simulation
 
 // number of generations
-long int number_generations = 5000;  // 200 for trial, 50000 for full simulation
+long int number_generations = 50000;  // 200 for trial, 50000 for full simulation
 
 // initial values for phi (social dependency) and theta (resource dependency)
 // a is an intercept, b is a gradient
@@ -76,7 +76,7 @@ double migration_cost_decay = 0.0;
 double migration_cost_power = 0.0;
 
 // max number of intervals per season (two seasons: summer, winter)
-int tmax = 1000;
+int tmax = 2500;
 
 int skip = 10;
 

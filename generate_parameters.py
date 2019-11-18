@@ -3,20 +3,20 @@
 # generate all parameter combinations to run the migration simulation
 
 init_theta_a = 0.05
-init_theta_b = 0.0
+init_theta_b = [0.0, 0.05] # 0.0 changed 19 Nov 2019
 init_phi_a = 0.05
-init_phi_b = 0.0
+init_phi_b = [0.0, 0.05] # 0.0
 
-tmax = 1000
+tmax = 2500
 
-pmort = [ 0.05, 0.1, 0.2 ]
+pmort = [ 0.05, 0.2 ]
 pgood_init = [ 1.0, 0.5 ]
 t_good_ends = [ 300 ]
 
 rgood = [ 1 ]
 rbad = [ 0.5 ]
 
-arrival_resource_decay = [0.1, 0.5]
+arrival_resource_decay = [0.01, 0.1] # [0.1, 0.5] changed 19 Nov 2019
 resource_reproduction_threshold = [ 1 ]
 
 # mutation rates (I fix those and they are not varying)

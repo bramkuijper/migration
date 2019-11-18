@@ -100,7 +100,7 @@ def analyze_file(filename):
     with open(filename) as infile:
         for lineno, line in enumerate(infile):
 
-            if re.search("^(generation|time|timestep);",line) is not None:
+            if re.search("^(generation|time|timestep);",line.lower()) is not None:
                 firstline = True
 
             # see whether we also have to store the initial values
@@ -119,7 +119,9 @@ def analyze_file(filename):
             # if this is the first line store
             # the header
             if firstline:
-                flhead += line.strip()
+                the_line = line.strip()
+                assert(len(the_line.split(";")) > 0)
+                flhead += the_line
                 firstline = False
 
             # if this is any other line starting
@@ -158,6 +160,8 @@ def analyze_file(filename):
     data += last_data_line.strip()
 
     if first:
+        #check whether header is present
+        assert(len(flhead) > 0)
 
         header_line = ";".join(parameters.keys()) + ";" + flhead.strip() + "file"
 
@@ -189,5 +193,4 @@ for root, dir, files in os.walk(sys.argv[1]):
 
     for file in files:
         if re.search("(sim|iter).*\d$",file) is not None:
-            #print(file)
             analyze_file(os.path.join(root, file))
