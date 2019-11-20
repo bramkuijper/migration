@@ -5,7 +5,7 @@
 init_theta_a = 0.05
 init_theta_b = [0.0, 0.05] # 0.0 changed 19 Nov 2019
 init_phi_a = 0.05
-init_phi_b = [0.0, 0.05] # 0.0
+init_phi_b = [-0.5, 0.0, 0.05] # 0.0
 
 tmax = 2500
 
