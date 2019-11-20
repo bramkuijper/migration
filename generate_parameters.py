@@ -47,10 +47,10 @@ backgroundstr = ""
 if background:
     backgroundstr = "&"
 
-for init_phi_a in init_phi_a;
-        for init_phi_b in init_phi_b;
-            for init_theta_a in init_theta_a;
-                for init_theta_b in init_theta_b;
+for init_phi_a in init_phi_a
+        for init_phi_b in init_phi_b:
+            for init_theta_a in init_theta_a:
+                for init_theta_b in init_theta_b:
                     for pmort_i in pmort:
                         for pgood_init_i in pgood_init:
                             for t_good_ends_i in t_good_ends:
