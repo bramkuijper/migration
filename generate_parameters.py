@@ -47,7 +47,7 @@ backgroundstr = ""
 if background:
     backgroundstr = "&"
 
-for init_phi_a in init_phi_a
+for init_phi_a in init_phi_a:
         for init_phi_b in init_phi_b:
             for init_theta_a in init_theta_a:
                 for init_theta_b in init_theta_b:
