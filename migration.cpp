@@ -76,7 +76,7 @@ double migration_cost_decay = 0.0;
 double migration_cost_power = 0.0;
 
 // max number of intervals per season (two seasons: summer, winter)
-int tmax = 2500;
+int tmax = 5000;
 
 int skip = 10;
 

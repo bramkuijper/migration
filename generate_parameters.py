@@ -5,9 +5,9 @@
 init_theta_a = 0.05
 init_theta_b = [ 0.0, 0.05 ] # 0.0 changed 19 Nov 2019
 init_phi_a = 0.05
-init_phi_b = [ -0.05, 0.0, 0.05 ] # 0.0
+init_phi_b = [ 0.0, 0.05 ] # 0.0 Negative values (-0.05) for the batch of 20 November caused immediate extinction
 
-tmax = 2500
+tmax = 5000
 
 pmort = [ 0.05, 0.2 ]
 pgood_init = [ 1.0, 0.5 ]
@@ -16,7 +16,7 @@ t_good_ends = [ 300 ]
 rgood = [ 1 ]
 rbad = [ 0.5 ]
 
-arrival_resource_decay = [ 0.01, 0.1 ] # [0.1, 0.5] changed 19 Nov 2019
+arrival_resource_decay = [ 0.05, 0.1 ] # [0.1, 0.5] changed 19 Nov 2019. Outcome was that for value of 0.01, the winter population size was < 25
 resource_reproduction_threshold = [ 1 ]
 
 # mutation rates (I fix those and they are not varying)
