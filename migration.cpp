@@ -383,7 +383,7 @@ void clear_staging_pool()
 double get_migration_cost(int const flock_size)
 {
     double total_migration_cost = max_migration_cost - migration_cost_decay * 
-            pow((double) lock_size / N, migration_cost_power);
+            pow((double) flock_size / N, migration_cost_power);
 
     if (total_migration_cost < min_migration_cost)
     {
