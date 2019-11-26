@@ -26,7 +26,7 @@ sdmu_theta = 0.01
 sdmu_phi = 0.01
     
     # migration cost parameters
-max_migration_cost = [ 1.0 ]
+max_migration_cost = [ 5.0 ]
 min_migration_cost = [ 0.1 ]
 migration_cost_decay = [ 0.5, 1.0, 2.0 ] # just only nonlinear terms for now
 migration_cost_power = [ 0.5, 1, 2 ]

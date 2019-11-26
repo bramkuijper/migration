@@ -383,7 +383,7 @@ void clear_staging_pool()
 double get_migration_cost(int const flock_size)
 {
     double total_migration_cost = max_migration_cost - migration_cost_decay * 
-            pow((double) flock_size / N, migration_cost_power);
+            pow((double) lock_size / N, migration_cost_power);
 
     if (total_migration_cost < min_migration_cost)
     {
@@ -391,11 +391,10 @@ double get_migration_cost(int const flock_size)
     }
 
     assert(total_migration_cost >= 0.0);
-    assert(total_migration_cost <= 1.0);
+    assert(total_migration_cost <= max_migration_cost);
 
     return(total_migration_cost);
 }
-
 
 // the dynamics of the population at the wintering ground
 void winter_dynamics(int t)
@@ -910,7 +909,7 @@ void summer_dynamics(int t)
         }
 
         assert(total_migration_cost >= 0.0);
-        assert(total_migration_cost <= 1.0);
+        assert(total_migration_cost <= max_migration_cost);
 
         // resources are reduced due to migration,
         // yet this depends on group size in a curvilinear fashion
