@@ -7,7 +7,7 @@ init_theta_b = [ 0.0, 0.05 ] # 0.0 changed 19 Nov 2019
 init_phi_a = 0.05
 init_phi_b = [ 0.0, 0.05 ] # 0.0 Negative values (-0.05) for the batch of 20 November caused immediate extinction
 
-tmax = 8000
+tmax = 5000
 
 pmort = [ 0.05, 0.1 ]  # Short simulations on 29 November suggested pmort of 0.2 was too high
 pgood_init = [ 1.0 ] # Deleted 0.5 option on 27 November 2019
