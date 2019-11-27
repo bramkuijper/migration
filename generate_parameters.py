@@ -9,14 +9,14 @@ init_phi_b = [ 0.0, 0.05 ] # 0.0 Negative values (-0.05) for the batch of 20 Nov
 
 tmax = 5000
 
-pmort = [ 0.05, 0.1 ]  # Short simulations on 29 November suggested pmort of 0.2 was too high
+pmort = [ 0.05 ]  # Short simulations on 27 November suggested pmort of 0.2 was too high. After further simulations, I decided to fix it at 0.05
 pgood_init = [ 1.0 ] # Deleted 0.5 option on 27 November 2019
 t_good_ends = [ 2500 ]
 
 rgood = [ 0.1 ] # Changed from 1 on 27 November 2019
 rbad = [ 0.05 ] # Changed from 0.5 on 27 November 2019
 
-arrival_resource_decay = [ 0.1, 0.2 ] # [0.1, 0.5] changed 19 Nov 2019. Outcome was that for value of 0.01, the winter population size was < 25
+arrival_resource_decay = [ 0.1 ] # [0.1, 0.5] changed 19 Nov 2019. Outcome was that for value of 0.01, the winter population size was < 25. On 27th Nov, I fixed it to 0.1 as values of 0.2 were associated with very low population sizes.
 resource_reproduction_threshold = [ 1 ]
 
 # mutation rates (I fix those and they are not varying)
@@ -26,8 +26,8 @@ sdmu_theta = 0.01
 sdmu_phi = 0.01
     
     # migration cost parameters
-max_migration_cost = [ 5.0 ]
-min_migration_cost = [ 2.5 ] 
+max_migration_cost = [ 20 ] # Earlier today (27 Nov) it worked well as 5
+min_migration_cost = [ 10 ] # Earlier today (27 Nov) it worked well as 2.5
 migration_cost_decay = [ 0.5, 1, 2 ]
 migration_cost_power = [ 0.5, 1, 2 ]
 
