@@ -7,17 +7,17 @@ init_theta_b = [ 0.0, 0.05 ] # 0.0 changed 19 Nov 2019
 init_phi_a = 0.05
 init_phi_b = [ 0.0, 0.05 ] # 0.0 Negative values (-0.05) for the batch of 20 November caused immediate extinction
 
-tmax = 5000
+tmax = 8000
 
-pmort = [ 0.05, 0.2 ]
-pgood_init = [ 1.0, 0.5 ]
+pmort = [ 0.05, 0.1 ]  # Short simulations on 29 November suggested pmort of 0.2 was too high
+pgood_init = [ 1.0 ] # Deleted 0.5 option on 27 November 2019
 t_good_ends = [ 2500 ]
 
 rgood = [ 0.1 ] # Changed from 1 on 27 November 2019
 rbad = [ 0.05 ] # Changed from 0.5 on 27 November 2019
 
 arrival_resource_decay = [ 0.1, 0.2 ] # [0.1, 0.5] changed 19 Nov 2019. Outcome was that for value of 0.01, the winter population size was < 25
-resource_reproduction_threshold = [ 1 ]  # Previously 1 (changed 27 November 2019)
+resource_reproduction_threshold = [ 1 ]
 
 # mutation rates (I fix those and they are not varying)
 mu_theta = 0.01
@@ -26,9 +26,9 @@ sdmu_theta = 0.01
 sdmu_phi = 0.01
     
     # migration cost parameters
-max_migration_cost = [ 5 ]
+max_migration_cost = [ 5.0 ]
 min_migration_cost = [ 2.5 ] 
-migration_cost_decay = [ 0.5, 1, 2 ] # just only nonlinear terms for now
+migration_cost_decay = [ 0.5, 1, 2 ]
 migration_cost_power = [ 0.5, 1, 2 ]
 
 
