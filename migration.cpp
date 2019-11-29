@@ -156,7 +156,7 @@ void init_arguments(int argc, char **argv)
     sdmu_theta = atof(argv[14]);
     sdmu_phi = atof(argv[15]);
     max_migration_cost = atof(argv[16]);
-    min_migration_cost = atof(argv[17]);
+    min_migration_cost = atof(argv[16])/2;
     migration_cost_decay = atof(argv[18]);
     migration_cost_power = atof(argv[19]);
     tmax = atoi(argv[20]);
