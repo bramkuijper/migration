@@ -31,7 +31,7 @@ uniform_real_distribution<> uniform(0.0,1.0);
 // function
 
 // number of individuals in population
-const int N = 1000;  // 1000 for trial, 5000 for full simulation
+const int N = 2000;  // 1000 for trial, 5000 for full simulation
 
 // number of generations
 long int number_generations = 50000;  // 200 for trial, 50000 for full simulation

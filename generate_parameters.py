@@ -26,8 +26,8 @@ sdmu_theta = 0.01
 sdmu_phi = 0.01
     
     # migration cost parameters
-max_migration_cost = [ 20 ] # Earlier today (27 Nov) it worked well as 5
-min_migration_cost = [ 10 ] # Earlier today (27 Nov) it worked well as 2.5
+max_migration_cost = [ 100 ] # Earlier today (27 Nov) it worked well as 5
+min_migration_cost = [ 50 ] # Earlier today (27 Nov) it worked well as 2.5
 migration_cost_decay = [ 0.5, 1, 2 ]
 migration_cost_power = [ 0.5, 1, 2 ]
 
