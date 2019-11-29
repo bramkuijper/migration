@@ -11,7 +11,7 @@ tmax = 5000
 
 pmort = [ 0.05 ]  # Short simulations on 27 November suggested pmort of 0.2 was too high. After further simulations, I decided to fix it at 0.05
 pgood_init = [ 1.0 ] # Deleted 0.5 option on 27 November 2019
-t_good_ends = [ 2500 ]
+t_good_ends = [ 1500 ]
 
 rgood = [ 0.1 ] # Changed from 1 on 27 November 2019
 rbad = [ 0.05 ] # Changed from 0.5 on 27 November 2019
