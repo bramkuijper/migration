@@ -47,49 +47,54 @@ backgroundstr = ""
 if background:
     backgroundstr = "&"
 
-for init_phi_b_i in init_phi_b:
-    for init_theta_b_i in init_theta_b:
-        for pmort_i in pmort:
-            for pgood_init_i in pgood_init:
-                for t_good_ends_i in t_good_ends:
-                    for rgood_i in rgood:
-                        for rbad_i in rbad:
-                            for arrival_resource_decay_i in arrival_resource_decay:
-                                for resource_reproduction_threshold_i in resource_reproduction_threshold:
-                                    for max_migration_cost_i in max_migration_cost:
-                                        for min_migration_cost_i in min_migration_cost:
-                                            for migration_cost_decay_i in migration_cost_decay:
-                                                for migration_cost_power_i in migration_cost_power:
 
-                                                        # increment the counter for the number of 
-                                                        # runs
-                                                        counter += 1
+number_replicates = 5
 
-                                                        print("echo " + str(counter))
+for rep_i in range(0, number_replicates):
+
+    for init_phi_b_i in init_phi_b:
+        for init_theta_b_i in init_theta_b:
+            for pmort_i in pmort:
+                for pgood_init_i in pgood_init:
+                    for t_good_ends_i in t_good_ends:
+                        for rgood_i in rgood:
+                            for rbad_i in rbad:
+                                for arrival_resource_decay_i in arrival_resource_decay:
+                                    for resource_reproduction_threshold_i in resource_reproduction_threshold:
+                                        for max_migration_cost_i in max_migration_cost:
+                                            for min_migration_cost_i in min_migration_cost:
+                                                for migration_cost_decay_i in migration_cost_decay:
+                                                    for migration_cost_power_i in migration_cost_power:
+
+                                                            # increment the counter for the number of 
+                                                            # runs
+                                                            counter += 1
+
+                                                            print("echo " + str(counter))
 
 
-                                                        print(executable + " " 
-                                                                + str(init_phi_a) + " "
-                                                                + str(init_phi_b_i) + " "
-                                                                + str(init_theta_a) + " "
-                                                                + str(init_theta_b_i) + " "
-                                                                + str(pmort_i) + " "
-                                                                + str(pgood_init_i) + " "
-                                                                + str(t_good_ends_i) + " "
-                                                                + str(rgood_i) + " "
-                                                                + str(rbad_i) + " "
-                                                                + str(arrival_resource_decay_i) + " "
-                                                                + str(resource_reproduction_threshold_i) + " "
-                                                                + str(mu_theta) + " "
-                                                                + str(mu_phi) + " "
-                                                                + str(sdmu_theta) + " "
-                                                                + str(sdmu_phi) + " "
-                                                                + str(max_migration_cost_i) + " "
-                                                                + str(min_migration_cost_i) + " "
-                                                                + str(migration_cost_decay_i) + " "
-                                                                + str(migration_cost_power_i) + " "
-                                                                + str(tmax) + " " 
-                                                                + backgroundstr)
+                                                            print(executable + " " 
+                                                                    + str(init_phi_a) + " "
+                                                                    + str(init_phi_b_i) + " "
+                                                                    + str(init_theta_a) + " "
+                                                                    + str(init_theta_b_i) + " "
+                                                                    + str(pmort_i) + " "
+                                                                    + str(pgood_init_i) + " "
+                                                                    + str(t_good_ends_i) + " "
+                                                                    + str(rgood_i) + " "
+                                                                    + str(rbad_i) + " "
+                                                                    + str(arrival_resource_decay_i) + " "
+                                                                    + str(resource_reproduction_threshold_i) + " "
+                                                                    + str(mu_theta) + " "
+                                                                    + str(mu_phi) + " "
+                                                                    + str(sdmu_theta) + " "
+                                                                    + str(sdmu_phi) + " "
+                                                                    + str(max_migration_cost_i) + " "
+                                                                    + str(min_migration_cost_i) + " "
+                                                                    + str(migration_cost_decay_i) + " "
+                                                                    + str(migration_cost_power_i) + " "
+                                                                    + str(tmax) + " " 
+                                                                    + backgroundstr)
 
 
 
