@@ -31,10 +31,10 @@ uniform_real_distribution<> uniform(0.0,1.0);
 // function
 
 // number of individuals in population
-const int N = 2000;  // 1000 for trial, 5000 for full simulation
+const int N = 2000; 
 
 // number of generations
-long int number_generations = 100000;
+long int number_generations = 100000; // simulation time doubled to see if evolving traits will stabilise
 
 // initial values for phi (social dependency) and theta (resource dependency)
 // a is an intercept, b is a gradient
