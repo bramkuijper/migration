@@ -34,7 +34,7 @@ uniform_real_distribution<> uniform(0.0,1.0);
 const int N = 2000;  // 1000 for trial, 5000 for full simulation
 
 // number of generations
-long int number_generations = 50000;  // 200 for trial, 50000 for full simulation
+long int number_generations = 100000;
 
 // initial values for phi (social dependency) and theta (resource dependency)
 // a is an intercept, b is a gradient
@@ -140,10 +140,10 @@ Individual SummerPop[N];
 // running the executable file
 void init_arguments(int argc, char **argv)
 {
-    init_theta_a = atof(argv[1]);
-    init_theta_b = atof(argv[2]);
-    init_phi_a = atof(argv[3]);
-    init_phi_b = atof(argv[4]);
+    init_phi_a = atof(argv[1]);
+    init_phi_b = atof(argv[2]);
+    init_theta_a = atof(argv[3]);
+    init_theta_b = atof(argv[4]);
     pmort = atof(argv[5]);
     pgood_init = atof(argv[6]);
     t_good_ends = atoi(argv[7]);
@@ -399,6 +399,9 @@ double get_migration_cost(int const flock_size)
 // the dynamics of the population at the wintering ground
 void winter_dynamics(int t)
 {
+	// Ensure that at least two individuals are still alive (to allow sexual reproduction)
+	assert(winter_pop > 1);  // inserted 04 Dec to try to solve occurrences of '-nan'
+	
 	// individuals forage
     // individuals accumulate resources
     // individuals make dispersal decisions
