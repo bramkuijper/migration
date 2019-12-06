@@ -557,7 +557,7 @@ void winter_dynamics(int t)
 
         // resources are reduced due to migration,
         // yet this depends on group size in a curvilinear fashion
-        SummerPop[i].resources = SummerPop[i].resources * total_migration_cost;
+        SummerPop[i].resources = SummerPop[i].resources - total_migration_cost;
 
         // and reduce it by time of arrival
         // TODO think more about this function
@@ -916,7 +916,7 @@ void summer_dynamics(int t)
 
         // resources are reduced due to migration,
         // yet this depends on group size in a curvilinear fashion
-        SummerPop[i].resources = SummerPop[i].resources * total_migration_cost;
+        SummerPop[i].resources = SummerPop[i].resources - total_migration_cost;
 
         // and reduce it by time of arrival
         // TODO think more about this function
