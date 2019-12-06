@@ -400,7 +400,6 @@ double get_migration_cost(int const flock_size)
 void winter_dynamics(int t)
 {
 	// Ensure that at least two individuals are still alive (to allow sexual reproduction)
-	assert(winter_pop > 1);  // inserted 04 Dec to try to solve occurrences of '-nan'
 	
 	// individuals forage
     // individuals accumulate resources
@@ -449,7 +448,7 @@ void winter_dynamics(int t)
     } // ENDS staging site foraging loop
 
     assert(winter_pop <= N);
-    assert(winter_pop >= 0);
+    assert(winter_pop >= 2);  // If population is less than two then it cannot reproduce (06 Dec)
 
     double psignal = 0.0;
 
