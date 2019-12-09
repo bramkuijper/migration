@@ -448,7 +448,7 @@ void winter_dynamics(int t)
     } // ENDS staging site foraging loop
 
     assert(winter_pop <= N);
-    assert(winter_pop >= 2);  // If population is less than two then it cannot reproduce (06 Dec)
+    assert(winter_pop >= 0);  
 
     double psignal = 0.0;
 
