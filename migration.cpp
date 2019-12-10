@@ -347,6 +347,8 @@ void mortality()
             --i;
         }
     }
+	
+	assert(winter_pop > 1);  // Ensure that at least two individuals are still alive (to allow sexual reproduction)
 
     for (int i = 0; i < summer_pop;++i)
     {
@@ -399,8 +401,6 @@ double get_migration_cost(int const flock_size)
 // the dynamics of the population at the wintering ground
 void winter_dynamics(int t)
 {
-	// Ensure that at least two individuals are still alive (to allow sexual reproduction)
-	
 	// individuals forage
     // individuals accumulate resources
     // individuals make dispersal decisions
