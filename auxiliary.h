@@ -4,6 +4,7 @@
 #include <string>
 #include <iostream>
 #include <sstream>
+#include <cstdlib>
 #include <chrono>
 
 // convert from integer to string
@@ -32,7 +33,7 @@ int get_nanoseconds()
 
     auto integral_duration = now.time_since_epoch();
 
-    int duration = integral_duration.count();
+    int duration = abs(integral_duration.count());
 
     return(duration);
 }
