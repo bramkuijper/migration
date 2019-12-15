@@ -61,6 +61,7 @@ double rbad = 0.0;
 double resource_reproduce_threshold = 0.0; 
 
 // how quickly resources decay per day arriving later than 0
+// TODO: do we really need this?
 double arrival_resource_decay = 0.0;
 
 // mutation rates
@@ -70,8 +71,6 @@ double sdmu_theta = 0.0;
 double sdmu_phi = 0.0;
 
 // migration cost function
-double max_migration_cost = 0.0;
-double min_migration_cost = 0.0;
 double migration_cost_decay = 0.0;
 double migration_cost_power = 0.0;
 
@@ -109,7 +108,8 @@ double ss_autumn_migrant_pop = 0.0;
 double ss_spring_staging_size = 0.0;
 double ss_autumn_staging_size = 0.0;
 
-struct Individual {
+struct Individual 
+{
     
     double resources;
 
@@ -131,10 +131,18 @@ struct Individual {
     double phi_b[2];
 };
 
+
 // wintering ground
 Individual WinterPop[N];
 Individual StagingPool[N];
 Individual SummerPop[N];
+
+// bounds value val between (min and max)
+double clamp(double const val, double const min, double const max) 
+{
+    return(val > max ? max : val < min ? min : val);
+}
+
 
 // get parameters from the command line when 
 // running the executable file
@@ -155,11 +163,29 @@ void init_arguments(int argc, char **argv)
     mu_phi = atof(argv[13]);
     sdmu_theta = atof(argv[14]);
     sdmu_phi = atof(argv[15]);
-    max_migration_cost = atof(argv[16]);
-    min_migration_cost = atof(argv[16])/2;
     migration_cost_decay = atof(argv[18]);
     migration_cost_power = atof(argv[19]);
     tmax = atoi(argv[20]);
+
+    // some bounds checking on parameters
+    // probability of encountering a good environment
+    // initially should be 0 <= pgood <= 1
+    assert(pgood_init >= 0.0);
+    assert(pgood_init <= 1.0);
+    
+    //max number of days per season > 0
+    assert(tmax > 0);
+
+    // probability that encountering good resource should be
+    // set to 0 after t_good_ends timesteps
+    assert(t_good_ends >= 0);
+    assert(t_good_ends <= tmax);
+
+    // resource increments
+    assert(rgood > 0);
+    assert(rbad > 0);
+    assert(rbad < rgood);
+
 }
 
 // write down all parameters in the file
@@ -183,8 +209,6 @@ void write_parameters(ofstream &DataFile)
             << "sdmu_phi;" << sdmu_phi << endl
             << "tmax;" << tmax << endl
             << "N;" << N << endl
-            << "max_migration_cost;" << max_migration_cost << endl
-            << "min_migration_cost;" << min_migration_cost << endl
             << "migration_cost_decay;" << migration_cost_decay << endl
             << "migration_cost_power;" << migration_cost_power << endl
             << "seed;" << seed << endl;
@@ -193,24 +217,66 @@ void write_parameters(ofstream &DataFile)
 // list of the data headers at the start of the file
 void write_data_headers(ofstream &DataFile)
 {
-    DataFile << "generation;time_interval;mean_theta_a;mean_theta_b;mean_phi_a;mean_phi_b;var_theta_a;var_theta_b;var_phi_a;var_phi_b;mean_resources;var_resources;winter_pop;mean_spring_staging_size;var_spring_staging_size;spring_migrant_pop;n_spring_flocks;mean_spring_flock_size;var_spring_flock_size;breeder_pop;offspring_pop;mean_autumn_staging_size;var_autumn_staging_size;autumn_migrant_pop;n_autumn_flocks;mean_autumn_flock_size;var_autumn_flock_size;" << endl;
+    DataFile << "generation;"
+        << "time_interval;"
+
+        << "mean_theta_a_winter;"
+        << "var_theta_a_winter;"
+        << "mean_theta_b_winter;"
+        << "var_theta_b_winter;"
+        << "mean_phi_a_winter;"
+        << "var_phi_a_winter;"
+        << "mean_phi_b_winter;"
+        << "var_phi_b_winter;"
+        << "mean_resources_winter;"
+        << "var_resources_winter;"
+
+        << "mean_theta_a_summer;"
+        << "var_theta_a_summer;"
+        << "mean_theta_b_summer;"
+        << "var_theta_b_summer;"
+        << "mean_phi_a_summer;"
+        << "var_phi_a_summer;"
+        << "mean_phi_b_summer;"
+        << "var_phi_b_summer;"
+        << "mean_resources_summer;"
+        << "var_resources_summer;"
+
+        << "winter_pop;"
+        << "summer_pop;"
+        << "mean_spring_staging_size;"
+        << "var_spring_staging_size;"
+        << "spring_migrant_pop;"
+        << "n_spring_flocks;"
+        << "mean_spring_flock_size;"
+        << "var_spring_flock_size;"
+        << "breeder_pop;"
+        << "offspring_pop;"
+        << "mean_autumn_staging_size;"
+        << "var_autumn_staging_size;"
+        << "autumn_migrant_pop;"
+        << "n_autumn_flocks;"
+        << "mean_autumn_flock_size;"
+        << "var_autumn_flock_size;" << endl;
 }
 
 // write data both for winter and summer populations
 void write_stats(ofstream &DataFile, int generation, int timestep)
 {
-    double mean_theta_a = 0.0;
-    double ss_theta_a = 0.0;
-    double mean_theta_b = 0.0;
-    double ss_theta_b = 0.0;
+    double mean_theta_a[2] = { 0.0, 0.0 };
+    double ss_theta_a[2] = { 0.0, 0.0 };
+    double mean_theta_b[2] = { 0.0, 0.0 };
+    double ss_theta_b[2] = { 0.0, 0.0 };
 
-    double mean_phi_a = 0.0;
-    double ss_phi_a = 0.0;
-    double mean_phi_b = 0.0;
-    double ss_phi_b = 0.0;
+    double mean_phi_a[2] = { 0.0, 0.0 };
+    double ss_phi_a[2] = { 0.0, 0.0 };
+    double mean_phi_b[2] = { 0.0, 0.0 };
+    double ss_phi_b[2] = { 0.0, 0.0 };
 
-    double mean_resources = 0.0;
-    double ss_resources = 0.0;
+    double mean_resources[2] = { 0.0, 0.0 };
+    double ss_resources[2] = { 0.0, 0.0 };
+
+    double val;
     
     for (int i = 0; i < winter_pop; ++i)  // So here we are cycling one by one through the winter population
     {
@@ -218,74 +284,99 @@ void write_stats(ofstream &DataFile, int generation, int timestep)
 		// two reaction norms) is genetically controlled
 		// by a single gene (diploid) exhibiting incomplete dominance
 		// (hence *0.5)
-		mean_theta_a += 0.5 * (WinterPop[i].theta_a[0] + WinterPop[i].theta_a[1]);
-        mean_theta_b += 0.5 * (WinterPop[i].theta_b[0] + WinterPop[i].theta_b[1]);
-        
-        ss_theta_a += 0.5 * (WinterPop[i].theta_a[0] + WinterPop[i].theta_a[1]) * 0.5 * (WinterPop[i].theta_a[0] + WinterPop[i].theta_a[1]);
-        ss_theta_b += 0.5 * (WinterPop[i].theta_b[0] + WinterPop[i].theta_b[1]) * 0.5 * (WinterPop[i].theta_b[0] + WinterPop[i].theta_b[1]);
+		val = 0.5 * (WinterPop[i].theta_a[0] + WinterPop[i].theta_a[1]);
+        mean_theta_a[0] = val;
+        ss_theta_a[0] = val * val;
 
-        mean_phi_a += 0.5 * (WinterPop[i].phi_a[0] + WinterPop[i].phi_a[1]);
+        val += 0.5 * (WinterPop[i].theta_b[0] + WinterPop[i].theta_b[1]);
+        mean_theta_b[0] = val;
+        ss_theta_b[0] = val * val;
+        
+        val = 0.5 * (WinterPop[i].phi_a[0] + WinterPop[i].phi_a[1]);
+        mean_phi_a[0] = val;
+        ss_phi_a[0] = val * val;
+
         mean_phi_b += 0.5 * (WinterPop[i].phi_b[0] + WinterPop[i].phi_b[1]);
+        mean_phi_b[0] = val;
+        ss_phi_b[0] = val * val;
         
-        ss_phi_a += 0.5 * (WinterPop[i].phi_a[0] + WinterPop[i].phi_a[1]) * 0.5 * (WinterPop[i].phi_a[0] + WinterPop[i].phi_a[1]);
-        ss_phi_b += 0.5 * (WinterPop[i].phi_b[0] + WinterPop[i].phi_b[1]) * 0.5 * (WinterPop[i].phi_b[0] + WinterPop[i].phi_b[1]);
-
-        mean_resources += WinterPop[i].resources;  // the resource level of individual i 
-        ss_resources += WinterPop[i].resources * WinterPop[i].resources;
+        val += WinterPop[i].resources;  // the resource level of individual i 
+        mean_resources[0] = val;
+        ss_resources[0] = val * val;
     }
 
     for (int i = 0; i < summer_pop; ++i)  // for each individual in the summer population:
     {
-        mean_theta_a += 0.5 * (SummerPop[i].theta_a[0] + SummerPop[i].theta_a[1]);
-        mean_theta_b += 0.5 * (SummerPop[i].theta_b[0] + SummerPop[i].theta_b[1]);
-        
-        ss_theta_a += 0.5 * (SummerPop[i].theta_a[0] + SummerPop[i].theta_a[1]) * 0.5 * (SummerPop[i].theta_a[0] + SummerPop[i].theta_a[1]);
-        ss_theta_b += 0.5 * (SummerPop[i].theta_b[0] + SummerPop[i].theta_b[1]) * 0.5 * (SummerPop[i].theta_b[0] + SummerPop[i].theta_b[1]);
+		val = 0.5 * (SummerPop[i].theta_a[1] + SummerPop[i].theta_a[1]);
+        mean_theta_a[1] = val;
+        ss_theta_a[1] = val * val;
 
-        mean_phi_a += 0.5 * (SummerPop[i].phi_a[0] + SummerPop[i].phi_a[1]);
-        mean_phi_b += 0.5 * (SummerPop[i].phi_b[0] + SummerPop[i].phi_b[1]);
+        val += 0.5 * (SummerPop[i].theta_b[1] + SummerPop[i].theta_b[1]);
+        mean_theta_b[1] = val;
+        ss_theta_b[1] = val * val;
         
-        ss_phi_a += 0.5 * (SummerPop[i].phi_a[0] + SummerPop[i].phi_a[1]) * 0.5 * (SummerPop[i].phi_a[0] + SummerPop[i].phi_a[1]);
-        ss_phi_b += 0.5 * (SummerPop[i].phi_b[0] + SummerPop[i].phi_b[1]) * 0.5 * (SummerPop[i].phi_b[0] + SummerPop[i].phi_b[1]);
+        val = 0.5 * (SummerPop[i].phi_a[1] + SummerPop[i].phi_a[1]);
+        mean_phi_a[1] = val;
+        ss_phi_a[1] = val * val;
 
-        mean_resources += SummerPop[i].resources;
-        ss_resources += SummerPop[i].resources * SummerPop[i].resources;
+        mean_phi_b += 0.5 * (SummerPop[i].phi_b[1] + SummerPop[i].phi_b[1]);
+        mean_phi_b[1] = val;
+        ss_phi_b[1] = val * val;
+        
+        val += SummerPop[i].resources;  // the resource level of individual i 
+        mean_resources[1] = val;
+        ss_resources[1] = val * val;
     }
 
-    // Here we are gathering the average over the two populations (i.e., summer AND winter) WHY DO WE DO THIS? Maybe to include individuals that are spending the summer at the overwintering grounds?
-	mean_theta_a /= summer_pop + winter_pop;
-    mean_theta_b /= summer_pop + winter_pop;
-    mean_phi_a /= summer_pop + winter_pop;
-    mean_phi_b /= summer_pop + winter_pop;
-	mean_resources /= summer_pop + winter_pop;
-
+    // calculate means and variances of the winter population
+	mean_theta_a[0] /=  winter_pop;
+    mean_theta_b[0] /=  winter_pop;
+    mean_phi_a[0] /=  winter_pop;
+    mean_phi_b[0] /=  winter_pop;
+	mean_resources[0] /=  winter_pop;
     
-    ss_theta_a /= summer_pop + winter_pop;
-    ss_theta_b /= summer_pop + winter_pop;
-    ss_phi_a /= summer_pop + winter_pop;
-    ss_phi_b /= summer_pop + winter_pop;
-    ss_resources /= summer_pop + winter_pop;
+    ss_theta_a[0] /= winter_pop; 
+    ss_theta_b[0] /= winter_pop; 
+    ss_phi_a[0] /= winter_pop; 
+    ss_phi_b[0] /= winter_pop;
+    ss_resources[0] /= winter_pop; 
+	
+    // calculate means and variances of the summer population
+    mean_theta_a[1] /=  summer_pop;
+    mean_theta_b[1] /=  summer_pop;
+    mean_phi_a[1] /=  summer_pop;
+    mean_phi_b[1] /=  summer_pop;
+	mean_resources[1] /=  summer_pop;
+    
+    ss_theta_a[1] /= summer_pop; 
+    ss_theta_b[1] /= summer_pop; 
+    ss_phi_a[1] /= summer_pop; 
+    ss_phi_b[1] /= summer_pop;
+    ss_resources[1] /= summer_pop; 
 
-    double var_theta_a = ss_theta_a - mean_theta_a * mean_theta_a;
-    double var_theta_b = ss_theta_b - mean_theta_b * mean_theta_b;
-    double var_phi_a = ss_phi_a - mean_phi_a * mean_phi_a;
-    double var_phi_b = ss_phi_b - mean_phi_b * mean_phi_b;
-	double var_resources = ss_resources - mean_resources * mean_resources;
-
+    // write statistics to a file
     DataFile 
         << generation << ";"
-        << timestep << ";"
-        << mean_theta_a << ";"
-        << mean_theta_b << ";"
-        << mean_phi_a << ";"
-        << mean_phi_b << ";"
-        << var_theta_a << ";"
-        << var_theta_b << ";"
-        << var_phi_a << ";"
-        << var_phi_b << ";"
-	    << mean_resources << ";"
-        << var_resources << ";"
+        << timestep << ";";
+
+    for (int i = 0; i < 2; ++i)
+    {
+        DataFile 
+            << mean_theta_a[i] << ";"
+            << (ss_theta_a[i] - mean_theta_a[i] * mean_theta_a[i]) << ";"
+            << mean_theta_b[i] << ";"
+            << (ss_theta_b[i] - mean_theta_b[i] * mean_theta_b[i]) << ";"
+            << mean_phi_a[i] << ";"
+            << (ss_phi_a[i] - mean_phi_a[i] * mean_phi_a[i]) << ";"
+            << mean_phi_b[i] << ";"
+            << (ss_phi_b[i] - mean_phi_b[i] * mean_phi_b[i]) << ";"
+            << mean_resources[i] << ";"
+            << (ss_resources[i] - mean_resources[i] * mean_resources[i]) << ";";
+    }
+
+    DataFile
         << winter_pop << ";"
+        << summer_pop << ";"
 	    << mean_spring_staging_size << ";" 
 		<< var_spring_staging_size << ";"
 		<< spring_migrant_pop << ";"
@@ -360,13 +451,13 @@ void mortality()
             --i;
         }
     }
+
 }
 
 // remove individuals from the staging pool and put them
 // back in the original population
 void clear_staging_pool()
 {
-	
 	// put individuals from staging pool (which haven't migrated) 
     // back in the original population
     for (int i = 0; i < staging_pop; ++i)
@@ -381,24 +472,28 @@ void clear_staging_pool()
     staging_pop = 0;
 }  // ENDS STAGING POOL CLEARANCE
 
-// MIGRATION COST
-double get_migration_cost(int const flock_size)
+// migration cost as a fraction of resources
+// wasted on migration
+// if flock size is 1, function returns c = 1 (i.e., max cost)
+// if flock size is >1, function returns 0 <= c < 1  
+double get_migration_cost_proportion(int const flock_size)
 {
-    double total_migration_cost = max_migration_cost - migration_cost_decay * 
-            pow((double) flock_size / N, migration_cost_power);
+    // flock size = 1: max cost
+    // flock size = N: no cost
+    // as this is a proportional cost, it should be bounded between 0 and 1
+    // hence costs decay as a fraction of the maximum flock size N
+    // if it would just decay with flock size it may well be that 
+    double total_migration_cost = max_migration_cost * (1.0 - migration_cost_decay * 
+            pow((double) flock_size / N, migration_cost_power));
 
-    if (total_migration_cost < min_migration_cost)
-    {
-        total_migration_cost = min_migration_cost;
-    }
-
-    assert(total_migration_cost >= 0.0);
-    assert(total_migration_cost <= max_migration_cost);
+    // make sure function is bounded between 0 and 1
+    total_migration_cost = clamp(total_migration_cost, 0.0, 1.0);
 
     return(total_migration_cost);
 }
 
 // the dynamics of the population at the wintering ground
+// at time t
 void winter_dynamics(int t)
 {
 	// individuals forage
@@ -406,16 +501,11 @@ void winter_dynamics(int t)
     // individuals make dispersal decisions
 
     // probability of encountering a good resource
-    // decays with time until hits time t = t_good_ends 
-    // when pgood = 0
-    double pgood = pgood_init - pgood_init / t_good_ends * t;
-
-    // set lower boundary to the probability
-    if (pgood <= 0)
-    {
-        pgood = 0;
-    }
-
+    
+    // if the time is later than t_good_ends
+    // one can only encounter bad resources, hence p_good_0
+    double pgood = t < t_good_ends ? pgood_init : 0.0;
+   
     // foraging of individuals who are just at the wintering site
     // and who have yet to decide to go to the staging site
     for (int i = 0; i < winter_pop; ++i)
@@ -427,8 +517,7 @@ void winter_dynamics(int t)
         else
         {
             WinterPop[i].resources += rbad;
-        } // ENDS winter foraging loop
-    
+        } 
     } // ok, resource dynamic done
 
 
@@ -448,7 +537,7 @@ void winter_dynamics(int t)
     } // ENDS staging site foraging loop
 
     assert(winter_pop <= N);
-    assert(winter_pop >= 0);  
+    assert(winter_pop > 0);  
 
     double psignal = 0.0;
 
@@ -556,7 +645,7 @@ void winter_dynamics(int t)
 
         // resources are reduced due to migration,
         // yet this depends on group size in a curvilinear fashion
-        SummerPop[i].resources = SummerPop[i].resources - total_migration_cost;
+        SummerPop[i].resources -= SummerPop[i].resources - total_migration_cost;
 
         // and reduce it by time of arrival
         // TODO think more about this function
@@ -903,15 +992,12 @@ void summer_dynamics(int t)
     // been added to the pool dependent on their flock size
     for (int i = winter_pop_old; i < winter_pop; ++i)
     {
-        total_migration_cost = get_migration_cost(NFlock);
+        total_migration_cost = get_migration_cost_proportion(NFlock);
 
         if (total_migration_cost < min_migration_cost)
         {
             total_migration_cost = min_migration_cost;
         }
-
-        assert(total_migration_cost >= 0.0);
-        assert(total_migration_cost <= max_migration_cost);
 
         // resources are reduced due to migration,
         // yet this depends on group size in a curvilinear fashion
