@@ -500,10 +500,9 @@ void winter_dynamics(int t)
     // individuals accumulate resources
     // individuals make dispersal decisions
 
-    // probability of encountering a good resource
-    
-    // if the time is later than t_good_ends
-    // one can only encounter bad resources, hence p_good_0
+    // determine probability of encountering a good resource:
+    //  if the time is later than t_good_ends
+    //  one can only encounter bad resources, hence p_good = 0
     double pgood = t < t_good_ends ? pgood_init : 0.0;
    
     // foraging of individuals who are just at the wintering site
@@ -552,6 +551,9 @@ void winter_dynamics(int t)
         psignal = 0.5 * (WinterPop[i].theta_a[0] + WinterPop[i].theta_a[1])
             + 0.5 * (WinterPop[i].theta_b[0] + WinterPop[i].theta_b[1]) * WinterPop[i].resources;
 
+        // bound the probability
+        psignal = clamp(psignal, 0.0, 1.0);
+
         // does individual want to signal to others to be ready for departure?
         if (uniform(rng_r) < psignal)
         {
@@ -560,7 +562,7 @@ void winter_dynamics(int t)
             ++staging_pop; // increment the number of individuals in the staging pool
 
             assert(staging_pop <= N);
-            assert(staging_pop >= 0);
+            assert(staging_pop > 0);
 
             // delete this individual from the winter population
             WinterPop[i] = WinterPop[winter_pop - 1];
@@ -569,7 +571,7 @@ void winter_dynamics(int t)
             --winter_pop;
             --i;
         }
-    }
+    } // end for move dispersers to staging
 
     // store current number of individuals at the breeding ground
     // so that we know which individuals have just arrived there
@@ -577,19 +579,22 @@ void winter_dynamics(int t)
     // group size)
     int summer_pop_old = summer_pop;
 
+    // keep track of flock size of individuals who will disperse
+    // at this timestep. This should be initialized at 0 at each
+    // timestep t
     int NFlock = 0;
 
     double pdisperse = 0.0;
 
+    // remember numbers of individuals in the staging pop at the start
     int staging_pop_start = staging_pop;
 
-    // actual spring dispersal
+    // actual spring dispersal from winter to summer population
     for (int i = 0; i < staging_pop; ++i)
     {
         // later we will consider collective dispersal decisions
         // for now, individuals leave dependent on the current amount of individuals
         // within the staging pool
-
         pdisperse = 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1])
             + 0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) * staging_pop_start;
 
@@ -619,37 +624,36 @@ void winter_dynamics(int t)
             
             assert(NFlock <= N);
         
-
 		} // ENDS: yes individual goes
 		
-    } // ENDS ACTUAL SPRING DISPERSAL
+    } // ENDS ACTUAL SPRING DISPERSAL and making of flocks
 	
-	double total_migration_cost;
+	double total_migration_scalar;
 
+    // keep track of mean and variance in flock sizes
 	mean_spring_staging_size += staging_pop_start;
+
 	ss_spring_staging_size += staging_pop_start * staging_pop_start;
 	
-    if (NFlock > 0){
+    if (NFlock > 0)
+    {
 		n_spring_flocks = n_spring_flocks+1;
 		mean_spring_flock_size += NFlock;
 		ss_spring_flock_size += NFlock * NFlock;  // Also serves as sum of squares of spring migrant population size
-		
-
 	}
 	
 	// update resource levels for all new individuals that have just
     // been added to the summer pool dependent on their flock size
     for (int i = summer_pop_old; i < summer_pop; ++i)
     {
-		total_migration_cost = get_migration_cost(NFlock);
+		total_migration_scalar = (1.0 - get_migration_cost_proportion(NFlock)) * (1.0 - arrival_resource_decay * (double)t/tmax);
+
+        assert(total_migration_scalar >= 0);
+        assert(total_migration_scalar <= 1.0);
 
         // resources are reduced due to migration,
         // yet this depends on group size in a curvilinear fashion
-        SummerPop[i].resources -= SummerPop[i].resources - total_migration_cost;
-
-        // and reduce it by time of arrival
-        // TODO think more about this function
-        SummerPop[i].resources = arrival_resource_decay * t;
+        SummerPop[i].resources = SummerPop[i].resources * total_migration_scalar;
 
 		// Surviving spring migrants are added to the count of breeders
 		if (SummerPop[i].resources >= resource_reproduce_threshold)
@@ -658,7 +662,7 @@ void winter_dynamics(int t)
 		}
         
 		// death due to starvation
-        if (SummerPop[i].resources < 0)
+        if (SummerPop[i].resources <= 0)
         {
             SummerPop[i] = SummerPop[summer_pop - 1];
             --summer_pop;
@@ -694,6 +698,8 @@ void create_offspring(Individual &mother, Individual &father, Individual &offspr
 
     // each parental allele has probability 0.5 to make it into offspring
     offspring.theta_a[0] = mutation(mother.theta_a[allele_sample(rng_r)], mu_theta, sdmu_theta);
+    
+
     offspring.theta_a[1] = mutation(father.theta_a[allele_sample(rng_r)], mu_theta, sdmu_theta);
 
     offspring.theta_b[0] = mutation(mother.theta_b[allele_sample(rng_r)], mu_theta, sdmu_theta);
