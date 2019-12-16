@@ -18,6 +18,7 @@ rbad = [ 0.05 ] # Changed from 0.5 on 27 November 2019
 
 arrival_resource_decay = [0.1] #[ 0.1, 0.5] # changed 19 Nov 2019. Outcome was that for value of 0.01, the winter population size was < 25. On 27th Nov, I fixed it to 0.1 as values of 0.2 were associated with very low population sizes.
 resource_reproduction_threshold = [0.1]
+resource_starvation_threshold = [0.0]
 
 # mutation rates (I fix those and they are not varying)
 mu_theta = 0.01
@@ -61,40 +62,41 @@ for rep_i in range(0, number_replicates):
                             for rbad_i in rbad:
                                 for arrival_resource_decay_i in arrival_resource_decay:
                                     for resource_reproduction_threshold_i in resource_reproduction_threshold:
-                                        for max_migration_cost_i in max_migration_cost:
-                                            for min_migration_cost_i in min_migration_cost:
-                                                for migration_cost_decay_i in migration_cost_decay:
-                                                    for migration_cost_power_i in migration_cost_power:
+                                        for resource_starvation_threshold_i in resource_starvation_threshold:
+                                            for max_migration_cost_i in max_migration_cost:
+                                                for min_migration_cost_i in min_migration_cost:
+                                                    for migration_cost_decay_i in migration_cost_decay:
+                                                        for migration_cost_power_i in migration_cost_power:
 
-                                                            # increment the counter for the number of 
-                                                            # runs
-                                                            counter += 1
+                                                                # increment the counter for the number of 
+                                                                # runs
+                                                                counter += 1
 
-                                                            print("echo " + str(counter))
+                                                                print("echo " + str(counter))
 
 
-                                                            print(executable + " " 
-                                                                    + str(init_phi_a) + " "
-                                                                    + str(init_phi_b_i) + " "
-                                                                    + str(init_theta_a) + " "
-                                                                    + str(init_theta_b_i) + " "
-                                                                    + str(pmort_i) + " "
-                                                                    + str(pgood_init_i) + " "
-                                                                    + str(t_good_ends_i) + " "
-                                                                    + str(rgood_i) + " "
-                                                                    + str(rbad_i) + " "
-                                                                    + str(arrival_resource_decay_i) + " "
-                                                                    + str(resource_reproduction_threshold_i) + " "
-                                                                    + str(mu_theta) + " "
-                                                                    + str(mu_phi) + " "
-                                                                    + str(sdmu_theta) + " "
-                                                                    + str(sdmu_phi) + " "
-                                                                    + str(max_migration_cost_i) + " "
-                                                                    + str(min_migration_cost_i) + " "
-                                                                    + str(migration_cost_decay_i) + " "
-                                                                    + str(migration_cost_power_i) + " "
-                                                                    + str(tmax) + " " 
-                                                                    + backgroundstr)
+                                                                print(executable + " " 
+                                                                        + str(init_phi_a) + " "
+                                                                        + str(init_phi_b_i) + " "
+                                                                        + str(init_theta_a) + " "
+                                                                        + str(init_theta_b_i) + " "
+                                                                        + str(pmort_i) + " "
+                                                                        + str(pgood_init_i) + " "
+                                                                        + str(t_good_ends_i) + " "
+                                                                        + str(rgood_i) + " "
+                                                                        + str(rbad_i) + " "
+                                                                        + str(arrival_resource_decay_i) + " "
+                                                                        + str(resource_reproduction_threshold_i) + " "
+                                                                        + str(resource_starvation_threshold_i) + " "
+                                                                        + str(mu_theta) + " "
+                                                                        + str(mu_phi) + " "
+                                                                        + str(sdmu_theta) + " "
+                                                                        + str(sdmu_phi) + " "
+                                                                        + str(max_migration_cost_i) + " "
+                                                                        + str(migration_cost_decay_i) + " "
+                                                                        + str(migration_cost_power_i) + " "
+                                                                        + str(tmax) + " " 
+                                                                        + backgroundstr)
 
 
 

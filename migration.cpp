@@ -59,6 +59,7 @@ double rbad = 0.0;
 
 // minimum resource level necessary to reproduce 
 double resource_reproduce_threshold = 0.0; 
+double resource_starvation_threshold = 0.0; 
 
 // how quickly resources decay per day arriving later than 0
 // TODO: do we really need this?
@@ -73,6 +74,7 @@ double sdmu_phi = 0.0;
 // migration cost function
 double migration_cost_decay = 0.0;
 double migration_cost_power = 0.0;
+double max_migration_cost = 0.0;
 
 // max number of intervals per season (two seasons: summer, winter)
 int tmax = 5000;
@@ -159,10 +161,12 @@ void init_arguments(int argc, char **argv)
     rbad = atof(argv[9]);
     arrival_resource_decay = atof(argv[10]);
     resource_reproduce_threshold = atof(argv[11]);
-    mu_theta = atof(argv[12]);
-    mu_phi = atof(argv[13]);
-    sdmu_theta = atof(argv[14]);
-    sdmu_phi = atof(argv[15]);
+    resource_starvation_threshold = atof(argv[12]);
+    mu_theta = atof(argv[13]);
+    mu_phi = atof(argv[14]);
+    sdmu_theta = atof(argv[15]);
+    sdmu_phi = atof(argv[16]);
+    max_migration_cost = atof(argv[17]);
     migration_cost_decay = atof(argv[18]);
     migration_cost_power = atof(argv[19]);
     tmax = atoi(argv[20]);
@@ -203,6 +207,7 @@ void write_parameters(ofstream &DataFile)
             << "rbad;" << rbad << endl
             << "arrival_resource_decay;" << arrival_resource_decay << endl
             << "resource_reproduce_threshold;" << resource_reproduce_threshold << endl
+            << "resource_starvation_threshold;" << resource_starvation_threshold << endl
             << "mu_theta;" << mu_theta << endl
             << "mu_phi;" << mu_phi << endl
             << "sdmu_theta;" << sdmu_theta << endl
@@ -211,6 +216,7 @@ void write_parameters(ofstream &DataFile)
             << "N;" << N << endl
             << "migration_cost_decay;" << migration_cost_decay << endl
             << "migration_cost_power;" << migration_cost_power << endl
+            << "max_migration_cost;" << max_migration_cost << endl
             << "seed;" << seed << endl;
 }
 
@@ -296,34 +302,34 @@ void write_stats(ofstream &DataFile, int generation, int timestep)
         mean_phi_a[0] = val;
         ss_phi_a[0] = val * val;
 
-        mean_phi_b += 0.5 * (WinterPop[i].phi_b[0] + WinterPop[i].phi_b[1]);
+        val = 0.5 * (WinterPop[i].phi_b[0] + WinterPop[i].phi_b[1]);
         mean_phi_b[0] = val;
         ss_phi_b[0] = val * val;
         
-        val += WinterPop[i].resources;  // the resource level of individual i 
+        val = WinterPop[i].resources;  // the resource level of individual i 
         mean_resources[0] = val;
         ss_resources[0] = val * val;
     }
 
     for (int i = 0; i < summer_pop; ++i)  // for each individual in the summer population:
     {
-		val = 0.5 * (SummerPop[i].theta_a[1] + SummerPop[i].theta_a[1]);
+		val = 0.5 * (SummerPop[i].theta_a[0] + SummerPop[i].theta_a[1]);
         mean_theta_a[1] = val;
         ss_theta_a[1] = val * val;
 
-        val += 0.5 * (SummerPop[i].theta_b[1] + SummerPop[i].theta_b[1]);
+        val += 0.5 * (SummerPop[i].theta_b[0] + SummerPop[i].theta_b[1]);
         mean_theta_b[1] = val;
         ss_theta_b[1] = val * val;
         
-        val = 0.5 * (SummerPop[i].phi_a[1] + SummerPop[i].phi_a[1]);
+        val = 0.5 * (SummerPop[i].phi_a[0] + SummerPop[i].phi_a[1]);
         mean_phi_a[1] = val;
         ss_phi_a[1] = val * val;
 
-        mean_phi_b += 0.5 * (SummerPop[i].phi_b[1] + SummerPop[i].phi_b[1]);
+        val = 0.5 * (SummerPop[i].phi_b[0] + SummerPop[i].phi_b[1]);
         mean_phi_b[1] = val;
         ss_phi_b[1] = val * val;
         
-        val += SummerPop[i].resources;  // the resource level of individual i 
+        val = SummerPop[i].resources;  // the resource level of individual i 
         mean_resources[1] = val;
         ss_resources[1] = val * val;
     }
@@ -439,8 +445,6 @@ void mortality()
         }
     }
 	
-	assert(winter_pop > 1);  // Ensure that at least two individuals are still alive (to allow sexual reproduction)
-
     for (int i = 0; i < summer_pop;++i)
     {
         // individual dies; replace with end of the stack individual
@@ -452,6 +456,7 @@ void mortality()
         }
     }
 
+    assert((winter_pop > 0 || staging_pop > 0) || summer_pop > 0);
 }
 
 // remove individuals from the staging pool and put them
@@ -520,6 +525,7 @@ void winter_dynamics(int t)
     } // ok, resource dynamic done
 
 
+
     // foraging of individuals who are already at the staging site
     for (int i = 0; i < staging_pop; ++i)
     { 
@@ -536,7 +542,8 @@ void winter_dynamics(int t)
     } // ENDS staging site foraging loop
 
     assert(winter_pop <= N);
-    assert(winter_pop > 0);  
+    assert(winter_pop >= 0);  
+    assert((winter_pop > 0 || staging_pop > 0) || summer_pop > 0);  
 
     double psignal = 0.0;
 
@@ -616,7 +623,7 @@ void winter_dynamics(int t)
             --staging_pop;
             --i;
 
-            assert(staging_pop <= N);
+            assert(staging_pop < N);
             assert(staging_pop >= 0);
 
             // increase flock size
@@ -646,7 +653,8 @@ void winter_dynamics(int t)
     // been added to the summer pool dependent on their flock size
     for (int i = summer_pop_old; i < summer_pop; ++i)
     {
-		total_migration_scalar = (1.0 - get_migration_cost_proportion(NFlock)) * (1.0 - arrival_resource_decay * (double)t/tmax);
+		total_migration_scalar = (1.0 - get_migration_cost_proportion(NFlock)) * 
+            (1.0 - arrival_resource_decay * (double)t/tmax);
 
         assert(total_migration_scalar >= 0);
         assert(total_migration_scalar <= 1.0);
@@ -655,14 +663,8 @@ void winter_dynamics(int t)
         // yet this depends on group size in a curvilinear fashion
         SummerPop[i].resources = SummerPop[i].resources * total_migration_scalar;
 
-		// Surviving spring migrants are added to the count of breeders
-		if (SummerPop[i].resources >= resource_reproduce_threshold)
-		{
-			breeder_pop = breeder_pop+1;
-		}
-        
 		// death due to starvation
-        if (SummerPop[i].resources <= 0)
+        if (SummerPop[i].resources < resource_starvation_threshold)
         {
             SummerPop[i] = SummerPop[summer_pop - 1];
             --summer_pop;
@@ -688,7 +690,10 @@ double mutation(double val, double mu, double sdmu)
 }
 
 // create a new offspring
-void create_offspring(Individual &mother, Individual &father, Individual &offspring)
+void create_offspring(
+        Individual &mother
+        ,Individual &father
+        ,Individual &offspring)
 {
     bernoulli_distribution allele_sample(0.5);
 
@@ -698,42 +703,30 @@ void create_offspring(Individual &mother, Individual &father, Individual &offspr
 
     // each parental allele has probability 0.5 to make it into offspring
     offspring.theta_a[0] = mutation(mother.theta_a[allele_sample(rng_r)], mu_theta, sdmu_theta);
-    
+    offspring.theta_a[0] = clamp(offspring.theta_a[0], 0.0, 1.0);
 
     offspring.theta_a[1] = mutation(father.theta_a[allele_sample(rng_r)], mu_theta, sdmu_theta);
+    offspring.theta_a[1] = clamp(offspring.theta_a[1], 0.0, 1.0);
 
     offspring.theta_b[0] = mutation(mother.theta_b[allele_sample(rng_r)], mu_theta, sdmu_theta);
+    offspring.theta_b[0] = clamp(offspring.theta_b[0], 0.0, 1.0);
+
     offspring.theta_b[1] = mutation(father.theta_b[allele_sample(rng_r)], mu_theta, sdmu_theta);
+    offspring.theta_b[1] = clamp(offspring.theta_b[1], 0.0, 1.0);
 
     // inherit phi loci
     offspring.phi_a[0] = mutation(mother.phi_a[allele_sample(rng_r)], mu_phi, sdmu_phi);
+    offspring.phi_a[0] = clamp(offspring.phi_a[0], 0.0, 1.0);
+
     offspring.phi_a[1] = mutation(father.phi_a[allele_sample(rng_r)], mu_phi, sdmu_phi);
+    offspring.phi_a[1] = clamp(offspring.phi_a[1], 0.0, 1.0);
     
     offspring.phi_b[0] = mutation(mother.phi_b[allele_sample(rng_r)], mu_phi, sdmu_phi);
-    offspring.phi_b[1] = mutation(father.phi_b[allele_sample(rng_r)], mu_phi, sdmu_phi);
+    offspring.phi_b[0] = clamp(offspring.phi_b[0], 0.0, 1.0);
 
-    for (int allele_i = 0; allele_i < 2; ++allele_i)
-    {
-        // put boundaries on the elevation between 0 and 1
-        // to help with the interpretation of the evolved values of the slope
-        if (offspring.theta_a[allele_i] < 0.0)
-        {
-            offspring.theta_a[allele_i] = 0.0;
-        }
-        else if (offspring.theta_a[allele_i] > 1.0)
-        {
-            offspring.theta_a[allele_i] = 1.0;
-        }
-        
-        if (offspring.phi_a[allele_i] < 0.0)
-        {
-            offspring.phi_a[allele_i] = 0.0;
-        }
-        else if (offspring.phi_a[allele_i] > 1.0)
-        {
-            offspring.phi_a[allele_i] = 1.0;
-        }
-    }   
+    offspring.phi_b[1] = mutation(father.phi_b[allele_sample(rng_r)], mu_phi, sdmu_phi);
+    offspring.phi_b[1] = clamp(offspring.phi_b[1], 0.0, 1.0);
+
 // ENDS OFFSPRING PRODUCTION
 }
 
@@ -759,6 +752,7 @@ void summer_reproduction(ofstream &DataFile)
     {
         // quit if extinct 
         write_parameters(DataFile);
+
         exit(1);
     }
 
@@ -766,6 +760,7 @@ void summer_reproduction(ofstream &DataFile)
     vector<Individual> Kids;
 
     uniform_int_distribution<> summer_sample(0, summer_pop - 1);
+
     // mating dynamic. Presumes that there an even 
     // number of individuals
     // so we just discard the last individual
@@ -780,6 +775,9 @@ void summer_reproduction(ofstream &DataFile)
         {
             continue;
         }
+
+        // update stats
+        ++breeder_pop;
 
         // now randomly select a father
         do {
@@ -814,7 +812,7 @@ void summer_reproduction(ofstream &DataFile)
             // add kid to the stack
             Kids.push_back(kid);
         }
-    }
+    } // end for (int i = 0; i < summer_pop; ++i)
 
     offspring_pop = Kids.size();
 
@@ -847,14 +845,16 @@ void summer_reproduction(ofstream &DataFile)
         Kids.pop_back();
     }
 // ENDS SUMMER REPRODUCTION
-}
+} // end void summer_reproduction(ofstream &DataFile)
 
 // gaining resources at breeding ground
 // & fly back
 void summer_dynamics(int t)
 {
-    // probability of encountering a good resource
-    double pgood = pgood_init - pgood_init / t_good_ends * t;
+    // determine probability of encountering a good resource:
+    //  if the time is later than t_good_ends
+    //  one can only encounter bad resources, hence p_good = 0
+    double pgood = t < t_good_ends ? pgood_init : 0.0;
 
     // set lower boundary to the probability
     if (pgood <= 0)
@@ -895,7 +895,8 @@ void summer_dynamics(int t)
     }
 
     assert(summer_pop<= N);
-    assert(summer_pop>= 0);
+    assert(summer_pop >= 0);
+    assert((summer_pop > 0 || winter_pop > 0) || staging_pop > 0);
 
     double psignal = 0.0;
 
@@ -910,6 +911,9 @@ void summer_dynamics(int t)
         // => go to the staging level
         psignal = 0.5 * (SummerPop[i].theta_a[0] + SummerPop[i].theta_a[1])
             + 0.5 * (SummerPop[i].theta_b[0] + SummerPop[i].theta_b[1]) * SummerPop[i].resources;
+
+        // bound the probability
+        psignal = clamp(psignal, 0.0, 1.0);
 
         // does individual want to signal to others to be ready for departure?
         if (uniform(rng_r) < psignal)
@@ -928,7 +932,7 @@ void summer_dynamics(int t)
             --summer_pop;
             --i;
         }
-    }
+    } // end for (int i = 0; i < summer_pop; ++i)
 
     // store current number of individuals at the breeding ground
     // so that we know which individuals have just arrived there
@@ -983,7 +987,7 @@ void summer_dynamics(int t)
 	    
     } // ENDS: Autumn dispersal
 	
-    double total_migration_cost = 0.0;
+    double total_migration_scalar = 0.0;
 	
 	mean_autumn_flock_size += NFlock;
 	ss_autumn_flock_size += NFlock * NFlock;
@@ -998,23 +1002,15 @@ void summer_dynamics(int t)
     // been added to the pool dependent on their flock size
     for (int i = winter_pop_old; i < winter_pop; ++i)
     {
-        total_migration_cost = get_migration_cost_proportion(NFlock);
-
-        if (total_migration_cost < min_migration_cost)
-        {
-            total_migration_cost = min_migration_cost;
-        }
+		total_migration_scalar = (1.0 - get_migration_cost_proportion(NFlock)) * 
+            (1.0 - arrival_resource_decay * (double)t/tmax);
 
         // resources are reduced due to migration,
         // yet this depends on group size in a curvilinear fashion
-        SummerPop[i].resources = SummerPop[i].resources - total_migration_cost;
-
-        // and reduce it by time of arrival
-        // TODO think more about this function
-        WinterPop[i].resources -= arrival_resource_decay * t;
+        SummerPop[i].resources = SummerPop[i].resources * total_migration_scalar;
 
         // death due to starvation
-        if (WinterPop[i].resources < 0)
+        if (WinterPop[i].resources < resource_starvation_threshold)
         {
             WinterPop[i] = WinterPop[winter_pop - 1];
             --winter_pop;
@@ -1058,7 +1054,6 @@ int main(int argc, char **argv)
         for (int t = 0; t < tmax; ++t)
         {
             winter_dynamics(t);
-			
         }
 		
 		spring_migrant_pop = mean_spring_flock_size;
