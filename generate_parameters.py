@@ -2,10 +2,10 @@
 
 # generate all parameter combinations to run the migration simulation
 
-init_theta_a = 0.05
-init_theta_b = [ 0.0, 0.05 ]
-init_phi_a = 0.05
-init_phi_b = [ 0.0, 0.05 ]
+init_theta_a = 0.5
+init_theta_b = [ 0.0 ]
+init_phi_a = 0.5
+init_phi_b = [ 0.0 ]
 
 tmax = 5000
 
