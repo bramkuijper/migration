@@ -3,10 +3,10 @@
 ## Model variables 
 
 ### Reaction norm loci (TODO: reaction norm on what?, possible values)
-- `theta_a` reaction norm of sigresources: elevation 
+- `theta_a` reaction norm of resources: elevation 
 - `theta_b` reaction norm on resources: slope
-- `phi_a` reaction norm on resources: elevation
-- `phi_b` reaction norm on resources: slope
+- `phi_a` social reaction norm: elevation
+- `phi_b` social reaction norm: slope
 
 ## Model variables 
 
@@ -18,7 +18,7 @@
 - `t_good_ends` time in each season after which it is no longer possible to find good resources
 - `rgood` the value of good resources
 - `rbad` the value of poor resources
-- `resource_reproduce_threshold` the amount of resources necessary to reproduce
+- `resource_reproduce_threshold` the minimum amount of resources necessary to reproduce
 
 ## The model
 
@@ -28,7 +28,7 @@
 During each timestep `t`, individuals obtain with probability `pgood` a good resource (of value `rgood`) and with probability `1 - pgood` a bad resource (of value `rbad`). Here `pgood` is larger than 0 only for the first `t_good_ends` timesteps of the season, after which all individuals receive `rbad` resources. 
 
 #### Migration decisions
-There are several ways of modeling collective dispersal. One way is to have individuals join another individual, this other individual can either accept or reject. I am not too sure this applies here. Rather it may well be that individuals signal to one another that they are willing to migrate. The way we implement this is by having individuals first enter a staging pool, which indicates their willingness to migrate. Individuals can then decide to disperse dependent on the size of the staging pool (i.e., the potential migrating group)
+There are several ways of modelling collective dispersal. One way is to have individuals join another individual, this other individual can either accept or reject. I am not too sure this applies here. Rather it may well be that individuals signal to one another that they are willing to migrate. The way we implement this is by having individuals first enter a staging pool, which indicates their willingness to migrate. Individuals can then decide to disperse dependent on the size of the staging pool (i.e., the potential migrating group)
 
 ##### Signaling willingness to migrate 
 Individuals signal their willingness to disperse (i.e., enter the staging pool) dependent on resources. The probability to enter the staging pool is given by
