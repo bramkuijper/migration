@@ -348,11 +348,11 @@ void write_stats(ofstream &DataFile, int generation, int timestep)
     ss_resources[0] /= winter_pop; 
 	
     // calculate means and variances of the summer population
-    mean_theta_a[1] /=  summer_pop;
-    mean_theta_b[1] /=  summer_pop;
-    mean_phi_a[1] /=  summer_pop;
-    mean_phi_b[1] /=  summer_pop;
-	mean_resources[1] /=  summer_pop;
+    mean_theta_a[1] /= summer_pop;
+    mean_theta_b[1] /= summer_pop;
+    mean_phi_a[1] /= summer_pop;
+    mean_phi_b[1] /= summer_pop;
+	mean_resources[1] /= summer_pop;
     
     ss_theta_a[1] /= summer_pop; 
     ss_theta_b[1] /= summer_pop; 
@@ -1089,8 +1089,7 @@ int main(int argc, char **argv)
 		ss_autumn_migrant_pop = 0.0;
 		ss_autumn_staging_size = 0.0;
 
-        // time during summer (i.e., days)
-        // during which individuals forage
+        // time during summer during which individuals forage
         for (int t = 0; t < tmax; ++t)
         {
             summer_dynamics(t);
