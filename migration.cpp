@@ -1077,8 +1077,13 @@ int main(int argc, char **argv)
 
         // have individuals reproduce after they migrated to the summer spot
         summer_reproduction(DataFile);
+		
+		if (generation % skip == 0)
+        {
+            write_stats(DataFile, generation, 1000);  // Surely we want to have let the seasons play out? (so timestep =/= 2, which was the previous setting [07 November 2019])
+        }
         
-        // set flock size stats to 0 before summer dynamics starts
+        // set flock size stats to 0 before postbreeding dynamics starts
         mean_autumn_flock_size = 0.0;
         mean_autumn_staging_size = 0.0;
 		var_autumn_flock_size = 0.0;
@@ -1103,11 +1108,6 @@ int main(int argc, char **argv)
 		// now record variance in autumn flock size and staging size over the season
 		var_autumn_flock_size = (ss_autumn_flock_size / n_autumn_flocks) - (mean_autumn_flock_size * mean_autumn_flock_size);
 		var_autumn_staging_size = (ss_autumn_staging_size / tmax) - (mean_autumn_staging_size * mean_autumn_staging_size);
-        
-		if (generation % skip == 0)
-        {
-            write_stats(DataFile, generation, 1000);  // Surely we want to have let the seasons play out? (so timestep =/= 2, which was the previous setting [07 November 2019])
-        }
 
         // all individuals who remain at the summer grounds die
         summer_pop = 0;
