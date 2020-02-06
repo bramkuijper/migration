@@ -34,7 +34,7 @@ uniform_real_distribution<> uniform(0.0,1.0);
 const int N = 2000; 
 
 // number of generations
-long int number_generations = 100 // 100000; // simulation time doubled to see if evolving traits will stabilise
+long int number_generations = 100; // 100000; // simulation time doubled to see if evolving traits will stabilise
 
 // initial values for phi (social dependency) and theta (resource dependency)
 // a is an intercept, b is a gradient
@@ -311,7 +311,7 @@ void write_stats(ofstream &DataFile, int generation, int timestep)
         ss_resources[0] = val * val;
     }
 	
-	cout << "summer_pop within write_stats = " << summer_pop \n;
+	cout << "summer_pop within write_stats = " << summer_pop << endl;
 	
     for (int i = 0; i < summer_pop; ++i)  // for each individual in the summer population:
     {
@@ -582,7 +582,7 @@ void winter_dynamics(int t)
         }
     } // end for move dispersers to staging
 
-	cout << "summer_pop_old" << summer_pop \n;
+	cout << "summer_pop_old" << summer_pop << endl;
 
     // store current number of individuals at the breeding ground
     // so that we know which individuals have just arrived there
@@ -848,7 +848,7 @@ void summer_reproduction(ofstream &DataFile)
 
         Kids.pop_back();
 		
-		cout << "summer_pop after next generation added = " << summer_pop \n;
+		cout << "summer_pop after next generation added = " << summer_pop << endl;
     }
 // ENDS SUMMER REPRODUCTION
 } // end void summer_reproduction(ofstream &DataFile)
