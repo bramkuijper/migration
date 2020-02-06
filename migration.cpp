@@ -34,7 +34,7 @@ uniform_real_distribution<> uniform(0.0,1.0);
 const int N = 2000; 
 
 // number of generations
-long int number_generations = 100000; // simulation time doubled to see if evolving traits will stabilise
+long int number_generations = 100 // 100000; // simulation time doubled to see if evolving traits will stabilise
 
 // initial values for phi (social dependency) and theta (resource dependency)
 // a is an intercept, b is a gradient
@@ -310,7 +310,9 @@ void write_stats(ofstream &DataFile, int generation, int timestep)
         mean_resources[0] = val;
         ss_resources[0] = val * val;
     }
-
+	
+	cout << "summer_pop within write_stats = " << summer_pop \n;
+	
     for (int i = 0; i < summer_pop; ++i)  // for each individual in the summer population:
     {
 		val = 0.5 * (SummerPop[i].theta_a[0] + SummerPop[i].theta_a[1]);
@@ -580,6 +582,8 @@ void winter_dynamics(int t)
         }
     } // end for move dispersers to staging
 
+	cout << "summer_pop_old" << summer_pop \n;
+
     // store current number of individuals at the breeding ground
     // so that we know which individuals have just arrived there
     // (we need to update their resources dependent on their migration
@@ -608,7 +612,7 @@ void winter_dynamics(int t)
         // yes individual goes
         if (uniform(rng_r) < pdisperse)
         {
-            SummerPop[summer_pop] = StagingPool[i];
+            SummerPop[summer_pop] = StagingPool[i]; // Individual transfers to SummerPop
             ++summer_pop;
             
             assert(summer_pop <= N);
@@ -843,6 +847,8 @@ void summer_reproduction(ofstream &DataFile)
         Kids[random_kid] = Kids[Kids.size() - 1];
 
         Kids.pop_back();
+		
+		cout << "summer_pop after next generation added = " << summer_pop \n;
     }
 // ENDS SUMMER REPRODUCTION
 } // end void summer_reproduction(ofstream &DataFile)
@@ -1077,13 +1083,8 @@ int main(int argc, char **argv)
 
         // have individuals reproduce after they migrated to the summer spot
         summer_reproduction(DataFile);
-		
-		if (generation % skip == 0)
-        {
-            write_stats(DataFile, generation, 1000);  // Surely we want to have let the seasons play out? (so timestep =/= 2, which was the previous setting [07 November 2019])
-        }
         
-        // set flock size stats to 0 before postbreeding dynamics starts
+        // set flock size stats to 0 before postbreeding_dynamics starts
         mean_autumn_flock_size = 0.0;
         mean_autumn_staging_size = 0.0;
 		var_autumn_flock_size = 0.0;
@@ -1109,7 +1110,12 @@ int main(int argc, char **argv)
 		var_autumn_flock_size = (ss_autumn_flock_size / n_autumn_flocks) - (mean_autumn_flock_size * mean_autumn_flock_size);
 		var_autumn_staging_size = (ss_autumn_staging_size / tmax) - (mean_autumn_staging_size * mean_autumn_staging_size);
 
-        // all individuals who remain at the summer grounds die
+		if (generation % skip == 0)
+        {
+            write_stats(DataFile, generation, 1000);  // Surely we want to have let the seasons play out? (so timestep =/= 2, which was the previous setting [07 November 2019])
+        }
+        
+		// all individuals who remain at the summer grounds die
         summer_pop = 0;
         staging_pop = 0;
 		breeder_pop = 0;
