@@ -651,7 +651,7 @@ void winter_dynamics(int t)
 	
 	// update resource levels for all new individuals that have just
     // been added to the summer pool dependent on their flock size
-    for (int i = summer_pop_old; i < summer_pop; ++i)
+    for (int i = summer_pop_old; i < summer_pop; ++i)  // Selecting individuals that have been added to the summer pop this timepoint
     {
 		total_migration_scalar = (1.0 - get_migration_cost_proportion(NFlock)) * 
             (1.0 - arrival_resource_decay * (double)t/tmax);
@@ -849,7 +849,7 @@ void summer_reproduction(ofstream &DataFile)
 
 // gaining resources at breeding ground
 // & fly back
-void summer_dynamics(int t)
+void postbreeding_dynamics(int t)
 {
     // determine probability of encountering a good resource:
     //  if the time is later than t_good_ends
@@ -896,7 +896,7 @@ void summer_dynamics(int t)
 
     assert(summer_pop<= N);
     assert(summer_pop >= 0);
-    assert((summer_pop > 0 || winter_pop > 0) || staging_pop > 0);
+    assert((summer_pop > 0 || winter_pop > 0) || staging_pop > 0);  // Might have no breeders in a given year, but non-zero population (is that right, Bram?)
 
     double psignal = 0.0;
 
@@ -934,7 +934,7 @@ void summer_dynamics(int t)
         }
     } // end for (int i = 0; i < summer_pop; ++i)
 
-    // store current number of individuals at the breeding ground
+    // store current number of individuals at the wintering ground
     // so that we know which individuals have just arrived there
     // (we need to update their resources dependent on their migration
     // group size)
@@ -959,7 +959,7 @@ void summer_dynamics(int t)
         // yes individual goes
         if (uniform(rng_r) < pdisperse)
         {
-            WinterPop[winter_pop] = StagingPool[i];
+            WinterPop[winter_pop] = StagingPool[i];  // Individual moves from staging pool to first empty position in WinterPop
             ++winter_pop;
             
             assert(winter_pop <= N);
@@ -1092,7 +1092,7 @@ int main(int argc, char **argv)
         // time during summer during which individuals forage
         for (int t = 0; t < tmax; ++t)
         {
-            summer_dynamics(t);
+            postbreeding_dynamics(t);
 			
         }
         
