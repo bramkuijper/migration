@@ -2,6 +2,8 @@
 // Bram Kuijper & Simon Evans
 // 2019
 //
+#define DEBUG
+
 #include <iostream>
 #include <cstdlib>
 #include <fstream>
@@ -15,7 +17,6 @@
 // various functions, such as unique filename creation
 #include "auxiliary.h"
 
-#define DEBUG
 
 // standard namespace
 using namespace std;
@@ -291,24 +292,24 @@ void write_stats(ofstream &DataFile, int generation, int timestep)
 		// by a single gene (diploid) exhibiting incomplete dominance
 		// (hence *0.5)
 		val = 0.5 * (WinterPop[i].theta_a[0] + WinterPop[i].theta_a[1]);
-        mean_theta_a[0] = val;
-        ss_theta_a[0] = val * val;
+        mean_theta_a[0] += val;
+        ss_theta_a[0] += val * val;
 
-        val += 0.5 * (WinterPop[i].theta_b[0] + WinterPop[i].theta_b[1]);
-        mean_theta_b[0] = val;
-        ss_theta_b[0] = val * val;
+        val = 0.5 * (WinterPop[i].theta_b[0] + WinterPop[i].theta_b[1]);
+        mean_theta_b[0] += val;
+        ss_theta_b[0] += val * val;
         
         val = 0.5 * (WinterPop[i].phi_a[0] + WinterPop[i].phi_a[1]);
-        mean_phi_a[0] = val;
-        ss_phi_a[0] = val * val;
+        mean_phi_a[0] += val;
+        ss_phi_a[0] += val * val;
 
         val = 0.5 * (WinterPop[i].phi_b[0] + WinterPop[i].phi_b[1]);
-        mean_phi_b[0] = val;
-        ss_phi_b[0] = val * val;
+        mean_phi_b[0] += val;
+        ss_phi_b[0] += val * val;
         
         val = WinterPop[i].resources;  // the resource level of individual i 
-        mean_resources[0] = val;
-        ss_resources[0] = val * val;
+        mean_resources[0] += val;
+        ss_resources[0] += val * val;
     }
 	
 	cout << "summer_pop within write_stats = " << summer_pop << endl;
@@ -316,24 +317,24 @@ void write_stats(ofstream &DataFile, int generation, int timestep)
     for (int i = 0; i < summer_pop; ++i)  // for each individual in the summer population:
     {
 		val = 0.5 * (SummerPop[i].theta_a[0] + SummerPop[i].theta_a[1]);
-        mean_theta_a[1] = val;
-        ss_theta_a[1] = val * val;
+        mean_theta_a[1] += val;
+        ss_theta_a[1] += val * val;
 
-        val += 0.5 * (SummerPop[i].theta_b[0] + SummerPop[i].theta_b[1]);
-        mean_theta_b[1] = val;
-        ss_theta_b[1] = val * val;
+        val = 0.5 * (SummerPop[i].theta_b[0] + SummerPop[i].theta_b[1]);
+        mean_theta_b[1] += val;
+        ss_theta_b[1] += val * val;
         
         val = 0.5 * (SummerPop[i].phi_a[0] + SummerPop[i].phi_a[1]);
-        mean_phi_a[1] = val;
-        ss_phi_a[1] = val * val;
+        mean_phi_a[1] += val;
+        ss_phi_a[1] += val * val;
 
         val = 0.5 * (SummerPop[i].phi_b[0] + SummerPop[i].phi_b[1]);
-        mean_phi_b[1] = val;
-        ss_phi_b[1] = val * val;
+        mean_phi_b[1] += val;
+        ss_phi_b[1] += val * val;
         
         val = SummerPop[i].resources;  // the resource level of individual i 
-        mean_resources[1] = val;
-        ss_resources[1] = val * val;
+        mean_resources[1] += val;
+        ss_resources[1] += val * val;
     }
 
     // calculate means and variances of the winter population
@@ -773,6 +774,9 @@ void summer_reproduction(ofstream &DataFile)
         // get the mother
         mother = SummerPop[i];
 
+        assert(mother.theta_b[1] >= 0.0);
+        assert(mother.theta_b[1] <= 1.0);
+
         // if mom does not meet minimum standards
         // no reproduction through female function
         if (mother.resources < resource_reproduce_threshold)
@@ -792,6 +796,9 @@ void summer_reproduction(ofstream &DataFile)
         while (father_id == i);
 
         father = SummerPop[father_id];
+        
+        assert(father.theta_b[1] >= 0.0);
+        assert(father.theta_b[1] <= 1.0);
 
         // translate maternal resources to numbers of offspring
         //
@@ -824,6 +831,8 @@ void summer_reproduction(ofstream &DataFile)
     // minus the current individuals in the summer population
     // minus the current individuals who stayed at the wintering ground
     int Ndead = N - summer_pop - winter_pop;
+
+    assert(Ndead >= 0);
 
     int random_kid = 0;
 
