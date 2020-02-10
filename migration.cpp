@@ -315,6 +315,20 @@ void write_stats(ofstream &DataFile, int generation, int timestep)
         ss_resources[0] += val * val;
     }
 	
+    // calculate means and variances of the winter population
+	mean_theta_a[0] /=  winter_pop;
+    mean_theta_b[0] /=  winter_pop;
+    mean_phi_a[0] /=  winter_pop;
+    mean_phi_b[0] /=  winter_pop;
+	mean_resources[0] /=  winter_pop;
+    
+    ss_theta_a[0] /= winter_pop; 
+    ss_theta_b[0] /= winter_pop; 
+    ss_phi_a[0] /= winter_pop; 
+    ss_phi_b[0] /= winter_pop;
+    ss_resources[0] /= winter_pop; 
+	
+	
     for (int i = 0; i < summer_pop; ++i)  // for each individual in the summer population:
     {
 		val = 0.5 * (SummerPop[i].theta_a[0] + SummerPop[i].theta_a[1]);
@@ -338,19 +352,7 @@ void write_stats(ofstream &DataFile, int generation, int timestep)
         ss_resources[1] += val * val;
     }
 
-    // calculate means and variances of the winter population
-	mean_theta_a[0] /=  winter_pop;
-    mean_theta_b[0] /=  winter_pop;
-    mean_phi_a[0] /=  winter_pop;
-    mean_phi_b[0] /=  winter_pop;
-	mean_resources[0] /=  winter_pop;
-    
-    ss_theta_a[0] /= winter_pop; 
-    ss_theta_b[0] /= winter_pop; 
-    ss_phi_a[0] /= winter_pop; 
-    ss_phi_b[0] /= winter_pop;
-    ss_resources[0] /= winter_pop; 
-	
+  
     // calculate means and variances of the summer population
     mean_theta_a[1] /= summer_pop;
     mean_theta_b[1] /= summer_pop;
@@ -1103,6 +1105,11 @@ int main(int argc, char **argv)
 			cout << "offspring_pop = " << offspring_pop << endl;
 		}
         
+		if (generation % skip == 0)
+        {
+            write_stats(DataFile, generation, 1000);  // Surely we want to have let the seasons play out? (so timestep =/= 2, which was the previous setting [07 November 2019])
+        }
+		
         // set flock size stats to 0 before postbreeding_dynamics starts
         mean_autumn_flock_size = 0.0;
         mean_autumn_staging_size = 0.0;
@@ -1128,17 +1135,12 @@ int main(int argc, char **argv)
 		// now record variance in autumn flock size and staging size over the season
 		var_autumn_flock_size = (ss_autumn_flock_size / n_autumn_flocks) - (mean_autumn_flock_size * mean_autumn_flock_size);
 		var_autumn_staging_size = (ss_autumn_staging_size / tmax) - (mean_autumn_staging_size * mean_autumn_staging_size);
-
-		if (generation % skip == 0)
-        {
-            write_stats(DataFile, generation, 1000);  // Surely we want to have let the seasons play out? (so timestep =/= 2, which was the previous setting [07 November 2019])
-        }
         
 		// all individuals who remain at the summer grounds die
         summer_pop = 0;
         staging_pop = 0;
 		breeder_pop = 0;
-		summer_pop_old = 1;  // 06/02/20: Again, to track summer_pop_old
+		summer_pop_old = 0;  // 06/02/20: Again, to track summer_pop_old
 
         // let individuals die with a certain probability 
         mortality();
