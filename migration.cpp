@@ -32,10 +32,10 @@ uniform_real_distribution<> uniform(0.0,1.0);
 // function
 
 // number of individuals in population
-const int N = 2000; 
+const int N = 100; // 2000; 
 
 // number of generations
-long int number_generations = 100; // 100000; // simulation time doubled to see if evolving traits will stabilise
+long int number_generations = 50; // 100000; // simulation time doubled to see if evolving traits will stabilise
 
 // initial values for phi (social dependency) and theta (resource dependency)
 // a is an intercept, b is a gradient
@@ -81,6 +81,7 @@ double max_migration_cost = 0.0;
 int tmax = 5000;
 
 int skip = 10;
+int pop_sample = 50;
 
 // stats of flock size and staging
 double mean_spring_flock_size = 0.0;
@@ -105,6 +106,8 @@ int offspring_pop = 0;
 int autumn_migrant_pop = 0;
 int n_spring_flocks = 0;  // recording the number of spring flocks (tmax - n(unusued departure intervals))
 int n_autumn_flocks = 0;
+
+int summer_pop_old = 0;  // 06/02/20: So that I can track summer_pop old
 
 double ss_spring_migrant_pop = 0.0;
 double ss_autumn_migrant_pop = 0.0;
@@ -311,8 +314,6 @@ void write_stats(ofstream &DataFile, int generation, int timestep)
         mean_resources[0] += val;
         ss_resources[0] += val * val;
     }
-	
-	cout << "summer_pop within write_stats = " << summer_pop << endl;
 	
     for (int i = 0; i < summer_pop; ++i)  // for each individual in the summer population:
     {
@@ -581,9 +582,7 @@ void winter_dynamics(int t)
             --winter_pop;
             --i;
         }
-    } // end for move dispersers to staging
-
-	cout << "summer_pop_old" << summer_pop << endl;
+    } // end for: move dispersers to staging
 
     // store current number of individuals at the breeding ground
     // so that we know which individuals have just arrived there
@@ -634,7 +633,7 @@ void winter_dynamics(int t)
             // increase flock size
             ++NFlock;
             
-            assert(NFlock <= N);
+            assert(NFlock <= N);			
         
 		} // ENDS: yes individual goes
 		
@@ -856,8 +855,7 @@ void summer_reproduction(ofstream &DataFile)
         Kids[random_kid] = Kids[Kids.size() - 1];
 
         Kids.pop_back();
-		
-		cout << "summer_pop after next generation added = " << summer_pop << endl;
+
     }
 // ENDS SUMMER REPRODUCTION
 } // end void summer_reproduction(ofstream &DataFile)
@@ -1037,7 +1035,7 @@ void postbreeding_dynamics(int t)
 } // ENDS: SUMMER DYNAMICS 
 
 
-// the key part of the code
+// THE KEY PART OF THE CODE
 // accepting command line arguments
 int main(int argc, char **argv)
 {
@@ -1069,7 +1067,14 @@ int main(int argc, char **argv)
         for (int t = 0; t < tmax; ++t)
         {
             winter_dynamics(t);
+			
         }
+		
+		if (generation % skip == 0)
+		{
+			cout << "summer_pop_old = " << summer_pop_old << endl;
+			cout << "summer_pop = " << summer_pop << endl;
+		}
 		
 		spring_migrant_pop = mean_spring_flock_size;
 		
@@ -1092,6 +1097,11 @@ int main(int argc, char **argv)
 
         // have individuals reproduce after they migrated to the summer spot
         summer_reproduction(DataFile);
+		
+		if (generation % skip == 0)
+		{
+			cout << "offspring_pop = " << offspring_pop << endl;
+		}
         
         // set flock size stats to 0 before postbreeding_dynamics starts
         mean_autumn_flock_size = 0.0;
@@ -1128,6 +1138,7 @@ int main(int argc, char **argv)
         summer_pop = 0;
         staging_pop = 0;
 		breeder_pop = 0;
+		summer_pop_old = 1;  // 06/02/20: Again, to track summer_pop_old
 
         // let individuals die with a certain probability 
         mortality();
