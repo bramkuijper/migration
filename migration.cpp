@@ -270,8 +270,8 @@ void write_data_headers(ofstream &DataFile)
         << "var_autumn_flock_size;" << endl;
 }
 
-// write data both for winter and summer populations
-void write_stats(ofstream &DataFile, int generation, int timestep)
+// write data for winter population (post mortality)
+void write_winter_stats(ofstream &DataFile, int generation, int timestep)
 {
     double mean_theta_a[2] = { 0.0, 0.0 };
     double ss_theta_a[2] = { 0.0, 0.0 };
@@ -328,7 +328,56 @@ void write_stats(ofstream &DataFile, int generation, int timestep)
     ss_phi_b[0] /= winter_pop;
     ss_resources[0] /= winter_pop; 
 	
-	
+    // write statistics to a file
+    DataFile 
+        << generation << ";"
+        << timestep << ";";
+
+    for (int i = 0; i < 2; ++i)
+    {
+        DataFile 
+            << mean_theta_a[i] << ";"
+            << (ss_theta_a[i] - mean_theta_a[i] * mean_theta_a[i]) << ";"
+            << mean_theta_b[i] << ";"
+            << (ss_theta_b[i] - mean_theta_b[i] * mean_theta_b[i]) << ";"
+            << mean_phi_a[i] << ";"
+            << (ss_phi_a[i] - mean_phi_a[i] * mean_phi_a[i]) << ";"
+            << mean_phi_b[i] << ";"
+            << (ss_phi_b[i] - mean_phi_b[i] * mean_phi_b[i]) << ";"
+            << mean_resources[i] << ";"
+            << (ss_resources[i] - mean_resources[i] * mean_resources[i]) << ";";
+    }
+
+    DataFile
+        << winter_pop << ";"
+        << mean_autumn_staging_size << ";"
+		<< var_autumn_staging_size << ";"			
+        << autumn_migrant_pop << ";"
+		<< n_autumn_flocks << ";"
+		<< mean_autumn_flock_size << ";" 
+		<< var_autumn_flock_size << ";"
+		<< endl;
+// ENDS: write data both for winter population and ends line entry in DataFile
+}
+
+// write data for summer population (post mortality)
+void write_summer_stats(ofstream &DataFile, int generation, int timestep)
+{
+    double mean_theta_a[2] = { 0.0, 0.0 };
+    double ss_theta_a[2] = { 0.0, 0.0 };
+    double mean_theta_b[2] = { 0.0, 0.0 };
+    double ss_theta_b[2] = { 0.0, 0.0 };
+
+    double mean_phi_a[2] = { 0.0, 0.0 };
+    double ss_phi_a[2] = { 0.0, 0.0 };
+    double mean_phi_b[2] = { 0.0, 0.0 };
+    double ss_phi_b[2] = { 0.0, 0.0 };
+
+    double mean_resources[2] = { 0.0, 0.0 };
+    double ss_resources[2] = { 0.0, 0.0 };
+
+    double val;
+   	
     for (int i = 0; i < summer_pop; ++i)  // for each individual in the summer population:
     {
 		val = 0.5 * (SummerPop[i].theta_a[0] + SummerPop[i].theta_a[1]);
@@ -352,7 +401,6 @@ void write_stats(ofstream &DataFile, int generation, int timestep)
         ss_resources[1] += val * val;
     }
 
-  
     // calculate means and variances of the summer population
     mean_theta_a[1] /= summer_pop;
     mean_theta_b[1] /= summer_pop;
@@ -387,7 +435,6 @@ void write_stats(ofstream &DataFile, int generation, int timestep)
     }
 
     DataFile
-        << winter_pop << ";"
         << summer_pop << ";"
 	    << mean_spring_staging_size << ";" 
 		<< var_spring_staging_size << ";"
@@ -396,15 +443,8 @@ void write_stats(ofstream &DataFile, int generation, int timestep)
 		<< mean_spring_flock_size << ";" 
 		<< var_spring_flock_size << ";"
 		<< breeder_pop << ";"
-        << offspring_pop << ";" 
-		<< mean_autumn_staging_size << ";"
-		<< var_autumn_staging_size << ";"			
-        << autumn_migrant_pop << ";"
-		<< n_autumn_flocks << ";"
-		<< mean_autumn_flock_size << ";" 
-		<< var_autumn_flock_size << ";"
-		<< endl;
-// ENDS: write data both for winter and summer populations
+        << offspring_pop << ";";
+// ENDS: write data for summer populations
 }
 
 
@@ -1072,12 +1112,6 @@ int main(int argc, char **argv)
 			
         }
 		
-		if (generation % skip == 0)
-		{
-			cout << "summer_pop_old = " << summer_pop_old << endl;
-			cout << "summer_pop = " << summer_pop << endl;
-		}
-		
 		spring_migrant_pop = mean_spring_flock_size;
 		
         // now take averages over all timesteps that individuals did (can) join groups
@@ -1099,15 +1133,10 @@ int main(int argc, char **argv)
 
         // have individuals reproduce after they migrated to the summer spot
         summer_reproduction(DataFile);
-		
-		if (generation % skip == 0)
-		{
-			cout << "offspring_pop = " << offspring_pop << endl;
-		}
         
 		if (generation % skip == 0)
         {
-            write_stats(DataFile, generation, 1000);  // Surely we want to have let the seasons play out? (so timestep =/= 2, which was the previous setting [07 November 2019])
+            write_summer_stats(DataFile, generation, 1000);
         }
 		
         // set flock size stats to 0 before postbreeding_dynamics starts
@@ -1144,6 +1173,11 @@ int main(int argc, char **argv)
 
         // let individuals die with a certain probability 
         mortality();
+		
+		if (generation % skip == 0)
+        {
+            write_winter_stats(DataFile, generation, 1000); 
+        }
 				
     } // ENDS: GENERATION
 
