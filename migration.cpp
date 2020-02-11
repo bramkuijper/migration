@@ -229,8 +229,29 @@ void write_data_headers(ofstream &DataFile)
 {
     DataFile << "generation;"
         << "time_interval;"
-
-        << "mean_theta_a_winter;"
+	
+	    << "mean_theta_a_summer;"
+	    << "var_theta_a_summer;"
+	    << "mean_theta_b_summer;"
+	    << "var_theta_b_summer;"
+	    << "mean_phi_a_summer;"
+	    << "var_phi_a_summer;"
+	    << "mean_phi_b_summer;"
+	    << "var_phi_b_summer;"
+	    << "mean_resources_summer;"
+	    << "var_resources_summer;"  
+		
+        << "summer_pop;"
+        << "mean_spring_staging_size;"
+        << "var_spring_staging_size;"
+        << "spring_migrant_pop;"
+        << "n_spring_flocks;"
+        << "mean_spring_flock_size;"
+        << "var_spring_flock_size;"
+        << "breeder_pop;"
+        << "offspring_pop;"
+		
+		<< "mean_theta_a_winter;"
         << "var_theta_a_winter;"
         << "mean_theta_b_winter;"
         << "var_theta_b_winter;"
@@ -241,27 +262,7 @@ void write_data_headers(ofstream &DataFile)
         << "mean_resources_winter;"
         << "var_resources_winter;"
 
-        << "mean_theta_a_summer;"
-        << "var_theta_a_summer;"
-        << "mean_theta_b_summer;"
-        << "var_theta_b_summer;"
-        << "mean_phi_a_summer;"
-        << "var_phi_a_summer;"
-        << "mean_phi_b_summer;"
-        << "var_phi_b_summer;"
-        << "mean_resources_summer;"
-        << "var_resources_summer;"
-
         << "winter_pop;"
-        << "summer_pop;"
-        << "mean_spring_staging_size;"
-        << "var_spring_staging_size;"
-        << "spring_migrant_pop;"
-        << "n_spring_flocks;"
-        << "mean_spring_flock_size;"
-        << "var_spring_flock_size;"
-        << "breeder_pop;"
-        << "offspring_pop;"
         << "mean_autumn_staging_size;"
         << "var_autumn_staging_size;"
         << "autumn_migrant_pop;"
@@ -330,25 +331,16 @@ void write_winter_stats(ofstream &DataFile, int generation, int timestep)
 	
     // write statistics to a file
     DataFile 
-        << generation << ";"
-        << timestep << ";";
-
-    for (int i = 0; i < 2; ++i)
-    {
-        DataFile 
-            << mean_theta_a[i] << ";"
-            << (ss_theta_a[i] - mean_theta_a[i] * mean_theta_a[i]) << ";"
-            << mean_theta_b[i] << ";"
-            << (ss_theta_b[i] - mean_theta_b[i] * mean_theta_b[i]) << ";"
-            << mean_phi_a[i] << ";"
-            << (ss_phi_a[i] - mean_phi_a[i] * mean_phi_a[i]) << ";"
-            << mean_phi_b[i] << ";"
-            << (ss_phi_b[i] - mean_phi_b[i] * mean_phi_b[i]) << ";"
-            << mean_resources[i] << ";"
-            << (ss_resources[i] - mean_resources[i] * mean_resources[i]) << ";";
-    }
-
-    DataFile
+        << mean_theta_a[0] << ";"
+        << (ss_theta_a[0] - mean_theta_a[0] * mean_theta_a[0]) << ";"
+        << mean_theta_b[0] << ";"
+        << (ss_theta_b[0] - mean_theta_b[0] * mean_theta_b[0]) << ";"
+        << mean_phi_a[0] << ";"
+        << (ss_phi_a[0] - mean_phi_a[0] * mean_phi_a[0]) << ";"
+        << mean_phi_b[0] << ";"
+        << (ss_phi_b[0] - mean_phi_b[0] * mean_phi_b[0]) << ";"
+        << mean_resources[0] << ";"
+        << (ss_resources[0] - mean_resources[0] * mean_resources[0]) << ";"
         << winter_pop << ";"
         << mean_autumn_staging_size << ";"
 		<< var_autumn_staging_size << ";"			
@@ -417,25 +409,18 @@ void write_summer_stats(ofstream &DataFile, int generation, int timestep)
     // write statistics to a file
     DataFile 
         << generation << ";"
-        << timestep << ";";
-
-    for (int i = 0; i < 2; ++i)
-    {
-        DataFile 
-            << mean_theta_a[i] << ";"
-            << (ss_theta_a[i] - mean_theta_a[i] * mean_theta_a[i]) << ";"
-            << mean_theta_b[i] << ";"
-            << (ss_theta_b[i] - mean_theta_b[i] * mean_theta_b[i]) << ";"
-            << mean_phi_a[i] << ";"
-            << (ss_phi_a[i] - mean_phi_a[i] * mean_phi_a[i]) << ";"
-            << mean_phi_b[i] << ";"
-            << (ss_phi_b[i] - mean_phi_b[i] * mean_phi_b[i]) << ";"
-            << mean_resources[i] << ";"
-            << (ss_resources[i] - mean_resources[i] * mean_resources[i]) << ";";
-    }
-
-    DataFile
-        << summer_pop << ";"
+        << timestep << ";"
+		<< mean_theta_a[1] << ";"
+        << (ss_theta_a[1] - mean_theta_a[1] * mean_theta_a[1]) << ";"
+        << mean_theta_b[1] << ";"
+        << (ss_theta_b[1] - mean_theta_b[1] * mean_theta_b[1]) << ";"
+        << mean_phi_a[1] << ";"
+        << (ss_phi_a[1] - mean_phi_a[1] * mean_phi_a[1]) << ";"
+        << mean_phi_b[1] << ";"
+        << (ss_phi_b[1] - mean_phi_b[1] * mean_phi_b[1]) << ";"
+        << mean_resources[1] << ";"
+        << (ss_resources[1] - mean_resources[1] * mean_resources[1]) << ";"
+		<< summer_pop << ";"
 	    << mean_spring_staging_size << ";" 
 		<< var_spring_staging_size << ";"
 		<< spring_migrant_pop << ";"
@@ -1135,9 +1120,9 @@ int main(int argc, char **argv)
         summer_reproduction(DataFile);
         
 		if (generation % skip == 0)
-        {
-            write_summer_stats(DataFile, generation, 1000);
-        }
+		 {
+			      write_summer_stats(DataFile, generation, 1000);
+		  }
 		
         // set flock size stats to 0 before postbreeding_dynamics starts
         mean_autumn_flock_size = 0.0;
