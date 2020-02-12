@@ -80,8 +80,7 @@ double max_migration_cost = 0.0;
 // max number of intervals per season (two seasons: summer, winter)
 int tmax = 5000;
 
-int skip = 10;
-int pop_sample = 50;
+int skip = 25;
 
 // stats of flock size and staging
 double mean_spring_flock_size = 0.0;
@@ -1126,7 +1125,7 @@ int main(int argc, char **argv)
         
 		if (generation % skip == 0)
 		 {
-			      write_summer_stats(DataFile, generation, 1000);
+			 write_summer_stats(DataFile, generation, 1000);
 		  }
 		
         // set flock size stats to 0 before postbreeding_dynamics starts
