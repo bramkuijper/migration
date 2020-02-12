@@ -35,7 +35,7 @@ uniform_real_distribution<> uniform(0.0,1.0);
 const int N = 2000; 
 
 // number of generations
-long int number_generations = 100000; // simulation time doubled to see if evolving traits will stabilise
+long int number_generations = 100000;
 
 // initial values for phi (social dependency) and theta (resource dependency)
 // a is an intercept, b is a gradient
@@ -55,6 +55,8 @@ double pgood_init = 0.0;
 int t_good_ends = 0.0;
 
 // how much resource individuals obtain on a good vs bad patch
+double rgood_init = 0.0;
+double rbad_init = 0.0;
 double rgood = 0.0;
 double rbad = 0.0;
 
@@ -160,8 +162,8 @@ void init_arguments(int argc, char **argv)
     pmort = atof(argv[5]);
     pgood_init = atof(argv[6]);
     t_good_ends = atoi(argv[7]);
-    rgood = atof(argv[8]);
-    rbad = atof(argv[9]);
+    rgood_init = atof(argv[8]);
+    rbad_init = atof(argv[9]);
     arrival_resource_decay = atof(argv[10]);
     resource_reproduce_threshold = atof(argv[11]);
     resource_starvation_threshold = atof(argv[12]);
@@ -189,9 +191,9 @@ void init_arguments(int argc, char **argv)
     assert(t_good_ends <= tmax);
 
     // resource increments
-    assert(rgood > 0);
-    assert(rbad > 0);
-    assert(rbad < rgood);
+    assert(rgood_init > 0);
+    assert(rbad_init > 0);
+    assert(rbad_init < rgood_init);
 
 }
 
@@ -206,8 +208,8 @@ void write_parameters(ofstream &DataFile)
             << "pmort;" << pmort << endl
             << "pgood_init;" << pgood_init << endl
             << "t_good_ends;" << t_good_ends << endl
-            << "rgood;" << rgood << endl
-            << "rbad;" << rbad << endl
+            << "rgood_init;" << rgood_init << endl
+            << "rbad_init;" << rbad_init << endl
             << "arrival_resource_decay;" << arrival_resource_decay << endl
             << "resource_reproduce_threshold;" << resource_reproduce_threshold << endl
             << "resource_starvation_threshold;" << resource_starvation_threshold << endl
@@ -1092,6 +1094,15 @@ int main(int argc, char **argv)
 		ss_spring_staging_size = 0.0;
 
         staging_pop = 0.0;  // Set staging population count to zero before winter dynamics
+		
+		if(generation < number_generations/2)
+			{	
+				rgood = rgood_init;
+				rbad = rbad_init;
+			} else{
+				rgood = rgood_init/2;
+				rbad = rbad_init/2;
+			}
 		
 		// time during winter (i.e., days)
         // during which individuals forage
