@@ -632,7 +632,7 @@ void winter_dynamics(int t)
 
     // remember numbers of individuals in the staging pop at the start
     int staging_pop_start = staging_pop;
-
+	
     // actual spring dispersal from winter to summer population
     for (int i = 0; i < staging_pop; ++i)
     {
@@ -784,7 +784,7 @@ void summer_reproduction(ofstream &DataFile)
     // father
     int father_id;
 
-    // see if population is extinct
+    // see if population is extinct. 13 Feb: TODO Need to change this. Population could be alive but no migrants that particular year.
     if (summer_pop == 1)
     {
         // quit if extinct 
@@ -1049,7 +1049,7 @@ void postbreeding_dynamics(int t)
     for (int i = winter_pop_old; i < winter_pop; ++i)
     {
 		total_migration_scalar = (1.0 - get_migration_cost_proportion(NFlock)) * 
-            (1.0 - arrival_resource_decay * (double)t/tmax);
+            1.0; //(1.0 - arrival_resource_decay * (double)t/tmax);  13 Feb, SRE: Removed arrival resource decay from wintering ground
 
         // resources are reduced due to migration,
         // yet this depends on group size in a curvilinear fashion
@@ -1095,18 +1095,22 @@ int main(int argc, char **argv)
 
         staging_pop = 0.0;  // Set staging population count to zero before winter dynamics
 		
-		if(generation < number_generations/2)
-			{	
-				rgood = rgood_init;
-				rbad = rbad_init;
-			} else{
-				rgood = rgood_init/2;
-				rbad = rbad_init/2;
-			}
+		rgood = rgood_init;  
+		//	if(generation > number_generations/2)  EXPERIMENTAL SWITCH
+		//	{	
+		//		rgood = rgood_init/2;
+		//		rbad = rbad_init/2;
+		//	}
+		
+		// SWITCH DOUBLES RESOURCE DECAY HALFWAY THROUGH SIMULATION
+		if (generation > number_generations/2)
+		{
+			arrival_resource_decay = 2*arrival_resource_decay;
+		}
 		
 		// time during winter (i.e., days)
         // during which individuals forage
-        for (int t = 0; t < tmax; ++t)
+		for (int t = 0; t < tmax; ++t)
         {
             winter_dynamics(t);
 			

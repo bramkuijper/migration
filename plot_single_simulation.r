@@ -75,7 +75,7 @@ p2 <- ggplot(data=the.data
             geom_line(aes(y = mean_autumn_staging_size, colour = "Autumn")) + 
             theme_classic() + 
             xlab("Generation") + 
-            ylab("Av Staging size")
+            ylab("Mean staging size")
 
 p3 <- ggplot(data=the.data
         ,aes(x=generation)) +
@@ -83,22 +83,22 @@ p3 <- ggplot(data=the.data
             geom_line(aes(y = mean_autumn_flock_size, colour = "Autumn")) + 
             theme_classic() + 
             xlab("Generation") + 
-            ylim(c(0,10)) +
-            ylab("Av Flock size")
+            #ylim(c(0,10)) +
+            ylab("Mean flock size")
 
 p4 <- ggplot(data=the.data
         ,aes(x=generation)) +
             geom_line(aes(y = breeder_pop, colour="N breeders")) +
             theme_classic() + 
             xlab("Generation") + 
-            ylab("N breeder")
+            ylab(expression("N"[breeder]))
 
 p5 <- ggplot(data=the.data
         ,aes(x=generation)) +
             geom_line(aes(y = offspring_pop, colour="N offspring")) +
             theme_classic() + 
             xlab("Generation") + 
-            ylab("N offspring")
+            ylab(expression("N"[offspring]))
 
 p6 <- ggplot(data=the.data
         ,aes(x=generation)) +
@@ -106,15 +106,15 @@ p6 <- ggplot(data=the.data
             geom_line(aes(y = mean_resources_winter, colour="Summer")) +
             theme_classic() + 
             xlab("Generation") + 
-            ylab("Resources")
+            ylab("Mean resources")
 
 
 p7 <- ggplot(data=the.data
         ,aes(x=generation)) +
             geom_line(aes(y = mean_theta_a_winter, colour="Stage (resources), theta winter")) +
-            geom_line(aes(y = mean_theta_a_summer, colour="Stage (resources), theta summer")) +
+            #geom_line(aes(y = mean_theta_a_summer, colour="Stage (resources), theta summer")) +
             geom_line(aes(y = mean_phi_a_winter, colour="Disperse (group size), phi winter")) +
-            geom_line(aes(y = mean_phi_a_summer, colour="Disperse (group size), phi summer")) +
+            #geom_line(aes(y = mean_phi_a_summer, colour="Disperse (group size), phi summer")) +
             theme_classic() + 
             xlab("Generation") + 
             ylab("Elevation")
@@ -122,9 +122,9 @@ p7 <- ggplot(data=the.data
 p8 <- ggplot(data=the.data
         ,aes(x=generation)) +
             geom_line(aes(y = mean_theta_b_winter, colour="Stage (resources), theta winter")) +
-            geom_line(aes(y = mean_theta_b_summer, colour="Stage (resources), theta summer")) +
+            #geom_line(aes(y = mean_theta_b_summer, colour="Stage (resources), theta summer")) +
             geom_line(aes(y = mean_phi_b_winter, colour="Disperse (group size), phi winter")) +
-            geom_line(aes(y = mean_phi_b_summer, colour="Disperse (group size), phi summer")) +
+            #geom_line(aes(y = mean_phi_b_summer, colour="Disperse (group size), phi summer")) +
             theme_classic() + 
             xlab("Generation") + 
             ylab("Slope")
