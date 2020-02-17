@@ -1134,17 +1134,11 @@ int main(int argc, char **argv)
         staging_pop = 0.0;  // Set staging population count to zero before winter dynamics
 		
 		rgood = rgood_init;  
-		//	if(generation > number_generations/2)  EXPERIMENTAL SWITCH
-		//	{	
-		//		rgood = rgood_init/2;
-		//		rbad = rbad_init/2;
-		//	}
-		
-		// SWITCH DOUBLES RESOURCE DECAY HALFWAY THROUGH SIMULATION
-		if (generation > number_generations/2)
-		{
-			arrival_resource_decay = 2*arrival_resource_decay;
-		}
+		if(generation > number_generations*0.6)  //EXPERIMENTAL SWITCH
+			{	
+				rgood = rgood_init/4;
+				rbad = rbad_init/4;
+			}
 		
 		// time during winter (i.e., days)
         // during which individuals forage
