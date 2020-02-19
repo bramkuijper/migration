@@ -49,7 +49,7 @@ if background:
     backgroundstr = "&"
 
 
-number_replicates = 5
+number_replicates = 1
 
 for rep_i in range(0, number_replicates):
 
@@ -72,7 +72,7 @@ for rep_i in range(0, number_replicates):
                                                                 # runs
                                                                 counter += 1
 
-                                                                print("echo " + str(counter))
+#                                                                print("echo " + str(counter))
 
 
                                                                 print(executable + " " 

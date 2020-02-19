@@ -119,7 +119,6 @@ double ss_autumn_staging_size = 0.0;
 
 struct Individual 
 {
-    
     double resources;
 
     // RESOURCE SENSITIVITY reaction norm (determines entry into staging pool)
