@@ -35,7 +35,7 @@ uniform_real_distribution<> uniform(0.0,1.0);
 const int N = 2000; 
 
 // number of generations
-long int number_generations = 1000;
+long int number_generations = 100000;
 
 // initial values for phi (social dependency) and theta (resource dependency)
 // a is an intercept, b is a gradient
@@ -385,7 +385,6 @@ void write_winter_stats(ofstream &DataFile, int generation, int timestep)
 // ENDS: write data both for winter population and ends line entry in DataFile
 }
 
-// write data for summer population (post mortality)
 void write_summer_stats(ofstream &DataFile, int generation, int timestep)
 {
     double mean_theta_a[2] = { 0.0, 0.0 };
@@ -454,6 +453,40 @@ void write_summer_stats(ofstream &DataFile, int generation, int timestep)
     DataFile 
         << generation << ";"
         << timestep << ";"
+        //<< mean_spring_staging_size << ";" 
+		//<< var_spring_staging_size << ";"
+		//<< spring_migrant_pop << ";"
+		//<< mean_latency << ";"
+		//<< (ss_latency - mean_latency * mean_latency) << ";"
+		//<< n_spring_flocks << ";"
+		//<< mean_spring_flock_size << ";" 
+		//<< var_spring_flock_size << ";"
+		<< summer_pop << ";"
+	    << mean_resources[1] << ";"
+	    << (ss_resources[1] - mean_resources[1] * mean_resources[1]) << ";";
+// ENDS: write data for spring migrants
+}
+
+// write data for summer population (post mortality)
+void write_spring_stats(ofstream &DataFile, int generation, int timestep)
+{
+	double mean_latency = 0.0;
+	double ss_latency = 0.0;
+	int lat;
+   	
+    for (int i = 0; i < summer_pop; ++i)  // for each individual in the population of migrants:
+    {
+		lat = SummerPop[i].latency;  // the migratory latency of individual i
+		mean_latency += lat;
+		ss_latency += lat * lat;
+	}
+
+    // calculate means and variances of the summer population
+	mean_latency /= summer_pop;
+	ss_latency /= summer_pop;
+
+    // write statistics to a file
+    DataFile 
         << mean_spring_staging_size << ";" 
 		<< var_spring_staging_size << ";"
 		<< spring_migrant_pop << ";"
@@ -461,20 +494,7 @@ void write_summer_stats(ofstream &DataFile, int generation, int timestep)
 		<< (ss_latency - mean_latency * mean_latency) << ";"
 		<< n_spring_flocks << ";"
 		<< mean_spring_flock_size << ";" 
-		<< var_spring_flock_size << ";"
-		<< summer_pop << ";"
-	    << mean_resources[1] << ";"
-	    << (ss_resources[1] - mean_resources[1] * mean_resources[1]) << ";"
-		<< mean_theta_a[1] << ";"
-        << (ss_theta_a[1] - mean_theta_a[1] * mean_theta_a[1]) << ";"
-        << mean_theta_b[1] << ";"
-        << (ss_theta_b[1] - mean_theta_b[1] * mean_theta_b[1]) << ";"
-        << mean_phi_a[1] << ";"
-        << (ss_phi_a[1] - mean_phi_a[1] * mean_phi_a[1]) << ";"
-        << mean_phi_b[1] << ";"
-        << (ss_phi_b[1] - mean_phi_b[1] * mean_phi_b[1]) << ";"
-		<< breeder_pop << ";"
-        << offspring_pop << ";";
+		<< var_spring_flock_size << ";";
 // ENDS: write data for summer populations
 }
 
@@ -1186,7 +1206,12 @@ int main(int argc, char **argv)
 		var_spring_flock_size = (ss_spring_flock_size / n_spring_flocks) - (mean_spring_flock_size * mean_spring_flock_size);
 		var_spring_staging_size = (ss_spring_staging_size / tmax) - (mean_spring_staging_size * mean_spring_staging_size);	
         
-        // all individuals that wanted to migrate have migrated now
+		if (generation % skip == 0)
+		 {
+			 write_spring_stats(DataFile, generation, 1000);
+		  }
+		
+		// all individuals that wanted to migrate have migrated now
         // all remainers are going to stay at wintering ground
         clear_staging_pool();
 
