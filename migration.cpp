@@ -140,7 +140,7 @@ struct Individual
     double phi_b[2];
 	
 	// individual departure latency
-	double latency;
+	int latency;
 };
 
 
@@ -306,7 +306,6 @@ void write_winter_stats(ofstream &DataFile, int generation, int timestep)
 	double ss_latency = 0.0;
 
     double val;
-	double lat;
     
     for (int i = 0; i < winter_pop; ++i)  // So here we are cycling one by one through the winter population
     {
@@ -336,7 +335,9 @@ void write_winter_stats(ofstream &DataFile, int generation, int timestep)
 		
     }
 	
-	// For latency we are only concerned with individuals that migrated in the present generation
+	// For latency we are only concerned with individuals that migrated in the present generation which will be at the end of the WinterPop array (non-migrants are transferred directly to the winter population from the preceding year)
+	int lat;
+	
 	for (int i = winter_pop - (autumn_migrant_pop+1); i < winter_pop; ++i)	
 	{
 		lat = WinterPop[i].latency;  // the migratory latency of individual i
@@ -404,6 +405,7 @@ void write_summer_stats(ofstream &DataFile, int generation, int timestep)
 	double ss_latency = 0.0;
 
     double val;
+	int lat;
    	
     for (int i = 0; i < summer_pop; ++i)  // for each individual in the summer population:
     {
@@ -426,6 +428,10 @@ void write_summer_stats(ofstream &DataFile, int generation, int timestep)
         val = SummerPop[i].resources;  // the resource level of individual i 
         mean_resources[1] += val;
         ss_resources[1] += val * val;
+		
+		lat = SummerPop[i].latency;  // the migratory latency of individual i
+		mean_latency += lat;
+		ss_latency += lat * lat;
 
 	}
 
@@ -483,7 +489,7 @@ void init_population()
         WinterPop[i].resources = 0.0;  // at start of simulation, initial resource level for all individuals is 0
 		
 		// set individual latency to 0
-		WinterPop[i].latency = 0.0;
+		WinterPop[i].latency = 0;
 		
         for (int j = 0; j < 2; ++j)
         {
@@ -641,7 +647,7 @@ void winter_dynamics(int t)
         {
             // add individual to the staging pool
             StagingPool[staging_pop] = WinterPop[i];
-			StagingPool[staging_pop].latency = 0.0;
+			StagingPool[staging_pop].latency = 0;
             ++staging_pop; // increment the number of individuals in the staging pool
 
             assert(staging_pop <= N);
@@ -776,7 +782,7 @@ void create_offspring(
     bernoulli_distribution allele_sample(0.5);
 
     offspring.resources = 0.0;
-	offspring.latency = 0.0;
+	offspring.latency = 0;
 
     // inherit theta loci
 
@@ -1034,7 +1040,7 @@ void postbreeding_dynamics(int t)
     double pdisperse = 0.0;
 	mean_latency = 0.0;
 	ss_latency = 0.0;
-	double lat = 0.0;
+	int lat = 0;
 
     int staging_pop_start = staging_pop;
 
@@ -1149,11 +1155,18 @@ int main(int argc, char **argv)
         staging_pop = 0.0;  // Set staging population count to zero before winter dynamics
 		
 		rgood = rgood_init;  
-		if(generation > number_generations*1)  //EXPERIMENTAL SWITCH
+		if(generation > number_generations*0.4)  //EXPERIMENTAL SWITCH
 			{	
-				rgood = rgood_init/4;
-				rbad = rbad_init/4;
+				rgood = rgood_init/5;
+				rbad = rbad_init/5;
 			}
+		
+		if(generation > number_generations*0.7)  //EXPERIMENTAL SWITCH
+			{	
+				rgood = rgood_init/10;
+				rbad = rbad_init/10;
+			}	
+		
 		
 		// time during winter (i.e., days)
         // during which individuals forage
