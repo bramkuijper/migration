@@ -35,7 +35,7 @@ uniform_real_distribution<> uniform(0.0,1.0);
 const int N = 2000; 
 
 // number of generations
-long int number_generations = 1000;
+long int number_generations = 100000;
 
 // initial values for phi (social dependency) and theta (resource dependency)
 // a is an intercept, b is a gradient
@@ -103,10 +103,12 @@ double ss_latency = 0.0;
 // individuals in various seasons/demographics
 int staging_pop = 0;
 int winter_pop = 0;
+int spring_nonmigrant_pop = 0;
 int spring_migrant_pop = 0;
 int summer_pop = 0;
 int breeder_pop = 0;
 int offspring_pop = 0;
+int autumn_nonmigrant_pop = 0;
 int autumn_migrant_pop = 0;
 int n_spring_flocks = 0;  // recording the number of spring flocks (tmax - n(unusued departure intervals))
 int n_autumn_flocks = 0;
@@ -236,10 +238,24 @@ void write_data_headers(ofstream &DataFile)
     DataFile << "generation;"
         << "time_interval;"
 			
+		// WINTER STATS:
+		<< "winter_pop;"
+		<< "mean_resources_winter;"
+        << "var_resources_winter;"
+		<< "mean_theta_a_winter;"
+        << "var_theta_a_winter;"
+        << "mean_theta_b_winter;"
+        << "var_theta_b_winter;"
+        << "mean_phi_a_winter;"
+        << "var_phi_a_winter;"
+        << "mean_phi_b_winter;"
+        << "var_phi_b_winter;" 
+				
 		// SPRING MIGRATION STATS:
         << "mean_spring_staging_size;"
         << "var_spring_staging_size;"
         << "spring_migrant_pop;"
+		<< "spring_nonmigrant_pop;"
 		<< "mean_spring_latency;"
 		<< "var_spring_latency;"
         << "n_spring_flocks;"
@@ -265,24 +281,12 @@ void write_data_headers(ofstream &DataFile)
         << "mean_autumn_staging_size;"
         << "var_autumn_staging_size;"
         << "autumn_migrant_pop;"
+		<< "autumn_nonmigrant_pop;"
 		<< "mean_autumn_latency;"
 		<< "var_autumn_latency;"
         << "n_autumn_flocks;"
         << "mean_autumn_flock_size;"
-        << "var_autumn_flock_size;"
-			
-		// WINTER STATS:
-		<< "winter_pop;"
-        << "mean_resources_winter;"
-        << "var_resources_winter;"
-		<< "mean_theta_a_winter;"
-        << "var_theta_a_winter;"
-        << "mean_theta_b_winter;"
-        << "var_theta_b_winter;"
-        << "mean_phi_a_winter;"
-        << "var_phi_a_winter;"
-        << "mean_phi_b_winter;"
-        << "var_phi_b_winter;" << endl;
+        << "var_autumn_flock_size;"<< endl;
 }
 
 
@@ -347,7 +351,9 @@ void write_winter_stats(ofstream &DataFile, int generation, int timestep)
 	
     // write statistics to a file
     DataFile 
-        << winter_pop << ";"
+        << generation << ";"
+        << timestep << ";"
+		<< winter_pop << ";"
         << mean_resources[0] << ";"
         << (ss_resources[0] - mean_resources[0] * mean_resources[0]) << ";"
         << mean_theta_a[0] << ";"
@@ -462,11 +468,10 @@ void write_spring_stats(ofstream &DataFile, int generation, int timestep)
 
     // write statistics to a file
     DataFile 
-        << generation << ";"
-        << timestep << ";"
         << mean_spring_staging_size << ";" 
 		<< var_spring_staging_size << ";"
 		<< spring_migrant_pop << ";"
+		<< spring_nonmigrant_pop << ";"
 		<< mean_latency << ";"
 		<< (ss_latency - mean_latency * mean_latency) << ";"
 		<< n_spring_flocks << ";"
@@ -496,6 +501,7 @@ void write_autumn_stats(ofstream &DataFile, int generation, int timestep)
         << mean_autumn_staging_size << ";"
 		<< var_autumn_staging_size << ";"			
         << autumn_migrant_pop << ";"
+		<< autumn_nonmigrant_pop << ";"
 		<< mean_latency << ";"
 		<< (ss_latency - mean_latency * mean_latency) << ";"
 		<< n_autumn_flocks << ";"
@@ -965,8 +971,8 @@ void summer_reproduction(ofstream &DataFile)
         Kids.pop_back();
 
     }
-// ENDS SUMMER REPRODUCTION
-} // end void summer_reproduction(ofstream &DataFile)
+
+} // ENDS SUMMER REPRODUCTION
 
 // gaining resources at breeding ground
 // & fly back
@@ -1182,13 +1188,13 @@ int main(int argc, char **argv)
         staging_pop = 0.0;  // Set staging population count to zero before winter dynamics
 		
 		rgood = rgood_init;  
-		if(generation > number_generations*0.4)  //EXPERIMENTAL SWITCH
+		if(generation > number_generations*0.1)  //EXPERIMENTAL SWITCH
 			{	
 				rgood = rgood_init/5;
 				rbad = rbad_init/5;
 			}
 		
-		if(generation > number_generations*0.7)  //EXPERIMENTAL SWITCH
+		if(generation > number_generations*0.2)  //EXPERIMENTAL SWITCH
 			{	
 				rgood = rgood_init/10;
 				rbad = rbad_init/10;
@@ -1220,6 +1226,8 @@ int main(int argc, char **argv)
 		
 		// all individuals that wanted to migrate have migrated now
         // all remainers are going to stay at wintering ground
+		spring_nonmigrant_pop = winter_pop + staging_pop;  
+		  
         clear_staging_pool();
 
         // let individuals die with a certain probability 
@@ -1241,6 +1249,7 @@ int main(int argc, char **argv)
 		ss_autumn_flock_size = 0.0;
 		n_autumn_flocks = 0.0;
 		autumn_migrant_pop = 0.0;
+		autumn_nonmigrant_pop = 0.0;
 		ss_autumn_migrant_pop = 0.0;
 		ss_autumn_staging_size = 0.0;
 		
@@ -1261,6 +1270,8 @@ int main(int argc, char **argv)
 		// now record variance in autumn flock size and staging size over the season
 		var_autumn_flock_size = (ss_autumn_flock_size / n_autumn_flocks) - (mean_autumn_flock_size * mean_autumn_flock_size);
 		var_autumn_staging_size = (ss_autumn_staging_size / tmax) - (mean_autumn_staging_size * mean_autumn_staging_size);
+		
+		autumn_nonmigrant_pop = summer_pop + staging_pop;
 	  
 		if (generation % skip == 0)
 		{
