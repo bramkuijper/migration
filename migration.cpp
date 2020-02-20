@@ -395,8 +395,8 @@ void write_summer_stats(ofstream &DataFile, int generation, int timestep)
     double mean_resources[2] = { 0.0, 0.0 };
     double ss_resources[2] = { 0.0, 0.0 };
 
-	double mean_latency = 0.0;
-	double ss_latency = 0.0;
+	mean_latency = 0.0;
+	ss_latency = 0.0;
 
     double val;
 	int lat;
@@ -463,8 +463,8 @@ void write_summer_stats(ofstream &DataFile, int generation, int timestep)
 // write data for summer population (post mortality)
 void write_spring_stats(ofstream &DataFile, int generation, int timestep)
 {
-	double mean_latency = 0.0;
-	double ss_latency = 0.0;
+	mean_latency = 0.0;
+	ss_latency = 0.0;
 	int lat;
    	
     for (int i = 0; i < summer_pop; ++i)  // for each individual in the population of migrants:
@@ -498,8 +498,8 @@ void write_spring_stats(ofstream &DataFile, int generation, int timestep)
 
 void write_autumn_stats(ofstream &DataFile, int generation, int timestep)
 {
-	double mean_latency = 0.0;
-	double ss_latency = 0.0;
+	mean_latency = 0.0;
+	ss_latency = 0.0;
 	int lat;
 	
 	for (int i = winter_pop - (autumn_migrant_pop+1); i < winter_pop; ++i)	
@@ -1227,13 +1227,13 @@ int main(int argc, char **argv)
         staging_pop = 0.0;  // Set staging population count to zero before winter dynamics
 		
 		rgood = rgood_init;  
-		if(generation > number_generations*0.1)  //EXPERIMENTAL SWITCH
+		if(generation > number_generations*1)  //EXPERIMENTAL SWITCH
 			{	
 				rgood = rgood_init/5;
 				rbad = rbad_init/5;
 			}
 		
-		if(generation > number_generations*0.2)  //EXPERIMENTAL SWITCH
+		if(generation > number_generations*1)  //EXPERIMENTAL SWITCH
 			{	
 				rgood = rgood_init/10;
 				rbad = rbad_init/10;
