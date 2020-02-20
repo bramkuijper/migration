@@ -35,7 +35,7 @@ uniform_real_distribution<> uniform(0.0,1.0);
 const int N = 2000; 
 
 // number of generations
-long int number_generations = 100000;
+long int number_generations = 1000;
 
 // initial values for phi (social dependency) and theta (resource dependency)
 // a is an intercept, b is a gradient
@@ -461,7 +461,6 @@ void write_summer_stats(ofstream &DataFile, int generation, int timestep)
 // ENDS: write summer stats
 }
 
-// write data for summer population (post mortality)
 void write_spring_stats(ofstream &DataFile, int generation, int timestep)
 {
 	mean_latency = 0.0;
@@ -482,7 +481,7 @@ void write_spring_stats(ofstream &DataFile, int generation, int timestep)
 		ss_departure += ticktock * ticktock;
 	}
 
-    // calculate means and variances of the summer population
+    // calculate means and variances of the spring migrants
 	mean_latency /= summer_pop;
 	ss_latency /= summer_pop;
 	mean_departure /= summer_pop;
@@ -1274,17 +1273,18 @@ int main(int argc, char **argv)
 
         staging_pop = 0.0;  // Set staging population count to zero before winter dynamics
 		
-		rgood = rgood_init;  
-		if(generation > number_generations*0.4)  //EXPERIMENTAL SWITCH
+		rgood = rgood_init;
+		rbad = rbad_init;  
+		if(generation > number_generations*1)  //EXPERIMENTAL SWITCH
 			{	
-				rgood = rgood_init/5;
-				rbad = rbad_init/5;
+				rgood = rgood_init/1;
+				rbad = rbad_init/1;
 			}
 		
-		if(generation > number_generations*0.7)  //EXPERIMENTAL SWITCH
+		if(generation > number_generations*1)  //EXPERIMENTAL SWITCH
 			{	
-				rgood = rgood_init/10;
-				rbad = rbad_init/10;
+				rgood = rgood_init/1;
+				rbad = rbad_init/1;
 			}	
 		
 		
