@@ -105,6 +105,8 @@ double ss_latency = 0.0;
 double mean_cost = 0.0;
 double var_cost = 0.0;
 double ss_cost = 0.0;
+double mean_departure = 0.0;
+double ss_departure = 0.0;
 
 // keep track of the current number of 
 // individuals in various seasons/demographics
@@ -151,6 +153,9 @@ struct Individual
 	// individual departure latency
 	int latency;
 	
+	// individual departure timing
+	int timing;
+	
 	// resource cost of migration for individual
 	double cost;
 };
@@ -172,10 +177,10 @@ double clamp(double const val, double const min, double const max)
 // running the executable file
 void init_arguments(int argc, char **argv)
 {
-    init_phi_a = atof(argv[1]);
-    init_phi_b = atof(argv[2]);
-    init_theta_a = atof(argv[3]);
-    init_theta_b = atof(argv[4]);
+    init_phi_a = atof(argv[1]);  // Elevation of the reaction norm for group size-dependent miratory departure
+    init_phi_b = atof(argv[2]);  // Slope of the reaction norm for group size-dependent miratory departure
+    init_theta_a = atof(argv[3]);  // // Elevation of the reaction norm for resource-dependent entry to staging pool
+    init_theta_b = atof(argv[4]);  // Slope of the reaction norm for resource-dependent entry to staging pool
     pmort = atof(argv[5]);
     pgood_init = atof(argv[6]);
     t_good_ends = atoi(argv[7]);
@@ -255,6 +260,8 @@ void write_data_headers(ofstream &DataFile)
 		<< "spring_nonmigrant_pop;"
 		<< "mean_spring_latency;"
 		<< "var_spring_latency;"
+		<< "mean_spring_departure;"
+		<< "var_spring_departure;"
         << "n_spring_flocks;"
         << "mean_spring_flock_size;"
         << "var_spring_flock_size;"
@@ -283,6 +290,8 @@ void write_data_headers(ofstream &DataFile)
 		<< "autumn_nonmigrant_pop;"
 		<< "mean_autumn_latency;"
 		<< "var_autumn_latency;"
+		<< "mean_autumn_departure;"
+		<< "var_autumn_departure;"
         << "n_autumn_flocks;"
         << "mean_autumn_flock_size;"
         << "var_autumn_flock_size;"
@@ -395,11 +404,7 @@ void write_summer_stats(ofstream &DataFile, int generation, int timestep)
     double mean_resources[2] = { 0.0, 0.0 };
     double ss_resources[2] = { 0.0, 0.0 };
 
-	mean_latency = 0.0;
-	ss_latency = 0.0;
-
     double val;
-	int lat;
    	
     for (int i = 0; i < summer_pop; ++i)  // for each individual in the summer population:
     {
@@ -422,10 +427,6 @@ void write_summer_stats(ofstream &DataFile, int generation, int timestep)
         val = SummerPop[i].resources;  // the resource level of individual i 
         mean_resources[1] += val;
         ss_resources[1] += val * val;
-		
-		lat = SummerPop[i].latency;  // the migratory latency of individual i
-		mean_latency += lat;
-		ss_latency += lat * lat;
 
 	}
 
@@ -465,18 +466,27 @@ void write_spring_stats(ofstream &DataFile, int generation, int timestep)
 {
 	mean_latency = 0.0;
 	ss_latency = 0.0;
+	mean_departure = 0.0;
+	ss_departure = 0.0;
 	int lat;
+	int ticktock;
    	
     for (int i = 0; i < summer_pop; ++i)  // for each individual in the population of migrants:
     {
 		lat = SummerPop[i].latency;  // the migratory latency of individual i
 		mean_latency += lat;
 		ss_latency += lat * lat;
+		
+		ticktock = SummerPop[i].timing;
+		mean_departure += ticktock;
+		ss_departure += ticktock * ticktock;
 	}
 
     // calculate means and variances of the summer population
 	mean_latency /= summer_pop;
 	ss_latency /= summer_pop;
+	mean_departure /= summer_pop;
+	ss_departure /= summer_pop;
 
     // write statistics to a file
     DataFile
@@ -488,6 +498,8 @@ void write_spring_stats(ofstream &DataFile, int generation, int timestep)
 		<< spring_nonmigrant_pop << ";"
 		<< mean_latency << ";"
 		<< (ss_latency - mean_latency * mean_latency) << ";"
+		<< mean_departure << ";"
+		<< (ss_departure - mean_departure * mean_departure) << ";"
 		<< n_spring_flocks << ";"
 		<< mean_spring_flock_size << ";" 
 		<< var_spring_flock_size << ";"
@@ -500,17 +512,26 @@ void write_autumn_stats(ofstream &DataFile, int generation, int timestep)
 {
 	mean_latency = 0.0;
 	ss_latency = 0.0;
+	mean_departure = 0.0;
+	ss_departure = 0.0;
 	int lat;
+	int ticktock;
 	
 	for (int i = spring_nonmigrant_pop; i < winter_pop; ++i)	
 	{
 		lat = WinterPop[i].latency;  // the migratory latency of individual i
 		mean_latency += lat;
 		ss_latency += lat * lat;
+		
+		ticktock = WinterPop[i].timing;  // the migratory departure timing of individual i
+		mean_departure += ticktock;
+		ss_departure += ticktock * ticktock;
 	}
 	
 	mean_latency /= autumn_migrant_pop;
 	ss_latency /= autumn_migrant_pop;
+	mean_departure /= autumn_migrant_pop;
+	ss_departure /= autumn_migrant_pop;
 	
     // write statistics to a file
     DataFile 
@@ -520,6 +541,8 @@ void write_autumn_stats(ofstream &DataFile, int generation, int timestep)
 		<< autumn_nonmigrant_pop << ";"
 		<< mean_latency << ";"
 		<< (ss_latency - mean_latency * mean_latency) << ";"
+		<< mean_departure << ";"
+		<< (ss_departure - mean_departure * mean_departure) << ";"
 		<< n_autumn_flocks << ";"
 		<< mean_autumn_flock_size << ";" 
 		<< var_autumn_flock_size << ";"
@@ -542,6 +565,9 @@ void init_population()
 		// set individual latency to 0
 		WinterPop[i].latency = 0;
 		
+		// set individual timing value to 1 (Departure on the first day will give a timing value of 1)
+		WinterPop[i].timing = 1;
+		
         for (int j = 0; j < 2; ++j)
         {
             // initialize allelic values for theta elevation and slope
@@ -553,6 +579,7 @@ void init_population()
             WinterPop[i].phi_b[j] = init_phi_b;
 			
         }
+		
     }
 
     winter_pop = N;
@@ -575,6 +602,10 @@ void mortality()
             --winter_pop;
             --i;
         }
+		else
+		{
+			WinterPop[i].timing = 1;  // individual survives: timing is reset to 1 for time t+1
+		}
     }
 	
     for (int i = 0; i < summer_pop;++i)
@@ -586,6 +617,11 @@ void mortality()
             --summer_pop;
             --i;
         }
+		else
+		{
+			SummerPop[i].timing = 1;  // individual survives: timing is reset to 1 for autumn migration
+		}
+		
     }
 
     assert((winter_pop > 0 || staging_pop > 0) || summer_pop > 0);
@@ -711,6 +747,10 @@ void winter_dynamics(int t)
             --winter_pop;
             --i;
         }
+		else
+		{
+			WinterPop[i].timing +=1;  // Individuals that do not enter the staging population will not be departing at time t
+		}
     } // end for: move dispersers to staging
 
     // store current number of individuals at the breeding ground
@@ -766,6 +806,7 @@ void winter_dynamics(int t)
         
 		} else {
 			StagingPool[i].latency += 1;  // If individual does not depart, increment its latency score
+			StagingPool[i].timing += 1;  // Also increment its timing score
 		}
 		
     } // ENDS ACTUAL SPRING DISPERSAL and making of flocks
@@ -844,6 +885,7 @@ void create_offspring(
 
     offspring.resources = 0.0;
 	offspring.latency = 0;
+	offspring.timing = 1;
 
     // inherit theta loci
 
@@ -1088,6 +1130,10 @@ void postbreeding_dynamics(int t)
             --summer_pop;
             --i;
         }
+		else
+		{
+			SummerPop[i].timing +=1;  // Individuals that do not enter the staging population will not be departing at time t
+		}
     } // end for (int i = 0; i < summer_pop; ++i)
 
     // store current number of individuals at the wintering ground
@@ -1147,8 +1193,10 @@ void postbreeding_dynamics(int t)
             
             assert(NFlock <= N);
         } // Ends: individual goes
-		else {
+		else 
+		{
 			StagingPool[i].latency += 1;  // Individual does not depart at time t
+			StagingPool[i].timing += 1;  // Ditto
 		}
 	    
     } // ENDS: Autumn dispersal at time t
@@ -1227,13 +1275,13 @@ int main(int argc, char **argv)
         staging_pop = 0.0;  // Set staging population count to zero before winter dynamics
 		
 		rgood = rgood_init;  
-		if(generation > number_generations*1)  //EXPERIMENTAL SWITCH
+		if(generation > number_generations*0.4)  //EXPERIMENTAL SWITCH
 			{	
 				rgood = rgood_init/5;
 				rbad = rbad_init/5;
 			}
 		
-		if(generation > number_generations*1)  //EXPERIMENTAL SWITCH
+		if(generation > number_generations*0.7)  //EXPERIMENTAL SWITCH
 			{	
 				rgood = rgood_init/10;
 				rbad = rbad_init/10;
