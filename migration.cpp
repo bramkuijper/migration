@@ -247,19 +247,6 @@ void write_data_headers(ofstream &DataFile)
 {
     DataFile << "generation;"
         << "time_interval;"
-			
-		// WINTER STATS:
-		<< "winter_pop;"
-		<< "mean_resources_winter;"
-        << "var_resources_winter;"
-		<< "mean_theta_a_winter;"
-        << "var_theta_a_winter;"
-        << "mean_theta_b_winter;"
-        << "var_theta_b_winter;"
-        << "mean_phi_a_winter;"
-        << "var_phi_a_winter;"
-        << "mean_phi_b_winter;"
-        << "var_phi_b_winter;" 
 				
 		// SPRING MIGRATION STATS:
         << "mean_spring_staging_size;"
@@ -300,7 +287,20 @@ void write_data_headers(ofstream &DataFile)
         << "mean_autumn_flock_size;"
         << "var_autumn_flock_size;"
 		<< "mean_autumn_cost;"
-		<< "var_autumn_cost;"<< endl;
+		<< "var_autumn_cost;"
+	
+		// WINTER STATS:
+		<< "winter_pop;"
+		<< "mean_resources_winter;"
+	    << "var_resources_winter;"
+		<< "mean_theta_a_winter;"
+	    << "var_theta_a_winter;"
+	    << "mean_theta_b_winter;"
+	    << "var_theta_b_winter;"
+	    << "mean_phi_a_winter;"
+	    << "var_phi_a_winter;"
+	    << "mean_phi_b_winter;"
+	    << "var_phi_b_winter;"<< endl;
 }
 
 
@@ -365,8 +365,6 @@ void write_winter_stats(ofstream &DataFile, int generation, int timestep)
 	
     // write statistics to a file
     DataFile 
-        << generation << ";"
-        << timestep << ";"
 		<< winter_pop << ";"
         << mean_resources[0] << ";"
         << (ss_resources[0] - mean_resources[0] * mean_resources[0]) << ";"
@@ -481,7 +479,9 @@ void write_spring_stats(ofstream &DataFile, int generation, int timestep)
 	ss_latency /= summer_pop;
 
     // write statistics to a file
-    DataFile 
+    DataFile
+        << generation << ";"
+        << timestep << ";" 
         << mean_spring_staging_size << ";" 
 		<< var_spring_staging_size << ";"
 		<< spring_migrant_pop << ";"
@@ -493,7 +493,7 @@ void write_spring_stats(ofstream &DataFile, int generation, int timestep)
 		<< var_spring_flock_size << ";"
 		<< mean_spring_cost << ";"
 		<< var_spring_cost << ";";
-// ENDS: write data for summer populations
+// ENDS: write data for spring migrants
 }
 
 void write_autumn_stats(ofstream &DataFile, int generation, int timestep)
@@ -525,7 +525,7 @@ void write_autumn_stats(ofstream &DataFile, int generation, int timestep)
 		<< var_autumn_flock_size << ";"
 		<< mean_autumn_cost << ";"
 		<< var_autumn_cost << ";";
-// ENDS: write data both for winter population and ends line entry in DataFile
+// ENDS: write data both for autumn migrants
 }
 
 
@@ -1219,6 +1219,10 @@ int main(int argc, char **argv)
 		n_spring_flocks = 0;
 		spring_migrant_pop = 0.0;
 		ss_spring_staging_size = 0.0;
+		mean_spring_cost = 0.0;
+		var_spring_cost = 0.0;
+		mean_cost = 0.0;
+		ss_cost = 0.0;
 
         staging_pop = 0.0;  // Set staging population count to zero before winter dynamics
 		
@@ -1237,12 +1241,7 @@ int main(int argc, char **argv)
 		
 		
 		// time during winter (i.e., days)
-        // during which individuals forage
-		
-		// clear migratory cost statistics
-		mean_cost = 0.0;
-		ss_cost = 0.0;
-		
+        // during which individuals forage	
 		for (int t = 0; t < tmax; ++t)
         {
             winter_dynamics(t);
@@ -1260,8 +1259,8 @@ int main(int argc, char **argv)
 		var_spring_staging_size = (ss_spring_staging_size / tmax) - (mean_spring_staging_size * mean_spring_staging_size);	
         
 		// migration cost statistics
-		mean_cost /= spring_migrant_pop;
-		var_cost = (ss_cost / spring_migrant_pop) - (mean_cost * mean_cost);
+		mean_spring_cost = mean_cost / spring_migrant_pop;
+		var_spring_cost = (ss_cost / spring_migrant_pop) - (mean_spring_cost * mean_spring_cost);
 		
 		
 		if (generation % skip == 0)
@@ -1299,6 +1298,8 @@ int main(int argc, char **argv)
 		ss_autumn_staging_size = 0.0;
 		mean_cost = 0.0;
 		ss_cost = 0.0;
+		mean_autumn_cost = 0.0;
+		var_autumn_cost = 0.0;
 		
         // time during summer during which individuals forage
         for (int t = 0; t < tmax; ++t)
@@ -1321,8 +1322,8 @@ int main(int argc, char **argv)
 		var_autumn_staging_size = (ss_autumn_staging_size / tmax) - (mean_autumn_staging_size * mean_autumn_staging_size);
 		
 		// migration cost statistics
-		mean_cost /= autumn_migrant_pop;
-		var_cost = (ss_cost / autumn_migrant_pop) - (mean_cost * mean_cost);
+		mean_autumn_cost = mean_cost / autumn_migrant_pop;
+		var_autumn_cost = (ss_cost / autumn_migrant_pop) - (mean_autumn_cost * mean_autumn_cost);
 		
 		autumn_nonmigrant_pop = summer_pop + staging_pop;
 	  
