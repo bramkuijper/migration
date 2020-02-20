@@ -1308,10 +1308,10 @@ int main(int argc, char **argv)
 			
         }
 
-		autumn_migrant_pop = mean_spring_flock_size;
+		autumn_migrant_pop = mean_autumn_flock_size;
 		
-		mean_latency /= mean_autumn_flock_size;  // Denominator is the migrant population size
-		var_latency = (ss_latency / mean_autumn_flock_size) - (mean_latency * mean_latency);
+		mean_latency /= autumn_migrant_pop;  // Denominator is the migrant population size
+		var_latency = (ss_latency / autumn_migrant_pop) - (autumn_migrant_pop * autumn_migrant_pop);
 		
         // now take averages over all timesteps that individuals did (can) join groups
         mean_autumn_flock_size /= n_autumn_flocks;
