@@ -502,7 +502,7 @@ void write_autumn_stats(ofstream &DataFile, int generation, int timestep)
 	ss_latency = 0.0;
 	int lat;
 	
-	for (int i = winter_pop - (autumn_migrant_pop+1); i < winter_pop; ++i)	
+	for (int i = spring_nonmigrant_pop; i < winter_pop; ++i)	
 	{
 		lat = WinterPop[i].latency;  // the migratory latency of individual i
 		mean_latency += lat;
@@ -1337,6 +1337,7 @@ int main(int argc, char **argv)
         staging_pop = 0;
 		breeder_pop = 0;
 		summer_pop_old = 0;  // 06/02/20: Again, to track summer_pop_old
+		spring_nonmigrant_pop = 0;
 
         // let individuals die with a certain probability 
         mortality();
