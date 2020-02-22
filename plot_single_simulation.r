@@ -86,6 +86,33 @@ p3 <- ggplot(data=the.data
             #ylim(c(0,10)) +
             ylab("Mean flock size")
 
+p3b <- ggplot(data=the.data
+        ,aes(x=generation)) +
+            geom_line(aes(y = var_spring_flock_size, colour="Spring")) +
+            geom_line(aes(y = var_autumn_flock_size, colour = "Autumn")) + 
+            theme_classic() + 
+            xlab("Generation") + 
+            #ylim(c(0,10)) +
+            ylab("Var flock size")
+
+p3c <- ggplot(data=the.data
+        ,aes(x=generation)) +
+            geom_line(aes(y = n_spring_flocks, colour="Spring")) +
+            geom_line(aes(y = n_autumn_flocks, colour = "Autumn")) + 
+            theme_classic() + 
+            xlab("Generation") + 
+            #ylim(c(0,10)) +
+            ylab("Number flocks")
+
+p3d <- ggplot(data=the.data
+        ,aes(x=generation)) +
+            geom_line(aes(y = mean_spring_cost, colour="Spring")) +
+            geom_line(aes(y = mean_autumn_cost, colour = "Autumn")) + 
+            theme_classic() + 
+            xlab("Generation") + 
+            #ylim(c(0,10)) +
+            ylab("Mean cost")
+
 p4 <- ggplot(data=the.data
         ,aes(x=generation)) +
             geom_line(aes(y = breeder_pop, colour="N breeders")) +
@@ -111,9 +138,9 @@ p6 <- ggplot(data=the.data
 
 p7 <- ggplot(data=the.data
         ,aes(x=generation)) +
-            geom_line(aes(y = mean_theta_a_winter, colour="Stage (resources), theta winter")) +
+            geom_line(aes(y = mean_theta_a_winter, colour="Psignal (resources), theta winter")) +
             #geom_line(aes(y = mean_theta_a_summer, colour="Stage (resources), theta summer")) +
-            geom_line(aes(y = mean_phi_a_winter, colour="Disperse (group size), phi winter")) +
+            geom_line(aes(y = mean_phi_a_winter, colour="Pdisperse (group size), phi winter")) +
             #geom_line(aes(y = mean_phi_a_summer, colour="Disperse (group size), phi summer")) +
             theme_classic() + 
             xlab("Generation") + 
@@ -121,15 +148,15 @@ p7 <- ggplot(data=the.data
 
 p8 <- ggplot(data=the.data
         ,aes(x=generation)) +
-            geom_line(aes(y = mean_theta_b_winter, colour="Stage (resources), theta winter")) +
+            geom_line(aes(y = mean_theta_b_winter, colour="Psignal (resources), theta winter")) +
             #geom_line(aes(y = mean_theta_b_summer, colour="Stage (resources), theta summer")) +
-            geom_line(aes(y = mean_phi_b_winter, colour="Disperse (group size), phi winter")) +
+            geom_line(aes(y = mean_phi_b_winter, colour="Pdisperse (group size), phi winter")) +
             #geom_line(aes(y = mean_phi_b_summer, colour="Disperse (group size), phi summer")) +
             theme_classic() + 
             xlab("Generation") + 
             ylab("Slope")
 
-big_plot <- arrangeGrob(p1.a, p1.b, p2, p3, p4, p5, p6, p7, p8, nrow=9,ncol=1)
+big_plot <- arrangeGrob(p1.a, p1.b, p2, p3, p3b, p3c, p3d, p4, p5, p6, p7, p8, nrow=12,ncol=1)
 the.base.name <- basename(args[1])
 
 output_file_name <- paste(
@@ -138,5 +165,5 @@ output_file_name <- paste(
         ,".pdf"
         ,sep="")
 
-ggsave(output_file_name, big_plot, height = 20)
+ggsave(output_file_name, big_plot, height = 25)
 
