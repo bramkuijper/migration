@@ -35,7 +35,7 @@ uniform_real_distribution<> uniform(0.0,1.0);
 const int N = 2000; 
 
 // number of generations
-long int number_generations = 100000;
+long int number_generations = 10e6;
 
 // initial values for phi (social dependency) and theta (resource dependency)
 // a is an intercept, b is a gradient
@@ -82,7 +82,7 @@ double max_migration_cost = 0.0;
 // max number of intervals per season (two seasons: summer, winter)
 int tmax = 5000;
 
-int skip = 25;
+int skip = 1;
 
 // stats of flock size and staging
 double mean_spring_flock_size = 0.0;
@@ -91,22 +91,33 @@ double mean_autumn_flock_size = 0.0;
 double mean_autumn_staging_size = 0.0;
 double var_spring_flock_size = 0.0;
 double var_spring_staging_size = 0.0;
+double mean_spring_cost = 0.0;
+double var_spring_cost = 0.0;
 double var_autumn_flock_size = 0.0;
 double var_autumn_staging_size = 0.0;
 double ss_spring_flock_size = 0.0;
 double ss_autumn_flock_size = 0.0;
+double mean_autumn_cost = 0.0;
+double var_autumn_cost = 0.0;
 double mean_latency = 0.0;
 double var_latency = 0.0;
 double ss_latency = 0.0;
+double mean_cost = 0.0;
+double var_cost = 0.0;
+double ss_cost = 0.0;
+double mean_departure = 0.0;
+double ss_departure = 0.0;
 
 // keep track of the current number of 
 // individuals in various seasons/demographics
 int staging_pop = 0;
 int winter_pop = 0;
+int spring_nonmigrant_pop = 0;
 int spring_migrant_pop = 0;
 int summer_pop = 0;
 int breeder_pop = 0;
 int offspring_pop = 0;
+int autumn_nonmigrant_pop = 0;
 int autumn_migrant_pop = 0;
 int n_spring_flocks = 0;  // recording the number of spring flocks (tmax - n(unusued departure intervals))
 int n_autumn_flocks = 0;
@@ -140,6 +151,12 @@ struct Individual
 	
 	// individual departure latency
 	int latency;
+	
+	// individual departure timing
+	int timing;
+	
+	// resource cost of migration for individual
+	double cost;
 };
 
 
@@ -159,10 +176,10 @@ double clamp(double const val, double const min, double const max)
 // running the executable file
 void init_arguments(int argc, char **argv)
 {
-    init_phi_a = atof(argv[1]);
-    init_phi_b = atof(argv[2]);
-    init_theta_a = atof(argv[3]);
-    init_theta_b = atof(argv[4]);
+    init_phi_a = atof(argv[1]);  // Elevation of the reaction norm for group size-dependent miratory departure
+    init_phi_b = atof(argv[2]);  // Slope of the reaction norm for group size-dependent miratory departure
+    init_theta_a = atof(argv[3]);  // // Elevation of the reaction norm for resource-dependent entry to staging pool
+    init_theta_b = atof(argv[4]);  // Slope of the reaction norm for resource-dependent entry to staging pool
     pmort = atof(argv[5]);
     pgood_init = atof(argv[6]);
     t_good_ends = atoi(argv[7]);
@@ -234,16 +251,21 @@ void write_data_headers(ofstream &DataFile)
 {
     DataFile << "generation;"
         << "time_interval;"
-			
+				
 		// SPRING MIGRATION STATS:
         << "mean_spring_staging_size;"
         << "var_spring_staging_size;"
         << "spring_migrant_pop;"
+		<< "spring_nonmigrant_pop;"
 		<< "mean_spring_latency;"
 		<< "var_spring_latency;"
+		<< "mean_spring_departure;"
+		<< "var_spring_departure;"
         << "n_spring_flocks;"
         << "mean_spring_flock_size;"
         << "var_spring_flock_size;"
+		<< "mean_spring_cost;"
+		<< "var_spring_cost;"
 		
 		// SUMMER STATS:	
 		<< "summer_pop;"
@@ -264,24 +286,29 @@ void write_data_headers(ofstream &DataFile)
         << "mean_autumn_staging_size;"
         << "var_autumn_staging_size;"
         << "autumn_migrant_pop;"
+		<< "autumn_nonmigrant_pop;"
 		<< "mean_autumn_latency;"
 		<< "var_autumn_latency;"
+		<< "mean_autumn_departure;"
+		<< "var_autumn_departure;"
         << "n_autumn_flocks;"
         << "mean_autumn_flock_size;"
         << "var_autumn_flock_size;"
-			
+		<< "mean_autumn_cost;"
+		<< "var_autumn_cost;"
+	
 		// WINTER STATS:
 		<< "winter_pop;"
-        << "mean_resources_winter;"
-        << "var_resources_winter;"
+		<< "mean_resources_winter;"
+	    << "var_resources_winter;"
 		<< "mean_theta_a_winter;"
-        << "var_theta_a_winter;"
-        << "mean_theta_b_winter;"
-        << "var_theta_b_winter;"
-        << "mean_phi_a_winter;"
-        << "var_phi_a_winter;"
-        << "mean_phi_b_winter;"
-        << "var_phi_b_winter;" << endl;
+	    << "var_theta_a_winter;"
+	    << "mean_theta_b_winter;"
+	    << "var_theta_b_winter;"
+	    << "mean_phi_a_winter;"
+	    << "var_phi_a_winter;"
+	    << "mean_phi_b_winter;"
+	    << "var_phi_b_winter;"<< endl;
 }
 
 
@@ -301,9 +328,6 @@ void write_winter_stats(ofstream &DataFile, int generation, int timestep)
     double mean_resources[2] = { 0.0, 0.0 };
     double ss_resources[2] = { 0.0, 0.0 };
 	
-	double mean_latency = 0.0;
-	double ss_latency = 0.0;
-
     double val;
     
     for (int i = 0; i < winter_pop; ++i)  // So here we are cycling one by one through the winter population
@@ -333,43 +357,26 @@ void write_winter_stats(ofstream &DataFile, int generation, int timestep)
         ss_resources[0] += val * val;
 		
     }
-	
-	// For latency we are only concerned with individuals that migrated in the present generation which will be at the end of the WinterPop array (non-migrants are transferred directly to the winter population from the preceding year)
-	int lat;
-	
-	for (int i = winter_pop - (autumn_migrant_pop+1); i < winter_pop; ++i)	
-	{
-		lat = WinterPop[i].latency;  // the migratory latency of individual i
-		mean_latency += lat;
-		ss_latency += lat * lat;
-	}
-	
-    // calculate means and variances of the winter population
-	mean_theta_a[0] /=  winter_pop;
-    mean_theta_b[0] /=  winter_pop;
-    mean_phi_a[0] /=  winter_pop;
-    mean_phi_b[0] /=  winter_pop;
-	mean_resources[0] /=  winter_pop;
-	mean_latency /= autumn_migrant_pop;
-    
-    ss_theta_a[0] /= winter_pop; 
-    ss_theta_b[0] /= winter_pop; 
-    ss_phi_a[0] /= winter_pop; 
-    ss_phi_b[0] /= winter_pop;
-    ss_resources[0] /= winter_pop; 
-	ss_latency /= autumn_migrant_pop;
+
+    if (winter_pop > 0)
+    {
+        // calculate means and variances of the winter population
+        mean_theta_a[0] /=  winter_pop;
+        mean_theta_b[0] /=  winter_pop;
+        mean_phi_a[0] /=  winter_pop;
+        mean_phi_b[0] /=  winter_pop;
+        mean_resources[0] /=  winter_pop;
+         
+        ss_theta_a[0] /= winter_pop; 
+        ss_theta_b[0] /= winter_pop; 
+        ss_phi_a[0] /= winter_pop; 
+        ss_phi_b[0] /= winter_pop;
+        ss_resources[0] /= winter_pop; 
+    }
 	
     // write statistics to a file
     DataFile 
-        << mean_autumn_staging_size << ";"
-		<< var_autumn_staging_size << ";"			
-        << autumn_migrant_pop << ";"
-		<< mean_latency << ";"
-		<< (ss_latency - mean_latency * mean_latency) << ";"
-		<< n_autumn_flocks << ";"
-		<< mean_autumn_flock_size << ";" 
-		<< var_autumn_flock_size << ";"
-        << winter_pop << ";"
+		<< winter_pop << ";"
         << mean_resources[0] << ";"
         << (ss_resources[0] - mean_resources[0] * mean_resources[0]) << ";"
         << mean_theta_a[0] << ";"
@@ -399,11 +406,7 @@ void write_summer_stats(ofstream &DataFile, int generation, int timestep)
     double mean_resources[2] = { 0.0, 0.0 };
     double ss_resources[2] = { 0.0, 0.0 };
 
-	double mean_latency = 0.0;
-	double ss_latency = 0.0;
-
     double val;
-	int lat;
    	
     for (int i = 0; i < summer_pop; ++i)  // for each individual in the summer population:
     {
@@ -426,76 +429,138 @@ void write_summer_stats(ofstream &DataFile, int generation, int timestep)
         val = SummerPop[i].resources;  // the resource level of individual i 
         mean_resources[1] += val;
         ss_resources[1] += val * val;
-		
-		lat = SummerPop[i].latency;  // the migratory latency of individual i
-		mean_latency += lat;
-		ss_latency += lat * lat;
 
 	}
 
-    // calculate means and variances of the summer population
-    mean_theta_a[1] /= summer_pop;
-    mean_theta_b[1] /= summer_pop;
-    mean_phi_a[1] /= summer_pop;
-    mean_phi_b[1] /= summer_pop;
-	mean_resources[1] /= summer_pop;
-	mean_latency /= summer_pop;
-    
-    ss_theta_a[1] /= summer_pop; 
-    ss_theta_b[1] /= summer_pop; 
-    ss_phi_a[1] /= summer_pop; 
-    ss_phi_b[1] /= summer_pop;
-    ss_resources[1] /= summer_pop; 
-	ss_latency /= summer_pop;
+    if (summer_pop > 0)
+    {
+        // calculate means and variances of the summer population
+        mean_theta_a[1] /= summer_pop;
+        mean_theta_b[1] /= summer_pop;
+        mean_phi_a[1] /= summer_pop;
+        mean_phi_b[1] /= summer_pop;
+        mean_resources[1] /= summer_pop;
+        
+        ss_theta_a[1] /= summer_pop; 
+        ss_theta_b[1] /= summer_pop; 
+        ss_phi_a[1] /= summer_pop; 
+        ss_phi_b[1] /= summer_pop;
+        ss_resources[1] /= summer_pop; 
+    }
 
+	
     // write statistics to a file
     DataFile 
-        << generation << ";"
-        << timestep << ";"
-        //<< mean_spring_staging_size << ";" 
-		//<< var_spring_staging_size << ";"
-		//<< spring_migrant_pop << ";"
-		//<< mean_latency << ";"
-		//<< (ss_latency - mean_latency * mean_latency) << ";"
-		//<< n_spring_flocks << ";"
-		//<< mean_spring_flock_size << ";" 
-		//<< var_spring_flock_size << ";"
-		<< summer_pop << ";"
+        << summer_pop << ";"
 	    << mean_resources[1] << ";"
-	    << (ss_resources[1] - mean_resources[1] * mean_resources[1]) << ";";
-// ENDS: write data for spring migrants
+	    << (ss_resources[1] - mean_resources[1] * mean_resources[1]) << ";"
+		<< mean_theta_a[1] << ";"
+        << (ss_theta_a[1] - mean_theta_a[1] * mean_theta_a[1]) << ";"
+        << mean_theta_b[1] << ";"
+        << (ss_theta_b[1] - mean_theta_b[1] * mean_theta_b[1]) << ";"
+        << mean_phi_a[1] << ";"
+        << (ss_phi_a[1] - mean_phi_a[1] * mean_phi_a[1]) << ";"
+        << mean_phi_b[1] << ";"
+        << (ss_phi_b[1] - mean_phi_b[1] * mean_phi_b[1]) << ";"
+		<< breeder_pop << ";"
+        << offspring_pop << ";";
+// ENDS: write summer stats
 }
 
-// write data for summer population (post mortality)
 void write_spring_stats(ofstream &DataFile, int generation, int timestep)
 {
-	double mean_latency = 0.0;
-	double ss_latency = 0.0;
+	mean_latency = 0.0;
+	ss_latency = 0.0;
+	mean_departure = 0.0;
+	ss_departure = 0.0;
 	int lat;
+	int ticktock;
    	
     for (int i = 0; i < summer_pop; ++i)  // for each individual in the population of migrants:
     {
 		lat = SummerPop[i].latency;  // the migratory latency of individual i
 		mean_latency += lat;
 		ss_latency += lat * lat;
+		
+		ticktock = SummerPop[i].timing;
+		mean_departure += ticktock;
+		ss_departure += ticktock * ticktock;
 	}
 
-    // calculate means and variances of the summer population
-	mean_latency /= summer_pop;
-	ss_latency /= summer_pop;
+    if (summer_pop > 0)
+    {
+        mean_latency /= summer_pop;
+        ss_latency /= summer_pop;
+        mean_departure /= summer_pop;
+        ss_departure /= summer_pop;
+    }
 
     // write statistics to a file
-    DataFile 
+    DataFile
+        << generation << ";"
+        << timestep << ";" 
         << mean_spring_staging_size << ";" 
 		<< var_spring_staging_size << ";"
 		<< spring_migrant_pop << ";"
+		<< spring_nonmigrant_pop << ";"
 		<< mean_latency << ";"
 		<< (ss_latency - mean_latency * mean_latency) << ";"
+		<< mean_departure << ";"
+		<< (ss_departure - mean_departure * mean_departure) << ";"
 		<< n_spring_flocks << ";"
 		<< mean_spring_flock_size << ";" 
-		<< var_spring_flock_size << ";";
-// ENDS: write data for summer populations
+		<< var_spring_flock_size << ";"
+		<< mean_spring_cost << ";"
+		<< var_spring_cost << ";";
+// ENDS: write data for spring migrants
 }
+
+void write_autumn_stats(ofstream &DataFile, int generation, int timestep)
+{
+	mean_latency = 0.0;
+	ss_latency = 0.0;
+	mean_departure = 0.0;
+	ss_departure = 0.0;
+	int lat;
+	int ticktock;
+	
+	for (int i = spring_nonmigrant_pop; i < winter_pop; ++i)	
+	{
+		lat = WinterPop[i].latency;  // the migratory latency of individual i
+		mean_latency += lat;
+		ss_latency += lat * lat;
+		
+		ticktock = WinterPop[i].timing;  // the migratory departure timing of individual i
+		mean_departure += ticktock;
+		ss_departure += ticktock * ticktock;
+	}
+	
+    if (autumn_migrant_pop > 0)
+    {
+        mean_latency /= autumn_migrant_pop;
+        ss_latency /= autumn_migrant_pop;
+        mean_departure /= autumn_migrant_pop;
+        ss_departure /= autumn_migrant_pop;
+    }
+	
+    // write statistics to a file
+    DataFile 
+        << mean_autumn_staging_size << ";"
+		<< var_autumn_staging_size << ";"			
+        << autumn_migrant_pop << ";"
+		<< autumn_nonmigrant_pop << ";"
+		<< mean_latency << ";"
+		<< (ss_latency - mean_latency * mean_latency) << ";"
+		<< mean_departure << ";"
+		<< (ss_departure - mean_departure * mean_departure) << ";"
+		<< n_autumn_flocks << ";"
+		<< mean_autumn_flock_size << ";" 
+		<< var_autumn_flock_size << ";"
+		<< mean_autumn_cost << ";"
+		<< var_autumn_cost << ";";
+// ENDS: write data both for autumn migrants
+}
+
 
 
 // initialize the population at the start of the simulation
@@ -510,6 +575,9 @@ void init_population()
 		// set individual latency to 0
 		WinterPop[i].latency = 0;
 		
+		// set individual timing value to 1 (Departure on the first day will give a timing value of 1)
+		WinterPop[i].timing = 1;
+		
         for (int j = 0; j < 2; ++j)
         {
             // initialize allelic values for theta elevation and slope
@@ -521,6 +589,7 @@ void init_population()
             WinterPop[i].phi_b[j] = init_phi_b;
 			
         }
+		
     }
 
     winter_pop = N;
@@ -543,6 +612,10 @@ void mortality()
             --winter_pop;
             --i;
         }
+		else
+		{
+			WinterPop[i].timing = 1;  // individual survives: timing is reset to 1 for time t+1
+		}
     }
 	
     for (int i = 0; i < summer_pop;++i)
@@ -554,6 +627,11 @@ void mortality()
             --summer_pop;
             --i;
         }
+		else
+		{
+			SummerPop[i].timing = 1;  // individual survives: timing is reset to 1 for autumn migration
+		}
+		
     }
 
     assert((winter_pop > 0 || staging_pop > 0) || summer_pop > 0);
@@ -581,7 +659,7 @@ void clear_staging_pool()
 // wasted on migration
 // if flock size is 1, function returns c = 1 (i.e., max cost)
 // if flock size is >1, function returns 0 <= c < 1  
-double get_migration_cost_proportion(int const flock_size)
+double get_migration_cost_proportion(int const flock_size, int const max_flock_size)
 {
     // flock size = 1: max cost
     // flock size = N: no cost
@@ -589,7 +667,7 @@ double get_migration_cost_proportion(int const flock_size)
     // hence costs decay as a fraction of the maximum flock size N
     // if it would just decay with flock size it may well be that 
     double total_migration_cost = max_migration_cost * (1.0 - migration_cost_decay * 
-            pow((double) flock_size / N, migration_cost_power));
+            pow((double) flock_size / max_flock_size, migration_cost_power));
 
     // make sure function is bounded between 0 and 1
     total_migration_cost = clamp(total_migration_cost, 0.0, 1.0);
@@ -679,6 +757,10 @@ void winter_dynamics(int t)
             --winter_pop;
             --i;
         }
+		else
+		{
+			WinterPop[i].timing +=1;  // Individuals that do not enter the staging population will not be departing at time t
+		}
     } // end for: move dispersers to staging
 
     // store current number of individuals at the breeding ground
@@ -704,7 +786,7 @@ void winter_dynamics(int t)
         // for now, individuals leave dependent on the current amount of individuals
         // within the staging pool
         pdisperse = 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1])
-            + 0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) * staging_pop_start;
+            + 0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) * staging_pop_start / winter_pop;
 
         // yes individual goes
         if (uniform(rng_r) < pdisperse)
@@ -734,6 +816,7 @@ void winter_dynamics(int t)
         
 		} else {
 			StagingPool[i].latency += 1;  // If individual does not depart, increment its latency score
+			StagingPool[i].timing += 1;  // Also increment its timing score
 		}
 		
     } // ENDS ACTUAL SPRING DISPERSAL and making of flocks
@@ -752,15 +835,25 @@ void winter_dynamics(int t)
 		ss_spring_flock_size += NFlock * NFlock;  // Also serves as sum of squares of spring migrant population size
 	}
 	
+	double cost = 0.0;
+	
 	// update resource levels for all new individuals that have just
     // been added to the summer pool dependent on their flock size
     for (int i = summer_pop_old; i < summer_pop; ++i)  // Selecting individuals that have been added to the summer pop this timepoint
+		
     {
-		total_migration_scalar = (1.0 - get_migration_cost_proportion(NFlock)) * 
+		
+		total_migration_scalar = (1.0 - get_migration_cost_proportion(NFlock, summer_pop)) * 
             (1.0 - arrival_resource_decay * (double)t/tmax);
 
         assert(total_migration_scalar >= 0);
         assert(total_migration_scalar <= 1.0);
+		
+		// Resource cost of migration to the individual
+		// must be calculated before migration-induced mortality or non-survivors will be excluded
+		cost = (1 - total_migration_scalar);
+		mean_cost += cost;
+		ss_cost += cost * cost;
 
         // resources are reduced due to migration,
         // yet this depends on group size in a curvilinear fashion
@@ -775,6 +868,13 @@ void winter_dynamics(int t)
         } // ends: death due to starvation
 		
     } // ENDS: updating resources of migrants
+
+
+//    cout << 
+//        "mean_spring_flock_size: " << (n_spring_flocks == 0 ? 0 : (double) mean_spring_flock_size / n_spring_flocks) << " ";
+//        
+//    cout << "summer cost: " << (summer_pop == 0 ? 0 : mean_cost / summer_pop) << " ";
+//    cout << "total mean cost: " << mean_cost << " " << endl;
 	
 } // ENDS WINTER DYNAMICS (looping through t)
 
@@ -802,6 +902,7 @@ void create_offspring(
 
     offspring.resources = 0.0;
 	offspring.latency = 0;
+	offspring.timing = 1;
 
     // inherit theta loci
 
@@ -957,8 +1058,8 @@ void summer_reproduction(ofstream &DataFile)
         Kids.pop_back();
 
     }
-// ENDS SUMMER REPRODUCTION
-} // end void summer_reproduction(ofstream &DataFile)
+
+} // ENDS SUMMER REPRODUCTION
 
 // gaining resources at breeding ground
 // & fly back
@@ -1046,6 +1147,10 @@ void postbreeding_dynamics(int t)
             --summer_pop;
             --i;
         }
+		else
+		{
+			SummerPop[i].timing +=1;  // Individuals that do not enter the staging population will not be departing at time t
+		}
     } // end for (int i = 0; i < summer_pop; ++i)
 
     // store current number of individuals at the wintering ground
@@ -1071,7 +1176,7 @@ void postbreeding_dynamics(int t)
         // within the staging pool
 
         pdisperse = 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1])
-            + 0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) * staging_pop_start;
+            + 0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) * staging_pop_start / summer_pop;
 
         // yes individual goes
         if (uniform(rng_r) < pdisperse)
@@ -1105,8 +1210,10 @@ void postbreeding_dynamics(int t)
             
             assert(NFlock <= N);
         } // Ends: individual goes
-		else {
+		else 
+		{
 			StagingPool[i].latency += 1;  // Individual does not depart at time t
+			StagingPool[i].timing += 1;  // Ditto
 		}
 	    
     } // ENDS: Autumn dispersal at time t
@@ -1119,19 +1226,28 @@ void postbreeding_dynamics(int t)
 	ss_autumn_staging_size += staging_pop_start * staging_pop_start;
 	
     if (winter_pop_old < winter_pop){
-		++ n_autumn_flocks;
+		++n_autumn_flocks;
 	}
 
-    // update resource levels for all new individuals that have just
+    double cost = 0.0;
+	
+	// update resource levels for all new individuals that have just
     // been added to the pool dependent on their flock size
     for (int i = winter_pop_old; i < winter_pop; ++i)
     {
-		total_migration_scalar = (1.0 - get_migration_cost_proportion(NFlock)) * 
+		total_migration_scalar = (1.0 - get_migration_cost_proportion(NFlock, winter_pop)) * 
             1.0; //(1.0 - arrival_resource_decay * (double)t/tmax);  13 Feb, SRE: Removed arrival resource decay from wintering ground
+		
+		// Resource cost of migration to the individual
+		cost = WinterPop[i].resources * (1 - total_migration_scalar);
+		mean_cost += cost;
+		ss_cost += cost * cost;
 
         // resources are reduced due to migration,
         // yet this depends on group size in a curvilinear fashion
         SummerPop[i].resources = SummerPop[i].resources * total_migration_scalar;
+
+//        cout << get_migration_cost_proportion(NFlock, winter_pop) << ";" << SummerPop[i].resources << ";" << total_migration_scalar << ";" << NFlock << ";" << endl;
 
         // death due to starvation
         if (WinterPop[i].resources < resource_starvation_threshold)
@@ -1143,7 +1259,13 @@ void postbreeding_dynamics(int t)
 
     } // Ends: update resource levels of winter arrivals
 
-} // ENDS: SUMMER DYNAMICS 
+//    cout << 
+//        "mean_spring_flock_size: " << (n_autumn_flocks == 0 ? 0 : (double) mean_autumn_flock_size / n_autumn_flocks) << " ";
+//        
+//    cout << "winter cost: " << (winter_pop == 0 ? 0 : mean_cost / winter_pop) << " ";
+//    cout << "total mean cost: " << mean_cost << " " << endl;
+
+} // ENDS: POST-BREEDING DYNAMICS 
 
 
 // THE KEY PART OF THE CODE
@@ -1170,25 +1292,30 @@ int main(int argc, char **argv)
 		n_spring_flocks = 0;
 		spring_migrant_pop = 0.0;
 		ss_spring_staging_size = 0.0;
+		mean_spring_cost = 0.0;
+		var_spring_cost = 0.0;
+		mean_cost = 0.0;
+		ss_cost = 0.0;
 
         staging_pop = 0.0;  // Set staging population count to zero before winter dynamics
 		
-		rgood = rgood_init;  
-		if(generation > number_generations*0.4)  //EXPERIMENTAL SWITCH
+		rgood = rgood_init;
+		rbad = rbad_init;  
+		if(generation > number_generations*1)  //EXPERIMENTAL SWITCH
 			{	
-				rgood = rgood_init/5;
-				rbad = rbad_init/5;
+				rgood = rgood_init/1;
+				rbad = rbad_init/1;
 			}
 		
-		if(generation > number_generations*0.7)  //EXPERIMENTAL SWITCH
+		if(generation > number_generations*1)  //EXPERIMENTAL SWITCH
 			{	
-				rgood = rgood_init/10;
-				rbad = rbad_init/10;
+				rgood = rgood_init/1;
+				rbad = rbad_init/1;
 			}	
 		
 		
 		// time during winter (i.e., days)
-        // during which individuals forage
+        // during which individuals forage	
 		for (int t = 0; t < tmax; ++t)
         {
             winter_dynamics(t);
@@ -1196,15 +1323,20 @@ int main(int argc, char **argv)
         }
 				
 		spring_migrant_pop = mean_spring_flock_size;
-		
+			
         // now take averages over all timesteps that individuals did (can) join groups
-        mean_spring_flock_size /= n_spring_flocks;
+        mean_spring_flock_size = n_spring_flocks > 0 ? mean_spring_flock_size / n_spring_flocks : 0;
 		mean_spring_staging_size /= tmax;
 		
 		// now record variance in flock size and staging size over the season
-		var_spring_flock_size = (ss_spring_flock_size / n_spring_flocks) - (mean_spring_flock_size * mean_spring_flock_size);
+		var_spring_flock_size = n_spring_flocks > 0 ? (ss_spring_flock_size / n_spring_flocks) - (mean_spring_flock_size * mean_spring_flock_size) : 0;
 		var_spring_staging_size = (ss_spring_staging_size / tmax) - (mean_spring_staging_size * mean_spring_staging_size);	
         
+		// migration cost statistics
+		mean_spring_cost = spring_migrant_pop > 0 ? mean_cost / spring_migrant_pop : 0;
+		var_spring_cost = spring_migrant_pop > 0 ? (ss_cost / spring_migrant_pop) - (mean_spring_cost * mean_spring_cost) : 0;
+		
+		
 		if (generation % skip == 0)
 		 {
 			 write_spring_stats(DataFile, generation, 1000);
@@ -1212,6 +1344,8 @@ int main(int argc, char **argv)
 		
 		// all individuals that wanted to migrate have migrated now
         // all remainers are going to stay at wintering ground
+		spring_nonmigrant_pop = winter_pop + staging_pop;  
+		  
         clear_staging_pool();
 
         // let individuals die with a certain probability 
@@ -1225,7 +1359,7 @@ int main(int argc, char **argv)
 			 write_summer_stats(DataFile, generation, 1000);
 		  }
 		
-        // set flock size stats to 0 before postbreeding_dynamics starts
+        // set autumn migration stats to 0 before postbreeding_dynamics starts
         mean_autumn_flock_size = 0.0;
         mean_autumn_staging_size = 0.0;
 		var_autumn_flock_size = 0.0;
@@ -1233,8 +1367,13 @@ int main(int argc, char **argv)
 		ss_autumn_flock_size = 0.0;
 		n_autumn_flocks = 0.0;
 		autumn_migrant_pop = 0.0;
+		autumn_nonmigrant_pop = 0.0;
 		ss_autumn_migrant_pop = 0.0;
 		ss_autumn_staging_size = 0.0;
+		mean_cost = 0.0;
+		ss_cost = 0.0;
+		mean_autumn_cost = 0.0;
+		var_autumn_cost = 0.0;
 		
         // time during summer during which individuals forage
         for (int t = 0; t < tmax; ++t)
@@ -1242,23 +1381,37 @@ int main(int argc, char **argv)
             postbreeding_dynamics(t);
 			
         }
-        
-		mean_latency /= mean_autumn_flock_size;  // Denominator is the migrant population size
-		var_latency = (ss_latency / mean_autumn_flock_size) - (mean_latency * mean_latency);
+
+		autumn_migrant_pop = mean_autumn_flock_size;
+		
+		mean_latency /= autumn_migrant_pop;  // Denominator is the migrant population size
+		var_latency = (ss_latency / autumn_migrant_pop) - (autumn_migrant_pop * autumn_migrant_pop);
 		
         // now take averages over all timesteps that individuals did (can) join groups
-        mean_autumn_flock_size /= n_autumn_flocks;
+        mean_autumn_flock_size = n_autumn_flocks > 0 ?  mean_autumn_flock_size / n_autumn_flocks : 0;
         mean_autumn_staging_size /= tmax;
 		
 		// now record variance in autumn flock size and staging size over the season
-		var_autumn_flock_size = (ss_autumn_flock_size / n_autumn_flocks) - (mean_autumn_flock_size * mean_autumn_flock_size);
+		var_autumn_flock_size = n_autumn_flocks > 0 ? (ss_autumn_flock_size / n_autumn_flocks) - (mean_autumn_flock_size * mean_autumn_flock_size) : 0;
 		var_autumn_staging_size = (ss_autumn_staging_size / tmax) - (mean_autumn_staging_size * mean_autumn_staging_size);
+		
+		// migration cost statistics
+		mean_autumn_cost =autumn_migrant_pop > 0 ? mean_cost / autumn_migrant_pop : 0;
+		var_autumn_cost = autumn_migrant_pop > 0 ? (ss_cost / autumn_migrant_pop) - (mean_autumn_cost * mean_autumn_cost) : 0;
+		
+		autumn_nonmigrant_pop = summer_pop + staging_pop;
 	  
+		if (generation % skip == 0)
+		{
+			write_autumn_stats(DataFile, generation, 1000);
+		}
+		
 		// all individuals who remain at the summer grounds die
         summer_pop = 0;
         staging_pop = 0;
 		breeder_pop = 0;
 		summer_pop_old = 0;  // 06/02/20: Again, to track summer_pop_old
+		spring_nonmigrant_pop = 0;
 
         // let individuals die with a certain probability 
         mortality();

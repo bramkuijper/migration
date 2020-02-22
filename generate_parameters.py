@@ -4,7 +4,7 @@
 
 init_theta_a = 0.5
 init_theta_b = [ 0.0 ]
-init_phi_a = 0.5
+init_phi_a = 0.1
 init_phi_b = [ 0.0 ]
 
 tmax = 5000
@@ -17,7 +17,7 @@ rgood = [ 0.1 ] # Changed from 1 on 27 November 2019
 rbad = [ 0.05 ] # Changed from 0.5 on 27 November 2019
 
 arrival_resource_decay = [0.1] #[ 0.1, 0.5] # changed 19 Nov 2019. Outcome was that for value of 0.01, the winter population size was < 25. On 27th Nov, I fixed it to 0.1 as values of 0.2 were associated with very low population sizes.
-resource_reproduction_threshold = [0.1]
+resource_reproduction_threshold = [0.0]
 resource_starvation_threshold = [0.0]
 
 # mutation rates (I fix those and they are not varying)
@@ -27,10 +27,10 @@ sdmu_theta = 0.01
 sdmu_phi = 0.01
     
     # migration cost parameters
-max_migration_cost = [0.5, 0.75, 1]
+max_migration_cost = [1]
 min_migration_cost = [ 0 ] # 29 Nov: setting it to be half the maximum migration cost
 migration_cost_decay = [ 1 ]
-migration_cost_power = [ 0.5, 1, 2 ]
+migration_cost_power = [ 2 ]
 
 
 executable = "./xmigration"
