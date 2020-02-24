@@ -105,6 +105,22 @@ p3c <- ggplot(data=the.data
             ylab("Number flocks")
 
 p3d <- ggplot(data=the.data
+		,aes(x=generation)) +
+			geom_line(aes(y = mean_spring_latency, colour="Spring")) +
+			geom_line(aes(y = mean_autumn_latency, colour="Autumn")) +
+			theme_classic() +
+			xlab("Generation") +
+			ylab("Mean latency")
+			
+p3e <- ggplot(data=the.data
+		,aes(x=generation)) +
+			geom_line(aes(y = mean_spring_departure, colour="Spring")) +
+			geom_line(aes(y = mean_autumn_departure, colour="Autumn")) +
+			theme_classic() +
+			xlab("Generation") +
+			ylab("Mean timing")
+
+p3f <- ggplot(data=the.data
         ,aes(x=generation)) +
             geom_line(aes(y = mean_spring_cost, colour="Spring")) +
             geom_line(aes(y = mean_autumn_cost, colour = "Autumn")) + 
@@ -156,7 +172,7 @@ p8 <- ggplot(data=the.data
             xlab("Generation") + 
             ylab("Slope")
 
-big_plot <- arrangeGrob(p1.a, p1.b, p2, p3, p3b, p3c, p3d, p4, p5, p6, p7, p8, nrow=12,ncol=1)
+big_plot <- arrangeGrob(p1.a, p1.b, p2, p3, p3b, p3c, p3d, p3e, p3f, p4, p5, p6, p7, p8, nrow=14,ncol=1)
 the.base.name <- basename(args[1])
 
 output_file_name <- paste(
