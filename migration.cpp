@@ -157,6 +157,9 @@ struct Individual
 	
 	// resource cost of migration for individual
 	double cost;
+	
+	// maximum flock size they could have formed part of
+	int potential;
 };
 
 
@@ -682,8 +685,8 @@ void winter_dynamics(int t)
 	// individuals forage
     // individuals accumulate resources
     // individuals make dispersal decisions
-
-    // determine probability of encountering a good resource:
+	
+	// determine probability of encountering a good resource:
     //  if the time is later than t_good_ends
     //  one can only encounter bad resources, hence p_good = 0
     double pgood = t < t_good_ends ? pgood_init : 0.0;
@@ -692,7 +695,9 @@ void winter_dynamics(int t)
     // and who have yet to decide to go to the staging site
     for (int i = 0; i < winter_pop; ++i)
     {
-        if (uniform(rng_r) < pgood) // good resource chosen
+        WinterPop[i].potential = 0;
+		
+		if (uniform(rng_r) < pgood) // good resource chosen
         {
             WinterPop[i].resources += rgood;
         }
@@ -745,6 +750,7 @@ void winter_dynamics(int t)
             // add individual to the staging pool
             StagingPool[staging_pop] = WinterPop[i];
 			StagingPool[staging_pop].latency = 0;
+			StagingPool[staging_pop].potential = winter_pop + staging_pop;
             ++staging_pop; // increment the number of individuals in the staging pool
 
             assert(staging_pop <= N);
@@ -843,7 +849,7 @@ void winter_dynamics(int t)
 		
     {
 		
-		total_migration_scalar = (1.0 - get_migration_cost_proportion(NFlock, summer_pop)) * 
+		total_migration_scalar = (1.0 - get_migration_cost_proportion(NFlock, SummerPop[i].potential)) * 
             (1.0 - arrival_resource_decay * (double)t/tmax);
 
         assert(total_migration_scalar >= 0);
@@ -851,7 +857,7 @@ void winter_dynamics(int t)
 		
 		// Resource cost of migration to the individual
 		// must be calculated before migration-induced mortality or non-survivors will be excluded
-		cost = (1 - total_migration_scalar);
+		cost = 1 - total_migration_scalar;  // Individual's resource cost scalar
 		mean_cost += cost;
 		ss_cost += cost * cost;
 
@@ -1081,7 +1087,9 @@ void postbreeding_dynamics(int t)
     // and who have yet to decide to go to the staging site
     for (int i = 0; i < summer_pop; ++i)
     {
-        if (uniform(rng_r) < pgood) // good resource chosen
+        SummerPop[i].potential = 0;
+		
+		if (uniform(rng_r) < pgood) // good resource chosen
         {
             SummerPop[i].resources += rgood;
         }
@@ -1135,6 +1143,7 @@ void postbreeding_dynamics(int t)
             // add individual to the staging pool
             StagingPool[staging_pop] = SummerPop[i];
 			StagingPool[staging_pop].latency = 0.0;
+			StagingPool[staging_pop].potential = summer_pop + staging_pop;
             ++staging_pop; // increment the number of individuals in the staging pool
 
             assert(staging_pop <= N);
@@ -1235,11 +1244,11 @@ void postbreeding_dynamics(int t)
     // been added to the pool dependent on their flock size
     for (int i = winter_pop_old; i < winter_pop; ++i)
     {
-		total_migration_scalar = (1.0 - get_migration_cost_proportion(NFlock, winter_pop)) * 
+		total_migration_scalar = (1.0 - get_migration_cost_proportion(NFlock, WinterPop[i].potential)) * 
             1.0; //(1.0 - arrival_resource_decay * (double)t/tmax);  13 Feb, SRE: Removed arrival resource decay from wintering ground
 		
 		// Resource cost of migration to the individual
-		cost = WinterPop[i].resources * (1 - total_migration_scalar);
+		cost = 1 - total_migration_scalar;  // Individual's resource cost scalar
 		mean_cost += cost;
 		ss_cost += cost * cost;
 
