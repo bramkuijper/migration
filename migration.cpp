@@ -35,7 +35,7 @@ uniform_real_distribution<> uniform(0.0,1.0);
 const int N = 2000; 
 
 // number of generations
-long int number_generations = 100000;
+long int number_generations = 80000;
 
 // initial values for phi (social dependency) and theta (resource dependency)
 // a is an intercept, b is a gradient
@@ -1310,6 +1310,8 @@ int main(int argc, char **argv)
 		
 		rgood = rgood_init;
 		rbad = rbad_init;  
+		
+		// CHANGING RESOURCE AVAILABILITY MID-SIMULATION (if desired)
 		if(generation > number_generations*1)  //EXPERIMENTAL SWITCH
 			{	
 				rgood = rgood_init/1;
