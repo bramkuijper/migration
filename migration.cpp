@@ -792,7 +792,7 @@ void winter_dynamics(int t)
         // for now, individuals leave dependent on the current amount of individuals
         // within the staging pool
         pdisperse = 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1])
-            + 0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) * (double) staging_pop_start / winter_pop;
+            + 0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) * (double) staging_pop_start / (staging_pop_start + winter_pop);
 
         // yes individual goes
         if (uniform(rng_r) < pdisperse)
@@ -1185,7 +1185,7 @@ void postbreeding_dynamics(int t)
         // within the staging pool
 
         pdisperse = 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1])
-            + 0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) * (double) staging_pop_start / summer_pop;
+            + 0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) * (double) staging_pop_start / (staging_pop_start + summer_pop);
 
         // yes individual goes
         if (uniform(rng_r) < pdisperse)
