@@ -112,9 +112,11 @@ double ss_departure = 0.0;
 // individuals in various seasons/demographics
 int staging_pop = 0;
 int winter_pop = 0;
+int spring_pop_start = 0;
 int spring_nonmigrant_pop = 0;
 int spring_migrant_pop = 0;
 int summer_pop = 0;
+int autumn_pop_start = 0;
 int breeder_pop = 0;
 int offspring_pop = 0;
 int autumn_nonmigrant_pop = 0;
@@ -849,7 +851,7 @@ void winter_dynamics(int t)
 		
     {
 		
-		total_migration_scalar = (1.0 - get_migration_cost_proportion(NFlock, SummerPop[i].potential)) * 
+		total_migration_scalar = (1.0 - get_migration_cost_proportion(NFlock, spring_pop_start)) * 
             (1.0 - arrival_resource_decay * (double)t/tmax);
 
         assert(total_migration_scalar >= 0);
@@ -1244,7 +1246,7 @@ void postbreeding_dynamics(int t)
     // been added to the pool dependent on their flock size
     for (int i = winter_pop_old; i < winter_pop; ++i)
     {
-		total_migration_scalar = (1.0 - get_migration_cost_proportion(NFlock, WinterPop[i].potential)) * 
+		total_migration_scalar = (1.0 - get_migration_cost_proportion(NFlock, autumn_pop_start)) * 
             1.0; //(1.0 - arrival_resource_decay * (double)t/tmax);  13 Feb, SRE: Removed arrival resource decay from wintering ground
 		
 		// Resource cost of migration to the individual
@@ -1305,6 +1307,8 @@ int main(int argc, char **argv)
 		var_spring_cost = 0.0;
 		mean_cost = 0.0;
 		ss_cost = 0.0;
+		spring_pop_start = 0.0;
+		autumn_pop_start = 0.0;
 
         staging_pop = 0.0;  // Set staging population count to zero before winter dynamics
 		
@@ -1324,6 +1328,7 @@ int main(int argc, char **argv)
 				rbad = rbad_init/1;
 			}	
 		
+		spring_pop_start = winter_pop;
 		
 		// time during winter (i.e., days)
         // during which individuals forage	
@@ -1386,7 +1391,9 @@ int main(int argc, char **argv)
 		mean_autumn_cost = 0.0;
 		var_autumn_cost = 0.0;
 		
-        // time during summer during which individuals forage
+        autumn_pop_start = summer_pop;
+		
+		// time during summer during which individuals forage
         for (int t = 0; t < tmax; ++t)
         {
             postbreeding_dynamics(t);
