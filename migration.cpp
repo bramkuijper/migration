@@ -32,7 +32,7 @@ uniform_real_distribution<> uniform(0.0,1.0);
 // function
 
 // number of individuals in population
-const int N = 2000; 
+const int N = 1500; 
 
 // number of generations
 long int number_generations = 80000;
@@ -82,7 +82,7 @@ double max_migration_cost = 0.0;
 // max number of intervals per season (two seasons: summer, winter)
 int tmax = 5000;
 
-int skip = 25;
+int skip = 100;
 
 // stats of flock size and staging
 double mean_spring_flock_size = 0.0;
