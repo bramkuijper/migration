@@ -110,6 +110,9 @@ double ss_departure = 0.0;
 double mean_signal_timing = 0.0;
 double var_signal_timing = 0.0;
 double ss_signal_timing = 0.0;
+double mean_age = 0.0;
+double var_age = 0.0;
+double ss_age = 0.0;
 
 // keep track of the current number of 
 // individuals in various seasons/demographics
@@ -168,6 +171,9 @@ struct Individual
 	
 	// phenology of signalling
 	int signal_timing;
+	
+	// individual age (start out at 1 as they are reproductively mature)
+	int age;
 };
 
 
@@ -323,7 +329,9 @@ void write_data_headers(ofstream &DataFile)
 	    << "mean_phi_a_winter;"
 	    << "var_phi_a_winter;"
 	    << "mean_phi_b_winter;"
-	    << "var_phi_b_winter;"<< endl;
+	    << "var_phi_b_winter;"
+		<< "mean_age;"
+		<< "var_age;"<< endl;
 }
 
 
@@ -343,7 +351,11 @@ void write_winter_stats(ofstream &DataFile, int generation, int timestep)
     double mean_resources[2] = { 0.0, 0.0 };
     double ss_resources[2] = { 0.0, 0.0 };
 	
-    double val;
+	double val;
+	
+	mean_age = 0.0;
+	ss_age = 0.0;
+	int age;
     
     for (int i = 0; i < winter_pop; ++i)  // So here we are cycling one by one through the winter population
     {
@@ -371,6 +383,10 @@ void write_winter_stats(ofstream &DataFile, int generation, int timestep)
         mean_resources[0] += val;
         ss_resources[0] += val * val;
 		
+		age = WinterPop[i].age;
+		mean_age += age;
+		ss_age += age * age;
+		
     }
 
     if (winter_pop > 0)
@@ -381,12 +397,14 @@ void write_winter_stats(ofstream &DataFile, int generation, int timestep)
         mean_phi_a[0] /=  winter_pop;
         mean_phi_b[0] /=  winter_pop;
         mean_resources[0] /=  winter_pop;
+		mean_age /= winter_pop;
          
         ss_theta_a[0] /= winter_pop; 
         ss_theta_b[0] /= winter_pop; 
         ss_phi_a[0] /= winter_pop; 
         ss_phi_b[0] /= winter_pop;
         ss_resources[0] /= winter_pop; 
+		ss_age /= winter_pop;
     }
 	
     // write statistics to a file
@@ -402,6 +420,8 @@ void write_winter_stats(ofstream &DataFile, int generation, int timestep)
         << (ss_phi_a[0] - mean_phi_a[0] * mean_phi_a[0]) << ";"
         << mean_phi_b[0] << ";"
         << (ss_phi_b[0] - mean_phi_b[0] * mean_phi_b[0]) << ";"
+		<< mean_age << ";"
+		<< (ss_age - mean_age * mean_age) << ";"
 		<< endl;
 // ENDS: write data both for winter population and ends line entry in DataFile
 }
@@ -538,8 +558,8 @@ void write_spring_stats(ofstream &DataFile, int generation, int timestep)
 		<< var_spring_flock_size << ";"
 		<< mean_spring_cost << ";"
 		<< var_spring_cost << ";";
-// ENDS: write data for spring migrants
-}
+
+}  // ENDS: write data for spring migrants
 
 void write_autumn_stats(ofstream &DataFile, int generation, int timestep)
 {
@@ -630,6 +650,8 @@ void init_population()
 			
         }
 		
+		WinterPop[i].age = 0;
+		
     }
 
     winter_pop = N;
@@ -672,6 +694,7 @@ void mortality()
 		{
 			SummerPop[i].timing = 1;  // individual survives: timing is reset to 1 for autumn migration
 			SummerPop[i].signal_timing = 1;  // signal phenology is also reset to 1 for autumn
+			SummerPop[i].age += 1;
 		}
 		
     }
@@ -951,6 +974,7 @@ void create_offspring(
 	offspring.latency = 0;
 	offspring.timing = 1;
 	offspring.signal_timing = 1;
+	offspring.age = 0;
 
     // inherit theta loci
 
@@ -1474,6 +1498,7 @@ int main(int argc, char **argv)
 		breeder_pop = 0;
 		summer_pop_old = 0;  // 06/02/20: Again, to track summer_pop_old
 		spring_nonmigrant_pop = 0;
+		spring_migrant_pop = 0;
 
         // let individuals die with a certain probability 
         mortality();
