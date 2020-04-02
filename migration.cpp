@@ -32,10 +32,10 @@ uniform_real_distribution<> uniform(0.0,1.0);
 // function
 
 // number of individuals in population
-const int N = 1500; 
+const int N = 500; 
 
 // number of generations
-long int number_generations = 80000;
+long int number_generations = 8000;
 
 // initial values for phi (social dependency) and theta (resource dependency)
 // a is an intercept, b is a gradient
@@ -107,6 +107,9 @@ double var_cost = 0.0;
 double ss_cost = 0.0;
 double mean_departure = 0.0;
 double ss_departure = 0.0;
+double mean_signal_timing = 0.0;
+double var_signal_timing = 0.0;
+double ss_signal_timing = 0.0;
 
 // keep track of the current number of 
 // individuals in various seasons/demographics
@@ -162,6 +165,9 @@ struct Individual
 	
 	// maximum flock size they could have formed part of
 	int potential;
+	
+	// phenology of signalling
+	int signal_timing;
 };
 
 
@@ -262,6 +268,8 @@ void write_data_headers(ofstream &DataFile)
         << "var_spring_staging_size;"
         << "spring_migrant_pop;"
 		<< "spring_nonmigrant_pop;"
+		<< "mean_spring_signal_timing;"
+		<< "var_spring_signal_timing;"
 		<< "mean_spring_latency;"
 		<< "var_spring_latency;"
 		<< "mean_spring_departure;"
@@ -291,6 +299,8 @@ void write_data_headers(ofstream &DataFile)
         << "mean_autumn_staging_size;"
         << "var_autumn_staging_size;"
         << "autumn_migrant_pop;"
+		<< "mean_autumn_signal_timing;"
+		<< "var_autumn_signal_timing;"
 		<< "autumn_nonmigrant_pop;"
 		<< "mean_autumn_latency;"
 		<< "var_autumn_latency;"
@@ -478,8 +488,11 @@ void write_spring_stats(ofstream &DataFile, int generation, int timestep)
 	ss_latency = 0.0;
 	mean_departure = 0.0;
 	ss_departure = 0.0;
+	mean_signal_timing = 0.0;
+	ss_signal_timing = 0.0;
 	int lat;
 	int ticktock;
+	int calendar;
    	
     for (int i = 0; i < summer_pop; ++i)  // for each individual in the population of migrants:
     {
@@ -490,6 +503,10 @@ void write_spring_stats(ofstream &DataFile, int generation, int timestep)
 		ticktock = SummerPop[i].timing;
 		mean_departure += ticktock;
 		ss_departure += ticktock * ticktock;
+		
+		calendar = SummerPop[i].signal_timing;
+		mean_signal_timing += calendar;
+		ss_signal_timing += calendar * calendar;
 	}
 
     if (summer_pop > 0)
@@ -498,6 +515,8 @@ void write_spring_stats(ofstream &DataFile, int generation, int timestep)
         ss_latency /= summer_pop;
         mean_departure /= summer_pop;
         ss_departure /= summer_pop;
+		mean_signal_timing /= summer_pop;
+		ss_signal_timing /= summer_pop;
     }
 
     // write statistics to a file
@@ -508,6 +527,8 @@ void write_spring_stats(ofstream &DataFile, int generation, int timestep)
 		<< var_spring_staging_size << ";"
 		<< spring_migrant_pop << ";"
 		<< spring_nonmigrant_pop << ";"
+		<< mean_signal_timing << ";"
+		<< (ss_signal_timing - mean_signal_timing * mean_signal_timing) << ";"
 		<< mean_latency << ";"
 		<< (ss_latency - mean_latency * mean_latency) << ";"
 		<< mean_departure << ";"
@@ -526,8 +547,11 @@ void write_autumn_stats(ofstream &DataFile, int generation, int timestep)
 	ss_latency = 0.0;
 	mean_departure = 0.0;
 	ss_departure = 0.0;
+	mean_signal_timing = 0.0;
+	ss_signal_timing = 0.0;
 	int lat;
 	int ticktock;
+	int calendar;
 	
 	for (int i = spring_nonmigrant_pop; i < winter_pop; ++i)	
 	{
@@ -538,6 +562,10 @@ void write_autumn_stats(ofstream &DataFile, int generation, int timestep)
 		ticktock = WinterPop[i].timing;  // the migratory departure timing of individual i
 		mean_departure += ticktock;
 		ss_departure += ticktock * ticktock;
+		
+		calendar = WinterPop[i].signal_timing;
+		mean_signal_timing += calendar;
+		ss_signal_timing += calendar * calendar;
 	}
 	
     if (autumn_migrant_pop > 0)
@@ -546,6 +574,8 @@ void write_autumn_stats(ofstream &DataFile, int generation, int timestep)
         ss_latency /= autumn_migrant_pop;
         mean_departure /= autumn_migrant_pop;
         ss_departure /= autumn_migrant_pop;
+		mean_signal_timing /= autumn_migrant_pop;
+		ss_signal_timing /= autumn_migrant_pop;
     }
 	
     // write statistics to a file
@@ -554,6 +584,8 @@ void write_autumn_stats(ofstream &DataFile, int generation, int timestep)
 		<< var_autumn_staging_size << ";"			
         << autumn_migrant_pop << ";"
 		<< autumn_nonmigrant_pop << ";"
+		<< mean_signal_timing << ";"
+		<< (ss_signal_timing - mean_signal_timing * mean_signal_timing) << ";"
 		<< mean_latency << ";"
 		<< (ss_latency - mean_latency * mean_latency) << ";"
 		<< mean_departure << ";"
@@ -579,6 +611,9 @@ void init_population()
 		
 		// set individual latency to 0
 		WinterPop[i].latency = 0;
+		
+		// set individual signal phenology to 1 (Signalling on the first day of the season will give a value of 1)
+		WinterPop[i].signal_timing = 1;
 		
 		// set individual timing value to 1 (Departure on the first day will give a timing value of 1)
 		WinterPop[i].timing = 1;
@@ -767,6 +802,8 @@ void winter_dynamics(int t)
         }
 		else
 		{
+			WinterPop[i].signal_timing += 1;  // Individual has not signalled readiness to leave (equivalent to not entering 'staging pool')
+			
 			WinterPop[i].timing +=1;  // Individuals that do not enter the staging population will not be departing at time t
 		}
     } // end for: move dispersers to staging
@@ -1123,7 +1160,9 @@ void postbreeding_dynamics(int t)
     assert((summer_pop > 0 || winter_pop > 0) || staging_pop > 0);  // Might have no breeders in a given year, but non-zero population (is that right, Bram?)
 
     double psignal = 0.0;
-
+	mean_signal_timing = 0.0;
+	ss_signal_timing = 0.0;
+	int calendar = 0;
 
     // individuals decide whether to go to staging site
     // i.e., prepare for dispersal
@@ -1160,6 +1199,8 @@ void postbreeding_dynamics(int t)
         }
 		else
 		{
+			SummerPop[i].signal_timing +=1;  // Individual did not signal at time t
+			
 			SummerPop[i].timing +=1;  // Individuals that do not enter the staging population will not be departing at time t
 		}
     } // end for (int i = 0; i < summer_pop; ++i)
@@ -1196,7 +1237,10 @@ void postbreeding_dynamics(int t)
 			WinterPop[winter_pop] = StagingPool[i];  // Individual moves from staging pool to first empty position in WinterPop
 			lat = WinterPop[winter_pop].latency;
 			mean_latency += lat;
-			ss_latency += (lat * lat);			
+			ss_latency += (lat * lat);
+			calendar = WinterPop[winter_pop].signal_timing;
+			mean_signal_timing += calendar;
+			ss_signal_timing += (calendar * calendar);			
 			++winter_pop;
             
             assert(winter_pop <= N);
@@ -1401,6 +1445,9 @@ int main(int argc, char **argv)
         }
 
 		autumn_migrant_pop = mean_autumn_flock_size;
+		
+		mean_signal_timing /= autumn_migrant_pop;
+		var_signal_timing = (ss_signal_timing / autumn_migrant_pop) - (autumn_migrant_pop * autumn_migrant_pop);
 		
 		mean_latency /= autumn_migrant_pop;  // Denominator is the migrant population size
 		var_latency = (ss_latency / autumn_migrant_pop) - (autumn_migrant_pop * autumn_migrant_pop);
