@@ -655,6 +655,7 @@ void mortality()
 		else
 		{
 			WinterPop[i].timing = 1;  // individual survives: timing is reset to 1 for time t+1
+			WinterPop[i].signal_timing = 1;
 		}
     }
 	
@@ -733,7 +734,6 @@ void winter_dynamics(int t)
     for (int i = 0; i < winter_pop; ++i)
     {
         WinterPop[i].potential = 0;
-		WinterPop[i].signal_timing = 0;
 		
 		if (uniform(rng_r) < pgood) // good resource chosen
         {
@@ -1128,7 +1128,7 @@ void postbreeding_dynamics(int t)
     for (int i = 0; i < summer_pop; ++i)
     {
         SummerPop[i].potential = 0;
-		SummerPop[i].signal_timing = 0;
+		SummerPop[i].signal_timing = 1;
 		
 		if (uniform(rng_r) < pgood) // good resource chosen
         {
@@ -1162,9 +1162,9 @@ void postbreeding_dynamics(int t)
     assert((summer_pop > 0 || winter_pop > 0) || staging_pop > 0);  // Might have no breeders in a given year, but non-zero population (is that right, Bram?)
 
     double psignal = 0.0;
-	mean_signal_timing = 0.0;
-	ss_signal_timing = 0.0;
-	int calendar = 0;
+	//mean_signal_timing = 0.0;
+	//ss_signal_timing = 0.0;
+	//int calendar = 0;
 
     // individuals decide whether to go to staging site
     // i.e., prepare for dispersal
@@ -1240,9 +1240,9 @@ void postbreeding_dynamics(int t)
 			lat = WinterPop[winter_pop].latency;
 			mean_latency += lat;
 			ss_latency += (lat * lat);
-			calendar = WinterPop[winter_pop].signal_timing;
-			mean_signal_timing += calendar;
-			ss_signal_timing += (calendar * calendar);			
+			//calendar = WinterPop[winter_pop].signal_timing;
+			//mean_signal_timing += calendar;
+			//ss_signal_timing += (calendar * calendar);			
 			++winter_pop;
             
             assert(winter_pop <= N);
