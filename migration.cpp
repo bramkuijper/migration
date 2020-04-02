@@ -32,10 +32,10 @@ uniform_real_distribution<> uniform(0.0,1.0);
 // function
 
 // number of individuals in population
-const int N = 500; 
+const int N = 1500; 
 
 // number of generations
-long int number_generations = 8000;
+long int number_generations = 80000;
 
 // initial values for phi (social dependency) and theta (resource dependency)
 // a is an intercept, b is a gradient
@@ -553,7 +553,7 @@ void write_autumn_stats(ofstream &DataFile, int generation, int timestep)
 	int ticktock;
 	int calendar;
 	
-	for (int i = spring_nonmigrant_pop; i < winter_pop; ++i)	
+	for (int i = autumn_nonmigrant_pop; i < winter_pop; ++i)	
 	{
 		lat = WinterPop[i].latency;  // the migratory latency of individual i
 		mean_latency += lat;
@@ -563,7 +563,7 @@ void write_autumn_stats(ofstream &DataFile, int generation, int timestep)
 		mean_departure += ticktock;
 		ss_departure += ticktock * ticktock;
 		
-		calendar = WinterPop[i].signal_timing;
+		calendar = WinterPop[i].signal_timing;  // the signalling phenology of individual i
 		mean_signal_timing += calendar;
 		ss_signal_timing += calendar * calendar;
 	}
@@ -671,6 +671,7 @@ void mortality()
 		else
 		{
 			SummerPop[i].timing = 1;  // individual survives: timing is reset to 1 for autumn migration
+			SummerPop[i].signal_timing = 1;  // signal phenology is also reset to 1 for autumn
 		}
 		
     }
@@ -949,6 +950,7 @@ void create_offspring(
     offspring.resources = 0.0;
 	offspring.latency = 0;
 	offspring.timing = 1;
+	offspring.signal_timing = 1;
 
     // inherit theta loci
 
@@ -1128,7 +1130,6 @@ void postbreeding_dynamics(int t)
     for (int i = 0; i < summer_pop; ++i)
     {
         SummerPop[i].potential = 0;
-		SummerPop[i].signal_timing = 1;
 		
 		if (uniform(rng_r) < pgood) // good resource chosen
         {
@@ -1162,9 +1163,6 @@ void postbreeding_dynamics(int t)
     assert((summer_pop > 0 || winter_pop > 0) || staging_pop > 0);  // Might have no breeders in a given year, but non-zero population (is that right, Bram?)
 
     double psignal = 0.0;
-	//mean_signal_timing = 0.0;
-	//ss_signal_timing = 0.0;
-	//int calendar = 0;
 
     // individuals decide whether to go to staging site
     // i.e., prepare for dispersal
@@ -1239,10 +1237,7 @@ void postbreeding_dynamics(int t)
 			WinterPop[winter_pop] = StagingPool[i];  // Individual moves from staging pool to first empty position in WinterPop
 			lat = WinterPop[winter_pop].latency;
 			mean_latency += lat;
-			ss_latency += (lat * lat);
-			//calendar = WinterPop[winter_pop].signal_timing;
-			//mean_signal_timing += calendar;
-			//ss_signal_timing += (calendar * calendar);			
+			ss_latency += (lat * lat);			
 			++winter_pop;
             
             assert(winter_pop <= N);
@@ -1448,11 +1443,11 @@ int main(int argc, char **argv)
 
 		autumn_migrant_pop = mean_autumn_flock_size;
 		
-		mean_signal_timing /= autumn_migrant_pop;
-		var_signal_timing = (ss_signal_timing / autumn_migrant_pop) - (autumn_migrant_pop * autumn_migrant_pop);
+		//mean_signal_timing /= autumn_migrant_pop;
+		//var_signal_timing = (ss_signal_timing / autumn_migrant_pop) - (autumn_migrant_pop * autumn_migrant_pop);
 		
-		mean_latency /= autumn_migrant_pop;  // Denominator is the migrant population size
-		var_latency = (ss_latency / autumn_migrant_pop) - (autumn_migrant_pop * autumn_migrant_pop);
+		//mean_latency /= autumn_migrant_pop;  // Denominator is the migrant population size
+		//var_latency = (ss_latency / autumn_migrant_pop) - (autumn_migrant_pop * autumn_migrant_pop);
 		
         // now take averages over all timesteps that individuals did (can) join groups
         mean_autumn_flock_size = n_autumn_flocks > 0 ?  mean_autumn_flock_size / n_autumn_flocks : 0;
