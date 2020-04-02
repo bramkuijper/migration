@@ -50,6 +50,7 @@ if (is.na(parameter_row))
 
 # read in data frame of corresponding simulation
 the.data <- read.table(args[1], header=T, nrow=parameter_row - 1, sep=";")
+the.data <- the.data[-c(1),]
 
 # now use ggplot2 to plot stuff
 
@@ -171,8 +172,23 @@ p8 <- ggplot(data=the.data
             theme_classic() + 
             xlab("Generation") + 
             ylab("Slope")
+            
+p9 <- ggplot(data=the.data
+		,aes(x=generation)) +
+			geom_line(aes(y = mean_spring_signal_timing, colour="Spring")) +
+			geom_line(aes(y = mean_autumn_signal_timing, colour="Autumn")) +
+			theme_classic() +
+			xlab("Generation") +
+			ylab("Mean signal phenology")
+			
+p10 <- ggplot(data=the.data
+        ,aes(x=generation)) +
+            geom_line(aes(y = mean_age, colour="Mean age")) +
+            theme_classic() + 
+            xlab("Generation") + 
+            ylab("Mean age")
 
-big_plot <- arrangeGrob(p1.a, p1.b, p2, p3, p3b, p3c, p3d, p3e, p3f, p4, p5, p6, p7, p8, nrow=14,ncol=1)
+big_plot <- arrangeGrob(p1.a, p1.b, p9, p2, p3, p3b, p3c, p3d, p3e, p3f, p4, p5, p6, p10, p7, p8, nrow=16,ncol=1)
 the.base.name <- basename(args[1])
 
 output_file_name <- paste(
