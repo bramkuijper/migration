@@ -733,6 +733,7 @@ void winter_dynamics(int t)
     for (int i = 0; i < winter_pop; ++i)
     {
         WinterPop[i].potential = 0;
+		WinterPop[i].signal_timing = 0;
 		
 		if (uniform(rng_r) < pgood) // good resource chosen
         {
@@ -1127,6 +1128,7 @@ void postbreeding_dynamics(int t)
     for (int i = 0; i < summer_pop; ++i)
     {
         SummerPop[i].potential = 0;
+		SummerPop[i].signal_timing = 0;
 		
 		if (uniform(rng_r) < pgood) // good resource chosen
         {
