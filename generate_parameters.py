@@ -20,7 +20,7 @@ arrival_resource_decay = [0.1] #[ 0.1, 0.5] # changed 19 Nov 2019. Outcome was t
 resource_reproduction_threshold = [0.1]
 resource_starvation_threshold = [0.0]
 
-# mutation rates (I fix those and they are not varying)
+# mutation rates
 mu_theta = 0.01
 mu_phi = 0.01
 sdmu_theta = 0.01
