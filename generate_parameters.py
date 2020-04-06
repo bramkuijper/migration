@@ -16,7 +16,7 @@ t_good_ends = [ 1500 ]
 rgood = [ 0.1 ] # Changed from 1 on 27 November 2019
 rbad = [ 0.05 ] # Changed from 0.5 on 27 November 2019
 
-arrival_resource_decay = [0.1] #[ 0.1, 0.5] # changed 19 Nov 2019. Outcome was that for value of 0.01, the winter population size was < 25. On 27th Nov, I fixed it to 0.1 as values of 0.2 were associated with very low population sizes.
+arrival_resource_decay = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9] #[ 0.1, 0.5] # changed 19 Nov 2019. Outcome was that for value of 0.01, the winter population size was < 25. On 27th Nov, I fixed it to 0.1 as values of 0.2 were associated with very low population sizes.
 resource_reproduction_threshold = [0.1]
 resource_starvation_threshold = [0.0]
 
@@ -49,7 +49,7 @@ if background:
     backgroundstr = "&"
 
 
-number_replicates = 100
+number_replicates = 5
 
 for rep_i in range(0, number_replicates):
 
