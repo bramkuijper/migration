@@ -188,7 +188,23 @@ p10 <- ggplot(data=the.data
             xlab("Generation") + 
             ylab("Mean age")
 
-big_plot <- arrangeGrob(p1.a, p1.b, p9, p2, p3, p3b, p3c, p3d, p3e, p3f, p4, p5, p6, p10, p7, p8, nrow=16,ncol=1)
+big_plot <- arrangeGrob(p1.a, 
+						p1.b, 
+						p9, 
+						p2, 
+						p3 + scale_y_continuous(trans = "log10"), 
+						p3b, 
+						p3c + scale_y_continuous(trans = "log10"), 
+						p3d, 
+						p3e + scale_y_continuous(trans = "log10"), 
+						p3f, 
+						p4, 
+						p5 + scale_y_continuous(trans = "log10"), 
+						p6 + scale_y_continuous(trans = "log10"), 
+						p10, 
+						p7, 
+						p8, 
+						nrow=16,ncol=1)
 the.base.name <- basename(args[1])
 
 output_file_name <- paste(
