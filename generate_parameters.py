@@ -3,9 +3,9 @@
 # generate all parameter combinations to run the migration simulation
 
 init_theta_a = 0.5
-init_theta_b = 0 #[ 0.0, 0.25, 0.5, 0.75, 1 ]
+init_theta_b = [0] #[ 0.0, 0.25, 0.5, 0.75, 1 ]
 init_phi_a = 0.5
-init_phi_b = 0 #//[ 0.0, 0.25, 0.5, 0.75, 1 ]
+init_phi_b = [0] #//[ 0.0, 0.25, 0.5, 0.75, 1 ]
 
 tmax = 5000
 
