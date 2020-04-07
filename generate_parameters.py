@@ -8,16 +8,17 @@ init_phi_a = 0.5
 init_phi_b = [0] #//[ 0.0, 0.25, 0.5, 0.75, 1 ]
 
 tmax = 5000
+twinter = 5000
 
 pmort = [ 0.05 ]  # Short simulations on 27 November suggested pmort of 0.2 was too high. After further simulations, I decided to fix it at 0.05
 pgood_init = [ 1.0 ] # Deleted 0.5 option on 27 November 2019
 t_good_ends = [ 1500 ]
 
-rgood = [ 0.1 ] # Changed from 1 on 27 November 2019
-rbad = [ 0.05 ] # Changed from 0.5 on 27 November 2019
+rgood = [ 0.02 ] # Changed from 1 on 27 November 2019
+rbad = [ 0.01 ] # Changed from 0.5 on 27 November 2019
 
 arrival_resource_decay = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9] #[ 0.1, 0.5] # changed 19 Nov 2019. Outcome was that for value of 0.01, the winter population size was < 25. On 27th Nov, I fixed it to 0.1 as values of 0.2 were associated with very low population sizes.
-resource_reproduction_threshold = [0.1]
+resource_reproduction_threshold = [1]
 resource_starvation_threshold = [0.0]
 
 # mutation rates
@@ -96,6 +97,7 @@ for rep_i in range(0, number_replicates):
                                                                         + str(migration_cost_decay_i) + " "
                                                                         + str(migration_cost_power_i) + " "
                                                                         + str(tmax) + " " 
+                                                                        + str(twinter) + " "
                                                                         + backgroundstr)
 
 
