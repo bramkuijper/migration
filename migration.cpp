@@ -35,7 +35,7 @@ uniform_real_distribution<> uniform(0.0,1.0);
 const int N = 1500;
 
 // number of generations
-long int number_generations = 60000;
+long int number_generations = 10000;
 
 // initial values for phi (social dependency) and theta (resource dependency)
 // a is an intercept, b is a gradient
@@ -60,9 +60,9 @@ double rbad_init = 0.0;
 double rgood = 0.0;
 double rbad = 0.0;
 
-// minimum resource level necessary to reproduce 
-double resource_reproduce_threshold = 0.0; 
-double resource_starvation_threshold = 0.0; 
+double resource_reproduce_threshold = 0.0;  // minimum resource level necessary to reproduce 
+double resource_starvation_threshold = 0.0;  // minimum resource level necessary to survive
+double resource_max = 0.0;  // maximum resource value an individual can achieve
 
 // how quickly resources decay per day arriving later than 0
 // TODO: do we really need this?
@@ -81,6 +81,7 @@ double max_migration_cost = 0.0;
 
 // max number of intervals per season (two seasons: summer, winter)
 int tmax = 5000;
+int twinter = 5000;
 
 int skip = 100;
 
@@ -213,7 +214,9 @@ void init_arguments(int argc, char **argv)
     migration_cost_decay = atof(argv[18]);
     migration_cost_power = atof(argv[19]);
     tmax = atoi(argv[20]);
-
+	twinter = atoi(argv[21]);
+	resource_max = atoi(argv[22]);
+		
     // some bounds checking on parameters
     // probability of encountering a good environment
     // initially should be 0 <= pgood <= 1
@@ -222,6 +225,7 @@ void init_arguments(int argc, char **argv)
     
     //max number of days per season > 0
     assert(tmax > 0);
+	assert(twinter > 0);
 
     // probability that encountering good resource should be
     // set to 0 after t_good_ends timesteps
@@ -232,6 +236,8 @@ void init_arguments(int argc, char **argv)
     assert(rgood_init > 0);
     assert(rbad_init > 0);
     assert(rbad_init < rgood_init);
+	
+	assert(resource_max > 0);
 
 }
 
@@ -249,6 +255,7 @@ void write_parameters(ofstream &DataFile)  // at end of outputted file
             << "rgood_init;" << rgood_init << endl
             << "rbad_init;" << rbad_init << endl
             << "arrival_resource_decay;" << arrival_resource_decay << endl
+			<< "resource_max;"  << resource_max << endl
             << "resource_reproduce_threshold;" << resource_reproduce_threshold << endl
             << "resource_starvation_threshold;" << resource_starvation_threshold << endl
             << "mu_theta;" << mu_theta << endl
@@ -256,6 +263,7 @@ void write_parameters(ofstream &DataFile)  // at end of outputted file
             << "sdmu_theta;" << sdmu_theta << endl
             << "sdmu_phi;" << sdmu_phi << endl
             << "tmax;" << tmax << endl
+			<< "twinter;" << twinter << endl
             << "N;" << N << endl
             << "migration_cost_decay;" << migration_cost_decay << endl
             << "migration_cost_power;" << migration_cost_power << endl
@@ -740,12 +748,41 @@ double get_migration_cost_proportion(int const flock_size, int const max_flock_s
     return(total_migration_cost);
 }
 
-// the dynamics of the population at the wintering ground
-// at time t
+
+// the foraging dynamics of the population during winter
 void winter_dynamics(int t)
 {
 	// individuals forage
     // individuals accumulate resources
+	// rgood does not run out during winter
+	// TODO introduce maximum resourcce value for individuals
+	
+    for (int i = 0; i < winter_pop; ++i)
+    {
+		if (uniform(rng_r) < pgood_init) // good resource chosen
+        {
+            WinterPop[i].resources += rgood;
+        }
+        else
+        {
+            WinterPop[i].resources += rbad;
+        }
+		
+	WinterPop[i].resources = clamp(WinterPop[i].resources, 0.0, resource_max); // individuals can reach a (uniform) maximum resource value
+    
+	} // ok, resource dynamic done
+
+    assert(winter_pop <= N);
+    assert(winter_pop >= 0);    
+
+} // ENDS WINTER DYNAMICS (looping through t)
+
+
+// the dynamics of the population at the wintering ground in spring, time t
+void spring_dynamics(int t)
+{
+	// individuals can continue to forage
+    // individuals can continue to accumulate resources
     // individuals make dispersal decisions
 	
 	// determine probability of encountering a good resource:
@@ -766,7 +803,10 @@ void winter_dynamics(int t)
         else
         {
             WinterPop[i].resources += rbad;
-        } 
+        }
+		
+	WinterPop[i].resources = clamp(WinterPop[i].resources, 0.0, resource_max);
+		 
     } // ok, resource dynamic done
 
 
@@ -784,6 +824,9 @@ void winter_dynamics(int t)
         {
             StagingPool[i].resources += rbad;
         }
+	
+	StagingPool[i].resources = clamp(StagingPool[i].resources, 0.0, resource_max);	
+		
     } // ENDS staging site foraging loop
 
     assert(winter_pop <= N);
@@ -928,6 +971,7 @@ void winter_dynamics(int t)
         // resources are reduced due to migration,
         // yet this depends on group size in a curvilinear fashion
         SummerPop[i].resources = SummerPop[i].resources * total_migration_scalar;
+		SummerPop[i].resources = clamp(SummerPop[i].resources, 0.0, resource_max);
 
 		// death due to starvation
         if (SummerPop[i].resources < resource_starvation_threshold)
@@ -946,7 +990,7 @@ void winter_dynamics(int t)
 //    cout << "summer cost: " << (summer_pop == 0 ? 0 : mean_cost / summer_pop) << " ";
 //    cout << "total mean cost: " << mean_cost << " " << endl;
 	
-} // ENDS WINTER DYNAMICS (looping through t)
+} // ENDS SPRING DYNAMICS (looping through t)
 
 // mutation of a certain allele with value val
 // given mutation rate mu and mutational distribution stdev sdmu
@@ -1164,6 +1208,8 @@ void postbreeding_dynamics(int t)
             SummerPop[i].resources += rbad;
         }
     
+	SummerPop[i].resources = clamp(SummerPop[i].resources, 0.0, resource_max);
+	
     } // ok resource dynamic done
 
 
@@ -1180,7 +1226,10 @@ void postbreeding_dynamics(int t)
         {
             StagingPool[i].resources += rbad;
         }
-    }
+    
+	StagingPool[i].resources = clamp(StagingPool[i].resources, 0.0, resource_max);
+	
+	}
 
     assert(summer_pop<= N);
     assert(summer_pop >= 0);
@@ -1322,6 +1371,7 @@ void postbreeding_dynamics(int t)
         // resources are reduced due to migration,
         // yet this depends on group size in a curvilinear fashion
         SummerPop[i].resources = SummerPop[i].resources * total_migration_scalar;
+		SummerPop[i].resources = clamp(SummerPop[i].resources, 0.0, resource_max);
 
 //        cout << get_migration_cost_proportion(NFlock, winter_pop) << ";" << SummerPop[i].resources << ";" << total_migration_scalar << ";" << NFlock << ";" << endl;
 
@@ -1395,11 +1445,19 @@ int main(int argc, char **argv)
 		
 		spring_pop_start = winter_pop;
 		
-		// time during winter (i.e., days)
-        // during which individuals forage	
+		
+		// Winter foraging (migration is not an option)
+		for (int t = 0; t < twinter; ++t)
+		{
+			winter_dynamics(t);
+		}
+		
+		
+		// time during spring
+        // during which individuals can migrate (or carry on foraging)
 		for (int t = 0; t < tmax; ++t)
         {
-            winter_dynamics(t);
+            spring_dynamics(t);
 			
         }
 				
