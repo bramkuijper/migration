@@ -35,7 +35,7 @@ uniform_real_distribution<> uniform(0.0,1.0);
 const int N = 1500;
 
 // number of generations
-long int number_generations = 10000;
+long int number_generations = 80000;
 
 // initial values for phi (social dependency) and theta (resource dependency)
 // a is an intercept, b is a gradient
@@ -225,7 +225,7 @@ void init_arguments(int argc, char **argv)
     
     //max number of days per season > 0
     assert(tmax > 0);
-	assert(twinter > 0);
+	assert(twinter >= 0);
 
     // probability that encountering good resource should be
     // set to 0 after t_good_ends timesteps
