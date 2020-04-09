@@ -35,7 +35,7 @@ uniform_real_distribution<> uniform(0.0,1.0);
 const int N = 1500;
 
 // number of generations
-long int number_generations = 80000;
+long int number_generations = 50000;
 
 // initial values for phi (social dependency) and theta (resource dependency)
 // a is an intercept, b is a gradient
@@ -81,7 +81,7 @@ double max_migration_cost = 0.0;
 
 // max number of intervals per season (two seasons: summer, winter)
 int tmax = 5000;
-int twinter = 5000;
+int twinter = 0.0;
 
 int skip = 100;
 
@@ -313,6 +313,7 @@ void write_data_headers(ofstream &DataFile)
         << "mean_autumn_staging_size;"
         << "var_autumn_staging_size;"
         << "autumn_migrant_pop;"
+		<< "autumn_nonmigrant_pop;"
 		<< "mean_autumn_signal_timing;"
 		<< "var_autumn_signal_timing;"
 		<< "autumn_nonmigrant_pop;"
@@ -1119,7 +1120,7 @@ void summer_reproduction(ofstream &DataFile)
         // translate maternal resources to numbers of offspring
         //
         // first round to lowest integer
-        resource_integer = floor(mother.resources);
+        resource_integer = floor(mother.resources / 5);
 
         // TODO (slightly digressing): can we come up with an analytical 
         // description of this rounding process of w into integer values?
@@ -1490,7 +1491,7 @@ int main(int argc, char **argv)
         // let individuals die with a certain probability 
         mortality();
 		
-        // have individuals reproduce after they migrated to the summer spot
+        // Individuals reproduce after they migrated to the summer spot
         summer_reproduction(DataFile);
         
 		if (generation % skip == 0)
