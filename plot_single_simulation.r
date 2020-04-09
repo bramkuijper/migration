@@ -56,20 +56,13 @@ the.data <- the.data[-c(1),]
 
 str(the.data)
 
-p1.a <- ggplot(data=the.data
+p1 <- ggplot(data=the.data
         ,aes(x=generation)) +
             geom_line(aes(y = winter_pop, colour="Winter")) +
             theme_classic() + 
             xlab("Generation") + 
             ylab("Population size")
-
-p1.b <- ggplot(data=the.data
-        ,aes(x=generation)) +
-            geom_line(aes(y = summer_pop, colour="Summer")) +
-            theme_classic() + 
-            xlab("Generation") + 
-            ylab("Population size")
-
+            
 p2 <- ggplot(data=the.data
         ,aes(x=generation)) +
             geom_line(aes(y = mean_spring_staging_size, colour="Spring")) +
@@ -188,8 +181,7 @@ p10 <- ggplot(data=the.data
             xlab("Generation") + 
             ylab("Mean age")
 
-big_plot <- arrangeGrob(p1.a, 
-						p1.b, 
+big_plot <- arrangeGrob(p1, 
 						p9, 
 						p2, 
 						p3 + scale_y_continuous(trans = "log10"), 
@@ -204,7 +196,7 @@ big_plot <- arrangeGrob(p1.a,
 						p10, 
 						p7, 
 						p8, 
-						nrow=16,ncol=1)
+						nrow=15,ncol=1)
 the.base.name <- basename(args[1])
 
 output_file_name <- paste(
