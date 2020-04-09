@@ -316,7 +316,6 @@ void write_data_headers(ofstream &DataFile)
 		<< "autumn_nonmigrant_pop;"
 		<< "mean_autumn_signal_timing;"
 		<< "var_autumn_signal_timing;"
-		<< "autumn_nonmigrant_pop;"
 		<< "mean_autumn_latency;"
 		<< "var_autumn_latency;"
 		<< "mean_autumn_departure;"
