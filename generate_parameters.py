@@ -28,8 +28,8 @@ mu_phi = 0.01
 sdmu_theta = 0.01
 sdmu_phi = 0.01
     
-    # migration cost parameters
-max_migration_cost = [0.75, 0.5, 0.25, 0.125, 0.1, 0.05, 0.025]
+# migration cost parameters
+max_migration_cost = [0.75, 0.625, 0.5, 0.375, 0.25, 0.2, 0.15, 0.125, 0.1, 0.075, 0.05, 0.025, 0.01]
 min_migration_cost = [ 0 ] # 29 Nov: setting it to be half the maximum migration cost
 migration_cost_decay = [ 1 ]
 migration_cost_power = [ 1 ]
@@ -51,7 +51,7 @@ if background:
     backgroundstr = "&"
 
 
-number_replicates = 10
+number_replicates = 12
 
 for rep_i in range(0, number_replicates):
 
