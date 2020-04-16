@@ -18,7 +18,7 @@ rgood = [ 0.01 ] # Changed from 1 on 27 November 2019
 rbad = [ 0.005 ] # Changed from 0.5 on 27 November 2019
 
 arrival_resource_decay = [0.1] # [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9] changed 19 Nov 2019. Outcome was that for value of 0.01, the winter population size was < 25. On 27th Nov, I fixed it to 0.1 as values of 0.2 were associated with very low population sizes.
-resource_reproduction_threshold = [1, 10, 50, 100, 200, 300]
+resource_reproduction_threshold = [1, 10, 50, 100, 200, 300]  # [1]
 resource_starvation_threshold = [0.0]
 resource_max = 500
 
