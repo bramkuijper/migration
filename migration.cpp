@@ -1097,7 +1097,7 @@ void summer_reproduction(ofstream &DataFile)
         // no reproduction through female function
         if (mother.resources < resource_reproduce_threshold)
         {
-            continue;
+            continue;  // breaks current iteration in the loop and proceeds to the next one
         }
 
         // update stats
@@ -1119,17 +1119,20 @@ void summer_reproduction(ofstream &DataFile)
         // translate maternal resources to numbers of offspring
         //
         // first round to lowest integer
-        resource_integer = floor(mother.resources / 5);
+        resource_integer = floor(mother.resources);  // 17/04/20: Prior to resetting mothers' resource values, mother.resources was divided by five to reduce family size
 
         // TODO (slightly digressing): can we come up with an analytical 
         // description of this rounding process of w into integer values?
         if (uniform(rng_r) < mother.resources - resource_integer)
         {
-            // make an additional offspring
+            // make an additional offspring (adding stochasticity to fecundity)
             ++resource_integer;
         }
         
-        // for each parent create the offspring
+		// reset mother's resource value to zero
+		mother.resources = 0;
+		
+        // for each parent create the number of offspring prescribed by their resource value + noise (i.e, resource_integer)
         for (int kid_i = 0; kid_i < resource_integer; ++kid_i)
         {
             Individual kid;
