@@ -79,9 +79,9 @@ for rep_i in range(0, number_replicates):
 
 
                                                                         print(executable + " " 
-                                                                                + str(init_phi_a) + " "
+                                                                                + str(init_phi_a_i) + " "
                                                                                 + str(init_phi_b_i) + " "
-                                                                                + str(init_theta_a) + " "
+                                                                                + str(init_theta_a_i) + " "
                                                                                 + str(init_theta_b_i) + " "
                                                                                 + str(pmort_i) + " "
                                                                                 + str(pgood_init_i) + " "
