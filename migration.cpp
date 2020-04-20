@@ -840,7 +840,15 @@ void spring_dynamics(int t)
     // signal to disperse
     for (int i = 0; i < winter_pop; ++i) 
     {
-        // reaction norm dependent on resources
+        
+		// individuals must acquire the resources necessary for migration and reproduction before
+		// they can consider migrating. 
+		if (WinterPop[i].resources < (resource_reproduction_threshold + min_migration_cost))
+		{
+			continue;
+		}
+		
+		// reaction norm dependent on resources
         // resulting in signaling a willingness to disperse
         // => go to the staging level
         psignal = 0.5 * (WinterPop[i].theta_a[0] + WinterPop[i].theta_a[1])
