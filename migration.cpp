@@ -60,7 +60,7 @@ double rbad_init = 0.0;
 double rgood = 0.0;
 double rbad = 0.0;
 
-double resource_reproduce_threshold = 0.0;  // minimum resource level necessary to reproduce 
+double resource_reproduction_threshold = 0.0;  // minimum resource level necessary to reproduce 
 double resource_starvation_threshold = 0.0;  // minimum resource level necessary to survive
 double resource_max = 0.0;  // maximum resource value an individual can achieve
 
@@ -204,7 +204,7 @@ void init_arguments(int argc, char **argv)
     rgood_init = atof(argv[8]);
     rbad_init = atof(argv[9]);
     arrival_resource_decay = atof(argv[10]);
-    resource_reproduce_threshold = atof(argv[11]);
+    resource_reproduction_threshold = atof(argv[11]);
     resource_starvation_threshold = atof(argv[12]);
     mu_theta = atof(argv[13]);
     mu_phi = atof(argv[14]);
@@ -256,7 +256,7 @@ void write_parameters(ofstream &DataFile)  // at end of outputted file
             << "rbad_init;" << rbad_init << endl
             << "arrival_resource_decay;" << arrival_resource_decay << endl
 			<< "resource_max;"  << resource_max << endl
-            << "resource_reproduce_threshold;" << resource_reproduce_threshold << endl
+            << "resource_reproduction_threshold;" << resource_reproduction_threshold << endl
             << "resource_starvation_threshold;" << resource_starvation_threshold << endl
             << "mu_theta;" << mu_theta << endl
             << "mu_phi;" << mu_phi << endl
@@ -1096,7 +1096,7 @@ void summer_reproduction(ofstream &DataFile)
 
         // if mom does not meet minimum standards
         // no reproduction through female function
-        if (mother.resources < resource_reproduce_threshold)
+        if (mother.resources < resource_reproduction_threshold)
         {
             continue;  // breaks current iteration in the loop and proceeds to the next one
         }
@@ -1120,7 +1120,7 @@ void summer_reproduction(ofstream &DataFile)
         // translate maternal resources to numbers of offspring
         //
         // first round to lowest integer
-        resource_integer = floor(mother.resources / 5);  // 17/04/20: Prior to resetting mothers' resource values, mother.resources was divided by five to reduce family size
+        resource_integer = floor((mother.resources - resource_reproduction_threshold) / 5);  // 17/04/20: Prior to resetting mothers' resource values, mother.resources was divided by five to reduce family size
 
         // TODO (slightly digressing): can we come up with an analytical 
         // description of this rounding process of w into integer values?
