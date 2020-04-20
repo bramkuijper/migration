@@ -56,7 +56,7 @@ number_replicates = 1
 for rep_i in range(0, number_replicates):
     for init_phi_a_i in init_phi_a:
         for init_phi_b_i in init_phi_b:
-            for init_phi_a_i in init_phi_a:
+            for init_theta_a_i in init_phi_a:
                 for init_theta_b_i in init_theta_b:
                     for pmort_i in pmort:
                         for pgood_init_i in pgood_init:
