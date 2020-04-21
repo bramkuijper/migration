@@ -1502,9 +1502,9 @@ int main(int argc, char **argv)
         mortality();
 		
 		// Allow populations to become established (individuals must acquire resources)
-		if(generation < 500)  
+		if(generation < 1000)  
 			{	
-				resource_reproduction_threshold = 0;
+				resource_reproduction_threshold = resource_reproduction_threshold * (generation / 1000);
 			}
 		
         // Individuals reproduce after they migrated to the summer spot
