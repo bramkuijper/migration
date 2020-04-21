@@ -755,7 +755,6 @@ void winter_dynamics(int t)
 	// individuals forage
     // individuals accumulate resources
 	// rgood does not run out during winter
-	// TODO introduce maximum resourcce value for individuals
 	
     for (int i = 0; i < winter_pop; ++i)
     {
@@ -843,7 +842,7 @@ void spring_dynamics(int t)
         
 		// individuals must acquire the resources necessary for migration and reproduction before
 		// they can consider migrating. 
-		if (WinterPop[i].resources < (resource_reproduction_threshold + min_migration_cost))
+		if (WinterPop[i].resources < resource_reproduction_threshold)
 		{
 			continue;
 		}
@@ -1501,6 +1500,12 @@ int main(int argc, char **argv)
 
         // let individuals die with a certain probability 
         mortality();
+		
+		// Allow populations to become established (individuals must acquire resources)
+		if(generation < 500)  
+			{	
+				resource_reproduction_threshold = 0;
+			}
 		
         // Individuals reproduce after they migrated to the summer spot
         summer_reproduction(DataFile);
