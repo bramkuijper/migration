@@ -37,7 +37,7 @@ migration_cost_power = [ 1 ]
 
 executable = "./xmigration"
 
-counter = 5
+counter = 1
 
 # should jobs run on the background
 # only do this if the number of jobs is smaller
@@ -51,7 +51,7 @@ if background:
     backgroundstr = "&"
 
 
-number_replicates = 1
+number_replicates = 3
 
 for rep_i in range(0, number_replicates):
     for init_phi_a_i in init_phi_a:
@@ -96,6 +96,7 @@ for rep_i in range(0, number_replicates):
                                                                                 + str(sdmu_theta) + " "
                                                                                 + str(sdmu_phi) + " "
                                                                                 + str(max_migration_cost_i) + " "
+                                                                                + str(min_migration_cost_i) + " "
                                                                                 + str(migration_cost_decay_i) + " "
                                                                                 + str(migration_cost_power_i) + " "
                                                                                 + str(tmax) + " " 

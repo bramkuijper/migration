@@ -35,7 +35,7 @@ uniform_real_distribution<> uniform(0.0,1.0);
 const int N = 1500;
 
 // number of generations
-long int number_generations = 50000;
+long int number_generations = 2000;
 
 // initial values for phi (social dependency) and theta (resource dependency)
 // a is an intercept, b is a gradient
@@ -78,6 +78,7 @@ double sdmu_phi = 0.0;
 double migration_cost_decay = 0.0;
 double migration_cost_power = 0.0;
 double max_migration_cost = 0.0;
+double min_migration_cost = 0.0;
 
 // max number of intervals per season (two seasons: summer, winter)
 int tmax = 5000;
@@ -211,11 +212,12 @@ void init_arguments(int argc, char **argv)
     sdmu_theta = atof(argv[15]);
     sdmu_phi = atof(argv[16]);
     max_migration_cost = atof(argv[17]);
-    migration_cost_decay = atof(argv[18]);
-    migration_cost_power = atof(argv[19]);
-    tmax = atoi(argv[20]);
-	twinter = atoi(argv[21]);
-	resource_max = atoi(argv[22]);
+	min_migration_cost = atof(argv[18]);
+    migration_cost_decay = atof(argv[19]);
+    migration_cost_power = atof(argv[20]);
+    tmax = atoi(argv[21]);
+	twinter = atoi(argv[22]);
+	resource_max = atoi(argv[23]);
 		
     // some bounds checking on parameters
     // probability of encountering a good environment
@@ -749,6 +751,23 @@ double get_migration_cost_proportion(int const flock_size, int const max_flock_s
 }
 
 
+double get_migration_cost_absolute(int const flock_size, int const max_flock_size)
+{
+    // flock size = 1: max cost
+    // flock size = N: no cost
+    // as this is a proportional cost, it should be bounded between 0 and 1
+    // hence costs decay as a fraction of the maximum flock size N
+    // if it would just decay with flock size it may well be that 
+    double total_migration_cost = max_migration_cost * (1.0 - migration_cost_decay * 
+            pow((double) flock_size / max_flock_size, migration_cost_power));
+
+    // make sure function is bounded between 0 and 1
+    total_migration_cost = clamp(total_migration_cost, 0.0, 1.0);
+
+    return(total_migration_cost);
+}
+
+
 // the foraging dynamics of the population during winter
 void winter_dynamics(int t)
 {
@@ -972,13 +991,15 @@ void spring_dynamics(int t)
 		// Resource cost of migration to the individual
 		// must be calculated before migration-induced mortality or non-survivors will be excluded
 		// THIS IS WHERE WE MAKE A CHANGE (20/04/20), because we have now decided we want to calculate group size based on survivors
-		cost = 1 - total_migration_scalar;  // Individual's resource cost scalar
+		//cost = 1 - total_migration_scalar;  // Individual's resource cost scalar
+		cost = min_migration_cost + (max_migration_cost - min_migration_cost) * pow(1 - ((NFlock - 1)/(N - 1)), migration_cost_power);
 		mean_cost += cost;
 		ss_cost += cost * cost;
 
         // resources are reduced due to migration,
         // yet this depends on group size in a curvilinear fashion
-        SummerPop[i].resources = SummerPop[i].resources * total_migration_scalar;
+		//SummerPop[i].resources = SummerPop[i].resources * total_migration_scalar;
+		SummerPop[i].resources = SummerPop[i].resources - cost;
 		SummerPop[i].resources = clamp(SummerPop[i].resources, 0.0, resource_max);
 
 		// death due to starvation
@@ -1103,7 +1124,7 @@ void summer_reproduction(ofstream &DataFile)
 
         // if mom does not meet minimum standards
         // no reproduction through female function
-        if (mother.resources < resource_reproduction_threshold)
+        if (mother.resources < breeding_threshold)
         {
             continue;  // breaks current iteration in the loop and proceeds to the next one
         }
@@ -1127,7 +1148,7 @@ void summer_reproduction(ofstream &DataFile)
         // translate maternal resources to numbers of offspring
         //
         // first round to lowest integer
-        resource_integer = floor((mother.resources - resource_reproduction_threshold) / 5);  // 17/04/20: Prior to resetting mothers' resource values, mother.resources was divided by five to reduce family size
+        resource_integer = floor((mother.resources - breeding_threshold) / 5);  // 17/04/20: Prior to resetting mothers' resource values, mother.resources was divided by five to reduce family size
 
         // TODO (slightly digressing): can we come up with an analytical 
         // description of this rounding process of w into integer values?
@@ -1504,7 +1525,11 @@ int main(int argc, char **argv)
 		// Allow populations to become established (individuals must acquire resources)
 		if(generation < 1000)  
 			{	
-				resource_reproduction_threshold = resource_reproduction_threshold * (generation / 1000);
+				breeding_threshold = resource_reproduction_threshold * (generation / 1000);
+			}
+		else
+			{
+				breeding_threshold = resource_reproduction_threshold;
 			}
 		
         // Individuals reproduce after they migrated to the summer spot
