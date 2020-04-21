@@ -51,7 +51,7 @@ if background:
     backgroundstr = "&"
 
 
-number_replicates = 3
+number_replicates = 5
 
 for rep_i in range(0, number_replicates):
     for init_phi_a_i in init_phi_a:
