@@ -63,6 +63,7 @@ double rbad = 0.0;
 double resource_reproduction_threshold = 0.0;  // minimum resource level necessary to reproduce 
 double resource_starvation_threshold = 0.0;  // minimum resource level necessary to survive
 double resource_max = 0.0;  // maximum resource value an individual can achieve
+double breeding_threshold = 0.0;
 
 // how quickly resources decay per day arriving later than 0
 // TODO: do we really need this?
