@@ -1157,7 +1157,7 @@ void summer_reproduction(ofstream &DataFile)
         // translate maternal resources to numbers of offspring
         //
         // first round to lowest integer
-        resource_integer = floor((mother.resources - breeding_threshold) / (min_offspring_cost + mother.timing * offspring_cost_magnifier);  // 17/04/20: Prior to resetting mothers' resource values, mother.resources was divided by five to reduce family size
+        resource_integer = floor((mother.resources - breeding_threshold) / (min_offspring_cost + mother.timing * offspring_cost_magnifier));  // 17/04/20: Prior to resetting mothers' resource values, mother.resources was divided by five to reduce family size
 
         // TODO (slightly digressing): can we come up with an analytical 
         // description of this rounding process of w into integer values?
