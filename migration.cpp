@@ -81,6 +81,10 @@ double migration_cost_power = 0.0;
 double max_migration_cost = 0.0;
 double min_migration_cost = 0.0;
 
+// reproductive cost function
+double min_offspring_cost = 0.0;
+double offspring_cost_magnifier = 0.0;
+
 // max number of intervals per season (two seasons: summer, winter)
 int tmax = 5000;
 int twinter = 0.0;
@@ -219,6 +223,8 @@ void init_arguments(int argc, char **argv)
     tmax = atoi(argv[21]);
 	twinter = atoi(argv[22]);
 	resource_max = atoi(argv[23]);
+	min_offspring_cost = atoi(argv[24]);
+	offspring_cost_magnifier = atoi(argv[25]);
 		
     // some bounds checking on parameters
     // probability of encountering a good environment
@@ -271,6 +277,8 @@ void write_parameters(ofstream &DataFile)  // at end of outputted file
             << "migration_cost_decay;" << migration_cost_decay << endl
             << "migration_cost_power;" << migration_cost_power << endl
             << "max_migration_cost;" << max_migration_cost << endl
+			<< "min_offspring_cost;" << min_offspring_cost << endl
+			<< "offspring_cost_magnifier" << offspring_cost_magnifier << endl
             << "seed;" << seed << endl;
 }
 
