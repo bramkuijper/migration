@@ -108,6 +108,6 @@ for rep_i in range(0, number_replicates):
                                                                                     + str(tmax) + " " 
                                                                                     + str(twinter) + " "
                                                                                     + str(resource_max) + " "
-                                                                                    + str(min_offspring_cost) + " "
-                                                                                    + str(offspring_cost_magnifier) + " "
+                                                                                    + str(min_offspring_cost_i) + " "
+                                                                                    + str(offspring_cost_magnifier_i) + " "
                                                                                     + backgroundstr)
