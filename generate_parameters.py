@@ -36,7 +36,7 @@ migration_cost_power = [ 0.5, 1, 2 ]
 
 # reproductive cost parameters
 min_offspring_cost = [ 5 ]
-offspring_cost_magnifier = [ 3 ] # The relative difference in resource cost per offspring having migrated at the earliest opportunity versus the last
+offspring_cost_magnifier = [ 3, 2, 1.5] # The relative difference in resource cost per offspring having migrated at the earliest opportunity versus the last
 
 
 executable = "./xmigration"
