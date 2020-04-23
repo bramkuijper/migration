@@ -18,7 +18,7 @@ rgood = [ 0.01 ] # Changed from 1 on 27 November 2019
 rbad = [ 0.005 ] # Changed from 0.5 on 27 November 2019
 
 arrival_resource_decay = [0.1] # [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9] changed 19 Nov 2019. Outcome was that for value of 0.01, the winter population size was < 25. On 27th Nov, I fixed it to 0.1 as values of 0.2 were associated with very low population sizes.
-resource_reproduction_threshold = [100, 200]  # [1]
+resource_reproduction_threshold = [100]  # [1]
 resource_starvation_threshold = [0.0]
 resource_max = 500
 
@@ -32,11 +32,11 @@ sdmu_phi = 0.01
 max_migration_cost = [25, 50, 75, 100] # [0.75, 0.625, 0.5, 0.375, 0.25, 0.2, 0.15, 0.125, 0.1, 0.075, 0.05, 0.025, 0.01]
 min_migration_cost = [ 10 ]
 migration_cost_decay = [ 1 ]
-migration_cost_power = [ 0.5, 1, 2 ]
+migration_cost_power = [ 1 ]
 
 # reproductive cost parameters
 min_offspring_cost = [ 5 ]
-offspring_cost_magnifier = [ 3, 2, 1.5] # The relative difference in resource cost per offspring having migrated at the earliest opportunity versus the last
+offspring_cost_magnifier = [ 1, 1.5, 2, 3] # The relative difference in resource cost per offspring having migrated at the earliest opportunity versus the last
 
 
 executable = "./xmigration"
