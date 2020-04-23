@@ -370,8 +370,8 @@ void write_winter_stats(ofstream &DataFile, int generation, int timestep)
     double mean_phi_b[2] = { 0.0, 0.0 };
     double ss_phi_b[2] = { 0.0, 0.0 };
 
-    double mean_resources[2] = { 0.0, 0.0 };
-    double ss_resources[2] = { 0.0, 0.0 };
+    double mean_resources = 0.0;
+    double ss_resources = 0.0;
 	
 	double val;
 	
@@ -402,8 +402,8 @@ void write_winter_stats(ofstream &DataFile, int generation, int timestep)
         ss_phi_b[0] += val * val;
         
         val = WinterPop[i].resources;  // the resource level of individual i  // 18 Feb 2020: I've changed this from StagingPool[i].resources
-        mean_resources[0] += val;
-        ss_resources[0] += val * val;
+        mean_resources += val;
+        ss_resources += val * val;
 		
 		age = WinterPop[i].age;
 		mean_age += age;
@@ -418,22 +418,22 @@ void write_winter_stats(ofstream &DataFile, int generation, int timestep)
         mean_theta_b[0] /=  winter_pop;
         mean_phi_a[0] /=  winter_pop;
         mean_phi_b[0] /=  winter_pop;
-        mean_resources[0] /=  winter_pop;
+        mean_resources /=  winter_pop;
 		mean_age /= winter_pop;
          
         ss_theta_a[0] /= winter_pop; 
         ss_theta_b[0] /= winter_pop; 
         ss_phi_a[0] /= winter_pop; 
         ss_phi_b[0] /= winter_pop;
-        ss_resources[0] /= winter_pop; 
+        ss_resources /= winter_pop; 
 		ss_age /= winter_pop;
     }
 	
     // write statistics to a file
     DataFile 
 		<< winter_pop << ";"
-        << mean_resources[0] << ";"
-        << (ss_resources[0] - mean_resources[0] * mean_resources[0]) << ";"
+        << mean_resources << ";"
+        << (ss_resources - mean_resources * mean_resources) << ";"
         << mean_theta_a[0] << ";"
         << (ss_theta_a[0] - mean_theta_a[0] * mean_theta_a[0]) << ";"
         << mean_theta_b[0] << ";"
@@ -460,8 +460,8 @@ void write_summer_stats(ofstream &DataFile, int generation, int timestep)
     double mean_phi_b[2] = { 0.0, 0.0 };
     double ss_phi_b[2] = { 0.0, 0.0 };
 
-    double mean_resources[2] = { 0.0, 0.0 };
-    double ss_resources[2] = { 0.0, 0.0 };
+    double mean_resources = 0.0;
+    double ss_resources = 0.0;
 
     double val;
    	
@@ -484,8 +484,8 @@ void write_summer_stats(ofstream &DataFile, int generation, int timestep)
         ss_phi_b[1] += val * val;
         
         val = SummerPop[i].resources;  // the resource level of individual i 
-        mean_resources[1] += val;
-        ss_resources[1] += val * val;
+        mean_resources += val;
+        ss_resources += val * val;
 
 	}
 
@@ -496,21 +496,21 @@ void write_summer_stats(ofstream &DataFile, int generation, int timestep)
         mean_theta_b[1] /= summer_pop;
         mean_phi_a[1] /= summer_pop;
         mean_phi_b[1] /= summer_pop;
-        mean_resources[1] /= summer_pop;
+        mean_resources /= summer_pop;
         
         ss_theta_a[1] /= summer_pop; 
         ss_theta_b[1] /= summer_pop; 
         ss_phi_a[1] /= summer_pop; 
         ss_phi_b[1] /= summer_pop;
-        ss_resources[1] /= summer_pop; 
+        ss_resources /= summer_pop; 
     }
 
 	
     // write statistics to a file
     DataFile 
         << summer_pop << ";"
-	    << mean_resources[1] << ";"
-	    << (ss_resources[1] - mean_resources[1] * mean_resources[1]) << ";"
+	    << mean_resources << ";"
+	    << (ss_resources - mean_resources * mean_resources) << ";"
 		<< mean_theta_a[1] << ";"
         << (ss_theta_a[1] - mean_theta_a[1] * mean_theta_a[1]) << ";"
         << mean_theta_b[1] << ";"
