@@ -278,7 +278,7 @@ void write_parameters(ofstream &DataFile)  // at end of outputted file
             << "migration_cost_power;" << migration_cost_power << endl
             << "max_migration_cost;" << max_migration_cost << endl
 			<< "min_offspring_cost;" << min_offspring_cost << endl
-			<< "offspring_cost_magnifier" << offspring_cost_magnifier << endl
+			<< "offspring_cost_magnifier;" << offspring_cost_magnifier << endl
             << "seed;" << seed << endl;
 }
 
