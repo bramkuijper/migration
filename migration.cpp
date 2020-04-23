@@ -181,6 +181,9 @@ struct Individual
 	
 	// individual age (start out at 1 as they are reproductively mature)
 	int age;
+	
+	// number of offspring produced
+	int fecundity;
 };
 
 
@@ -1057,6 +1060,7 @@ void create_offspring(
 	offspring.timing = 1;
 	offspring.signal_timing = 1;
 	offspring.age = 0;
+	offspring.fecundity = 0;
 
     // inherit theta loci
 
@@ -1086,8 +1090,7 @@ void create_offspring(
     offspring.phi_b[1] = mutation(father.phi_b[allele_sample(rng_r)], mu_phi, sdmu_phi);
     offspring.phi_b[1] = clamp(offspring.phi_b[1], 0.0, 1.0);
 
-// ENDS OFFSPRING PRODUCTION
-}
+}  // ENDS OFFSPRING PRODUCTION
 
 
 
@@ -1120,9 +1123,8 @@ void summer_reproduction(ofstream &DataFile)
 
     uniform_int_distribution<> summer_sample(0, summer_pop - 1);
 
-    // mating dynamic. Presumes that there an even 
-    // number of individuals
-    // so we just discard the last individual
+    // Mating dynamic. Presumes that there are an even number of individuals so we  
+    // just discard the last individual
     for (int i = 0; i < summer_pop; ++i)
     {
         // get the mother
@@ -1130,6 +1132,7 @@ void summer_reproduction(ofstream &DataFile)
 
         assert(mother.theta_b[1] >= 0.0);
         assert(mother.theta_b[1] <= 1.0);
+		mother.fecundity = 0.0;
 
         // if mom does not meet minimum standards
         // no reproduction through female function
@@ -1169,6 +1172,9 @@ void summer_reproduction(ofstream &DataFile)
         
 		// reset mother's resource value to zero
 		mother.resources = 0;
+		
+		// record mother's fecundity
+		mother.fecundity = resource_integer;
 		
         // for each parent create the number of offspring prescribed by their resource value + noise (i.e, resource_integer)
         for (int kid_i = 0; kid_i < resource_integer; ++kid_i)
