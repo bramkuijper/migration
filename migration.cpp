@@ -818,7 +818,7 @@ void spring_dynamics(int t)
 	// determine probability of encountering a good resource:
     //  if the time is later than t_good_ends
     //  one can only encounter bad resources, hence p_good = 0
-    double pgood = t < t_good_ends ? pgood_init : 0.0;
+    double pgood = t < t_good_ends ? pgood_init : 0;
    
     // foraging of individuals who are just at the wintering site
     // and who have yet to decide to go to the staging site
@@ -971,8 +971,6 @@ void spring_dynamics(int t)
 		}
 		
     } // ENDS ACTUAL SPRING DISPERSAL and making of flocks
-	
-	double total_migration_scalar;
 
     // keep track of mean and variance in flock sizes
 	mean_spring_staging_size += staging_pop_start;
@@ -992,25 +990,15 @@ void spring_dynamics(int t)
     // been added to the summer pool dependent on their flock size
     for (int i = summer_pop_old; i < summer_pop; ++i)  // Selecting individuals that have been added to the summer pop this timepoint
 		
-    {
-		
-		total_migration_scalar = (1.0 - get_migration_cost_proportion(NFlock, spring_pop_start)) * 
-            (1.0 - arrival_resource_decay * (double)t/tmax);
-
-        assert(total_migration_scalar >= 0);
-        assert(total_migration_scalar <= 1.0);
-		
+    {		
 		// Resource cost of migration to the individual
 		// must be calculated before migration-induced mortality or non-survivors will be excluded
 		// THIS IS WHERE WE MAKE A CHANGE (20/04/20), because we have now decided we want to calculate group size based on survivors
-		//cost = 1 - total_migration_scalar;  // Individual's resource cost scalar
 		cost = min_migration_cost + (max_migration_cost - min_migration_cost) * pow(1 - ((NFlock - 1)/(N - 1)), migration_cost_power);
 		mean_cost += cost;
 		ss_cost += cost * cost;
 
         // resources are reduced due to migration,
-        // yet this depends on group size in a curvilinear fashion
-		//SummerPop[i].resources = SummerPop[i].resources * total_migration_scalar;
 		SummerPop[i].resources = SummerPop[i].resources - cost;
 		SummerPop[i].resources = clamp(SummerPop[i].resources, 0.0, resource_max);
 
@@ -1132,11 +1120,11 @@ void summer_reproduction(ofstream &DataFile)
 
         assert(mother.theta_b[1] >= 0.0);
         assert(mother.theta_b[1] <= 1.0);
-		mother.fecundity = 0.0;
+		SummerPop[i].fecundity = 0.0;
 
         // if mom does not meet minimum standards
         // no reproduction through female function
-        if (mother.resources < breeding_threshold)
+        if (SummerPop[i].resources < breeding_threshold)
         {
             continue;  // breaks current iteration in the loop and proceeds to the next one
         }
@@ -1160,21 +1148,21 @@ void summer_reproduction(ofstream &DataFile)
         // translate maternal resources to numbers of offspring
         //
         // first round to lowest integer
-        resource_integer = floor((mother.resources - breeding_threshold) / (min_offspring_cost + mother.timing * offspring_cost_magnifier));  // 17/04/20: Prior to resetting mothers' resource values, mother.resources was divided by five to reduce family size
+        resource_integer = floor((SummerPop[i].resources - breeding_threshold) / (min_offspring_cost + SummerPop[i].timing * offspring_cost_magnifier));  // 17/04/20: Prior to resetting mothers' resource values, mother.resources was divided by five to reduce family size
 
         // TODO (slightly digressing): can we come up with an analytical 
         // description of this rounding process of w into integer values?
-        if (uniform(rng_r) < mother.resources - resource_integer)
+        if (uniform(rng_r) < SummerPop[i].resources - resource_integer)
         {
             // make an additional offspring (adding stochasticity to fecundity)
             ++resource_integer;
         }
         
 		// reset mother's resource value to zero
-		mother.resources = 0;
+		SummerPop[i].resources = 0;
 		
 		// record mother's fecundity
-		mother.fecundity = resource_integer;
+		SummerPop[i].fecundity = resource_integer;
 		
         // for each parent create the number of offspring prescribed by their resource value + noise (i.e, resource_integer)
         for (int kid_i = 0; kid_i < resource_integer; ++kid_i)
@@ -1193,14 +1181,14 @@ void summer_reproduction(ofstream &DataFile)
     // number of dead individuals is the max population
     // minus the current individuals in the summer population
     // minus the current individuals who stayed at the wintering ground
-    int Ndead = N - summer_pop - winter_pop;
+    int Nvacancies = N - summer_pop - winter_pop;
 
-    assert(Ndead >= 0);
+    assert(Nvacancies >= 0);
 
     int random_kid = 0;
 
     // recruit new individuals to the summer pool
-    for (int i = 0; i < Ndead; ++i)
+    for (int i = 0; i < Nvacancies; ++i)
     {
         // no kids left to recruit
         if (Kids.size() == 0)
@@ -1231,7 +1219,7 @@ void postbreeding_dynamics(int t)
     // determine probability of encountering a good resource:
     //  if the time is later than t_good_ends
     //  one can only encounter bad resources, hence p_good = 0
-    double pgood = t < t_good_ends ? pgood_init : pbad;
+    double pgood = t < t_good_ends ? pgood_init : 0;
 
     // set lower boundary to the probability
     if (pgood <= 0)
@@ -1390,8 +1378,6 @@ void postbreeding_dynamics(int t)
 	    
     } // ENDS: Autumn dispersal at time t
 	
-    double total_migration_scalar = 0.0;
-	
 	mean_autumn_flock_size += NFlock;
 	ss_autumn_flock_size += NFlock * NFlock;
 	mean_autumn_staging_size += staging_pop_start;
@@ -1406,23 +1392,17 @@ void postbreeding_dynamics(int t)
 	// update resource levels for all new individuals that have just
     // been added to the pool dependent on their flock size
     for (int i = winter_pop_old; i < winter_pop; ++i)
-    {
-		total_migration_scalar = (1.0 - get_migration_cost_proportion(NFlock, autumn_pop_start)) * 
-            1.0; //(1.0 - arrival_resource_decay * (double)t/tmax);  13 Feb, SRE: Removed arrival resource decay from wintering ground
-		
-		// Resource cost of migration to the individual
-		cost = 1 - total_migration_scalar;  // Individual's resource cost scalar
+    {	
+		cost = min_migration_cost + (max_migration_cost - min_migration_cost) * pow(1 - ((NFlock - 1)/(N - 1)), migration_cost_power);
 		mean_cost += cost;
 		ss_cost += cost * cost;
 
         // resources are reduced due to migration,
-        // yet this depends on group size in a curvilinear fashion
-        SummerPop[i].resources = SummerPop[i].resources * total_migration_scalar;
-		SummerPop[i].resources = clamp(SummerPop[i].resources, 0.0, resource_max);
-
-//        cout << get_migration_cost_proportion(NFlock, winter_pop) << ";" << SummerPop[i].resources << ";" << total_migration_scalar << ";" << NFlock << ";" << endl;
-
-        // death due to starvation
+		WinterPop[i].resources = WinterPop[i].resources - cost;
+		WinterPop[i].resources = clamp(SummerPop[i].resources, 0.0, resource_max);
+		
+		
+		// death due to starvation
         if (WinterPop[i].resources < resource_starvation_threshold)
         {
             WinterPop[i] = WinterPop[winter_pop - 1];
@@ -1431,12 +1411,6 @@ void postbreeding_dynamics(int t)
         }
 
     } // Ends: update resource levels of winter arrivals
-
-//    cout << 
-//        "mean_spring_flock_size: " << (n_autumn_flocks == 0 ? 0 : (double) mean_autumn_flock_size / n_autumn_flocks) << " ";
-//        
-//    cout << "winter cost: " << (winter_pop == 0 ? 0 : mean_cost / winter_pop) << " ";
-//    cout << "total mean cost: " << mean_cost << " " << endl;
 
 } // ENDS: POST-BREEDING DYNAMICS 
 
