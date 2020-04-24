@@ -1231,7 +1231,7 @@ void postbreeding_dynamics(int t)
     // determine probability of encountering a good resource:
     //  if the time is later than t_good_ends
     //  one can only encounter bad resources, hence p_good = 0
-    double pgood = t < t_good_ends ? pgood_init : 0.0;
+    double pgood = t < t_good_ends ? pgood_init : pbad;
 
     // set lower boundary to the probability
     if (pgood <= 0)
