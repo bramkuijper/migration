@@ -141,6 +141,7 @@ int autumn_migrant_pop = 0;
 int n_spring_flocks = 0;  // recording the number of spring flocks (tmax - n(unusued departure intervals))
 int n_autumn_flocks = 0;
 int summer_pop_old = 0;  // 06/02/20: So that I can track summer_pop old
+int Nvacancies = 0;
 
 double ss_spring_migrant_pop = 0.0;
 double ss_autumn_migrant_pop = 0.0;
@@ -225,13 +226,12 @@ void init_arguments(int argc, char **argv)
     sdmu_phi = atof(argv[16]);
     max_migration_cost = atof(argv[17]);
 	min_migration_cost = atof(argv[18]);
-    migration_cost_decay = atof(argv[19]);
-    migration_cost_power = atof(argv[20]);
-    tmax = atoi(argv[21]);
-	twinter = atoi(argv[22]);
-	resource_max = atoi(argv[23]);
-	min_offspring_cost = atoi(argv[24]);
-	offspring_cost_magnifier = atoi(argv[25]);
+    migration_cost_power = atof(argv[19]);
+    tmax = atoi(argv[20]);
+	twinter = atoi(argv[21]);
+	resource_max = atoi(argv[22]);
+	min_offspring_cost = atoi(argv[23]);
+	offspring_cost_magnifier = atoi(argv[24]);
 		
     // some bounds checking on parameters
     // probability of encountering a good environment
@@ -481,7 +481,7 @@ void write_summer_stats(ofstream &DataFile, int generation, int timestep)
 	mean_fecundity = 0.0;
 	ss_fecundity = 0.0;
    	
-    for (int i = 0; i < summer_pop; ++i)  // for each individual in the summer population:
+    for (int i = 0; i < (summer_pop - Nvacancies); ++i)  // for each individual in the summer population:
     {
 		val = 0.5 * (SummerPop[i].theta_a[0] + SummerPop[i].theta_a[1]);
         mean_theta_a[1] += val;
@@ -794,42 +794,8 @@ void clear_staging_pool()
 	assert(winter_pop <= N);
 
     staging_pop = 0;
+	
 }  // ENDS STAGING POOL CLEARANCE
-
-// migration cost as a fraction of resources
-// wasted on migration
-// if flock size is 1, function returns c = 1 (i.e., max cost)
-// if flock size is >1, function returns 0 <= c < 1  
-double get_migration_cost_proportion(int const flock_size, int const max_flock_size)
-{
-    // flock size = 1: max cost
-    // flock size = N: no cost
-    // as this is a proportional cost, it should be bounded between 0 and 1
-    // hence costs decay as a fraction of the maximum flock size N
-    // if it would just decay with flock size it may well be that 
-    double total_migration_cost = max_migration_cost * (1.0 - migration_cost_decay * 
-            pow((double) flock_size / max_flock_size, migration_cost_power));
-
-    // make sure function is bounded between 0 and 1
-    total_migration_cost = clamp(total_migration_cost, 0.0, 1.0);
-
-    return(total_migration_cost);
-}
-
-
-double get_migration_cost_absolute(int const flock_size, int const max_flock_size)
-{
-    // flock size = 1: max cost
-    // flock size = N: no cost
-    // as this is a proportional cost, it should be bounded between 0 and 1
-    // hence costs decay as a fraction of the maximum flock size N
-    // if it would just decay with flock size it may well be that 
-    double migration_cost = max_migration_cost * (1.0 - migration_cost_decay * 
-            pow((double) flock_size / max_flock_size, migration_cost_power));
-
-    return(total_migration_cost);
-}
-
 
 // the foraging dynamics of the population during winter
 void winter_dynamics(int t)
@@ -1143,7 +1109,7 @@ void summer_reproduction(ofstream &DataFile)
     // resources
     int resource_integer;
 
-    /// auxilary variable specifying the id of the randomly sampled
+    /// auxilary variable specifying the identity of the randomly sampled
     // father
     int father_id;
 
@@ -1170,13 +1136,13 @@ void summer_reproduction(ofstream &DataFile)
 
         assert(mother.theta_b[1] >= 0.0);
         assert(mother.theta_b[1] <= 1.0);
-		SummerPop[i].fecundity = 0.0;
 
         // if mom does not meet minimum standards
         // no reproduction through female function
         if (SummerPop[i].resources < breeding_threshold)
         {
-            continue;  // breaks current iteration in the loop and proceeds to the next one
+            SummerPop[i].fecunity = 0.0;
+			continue;  // breaks current iteration in the loop and proceeds to the next one
         }
 
         // update stats
@@ -1231,7 +1197,7 @@ void summer_reproduction(ofstream &DataFile)
     // number of dead individuals is the max population
     // minus the current individuals in the summer population
     // minus the current individuals who stayed at the wintering ground
-    int Nvacancies = N - summer_pop - winter_pop;
+    Nvacancies = N - summer_pop - winter_pop;
 
     assert(Nvacancies >= 0);
 
@@ -1258,9 +1224,9 @@ void summer_reproduction(ofstream &DataFile)
 
         Kids.pop_back();
 
-    }
-
+    }  // Ends recruitment of offspring (kids)
 } // ENDS SUMMER REPRODUCTION
+
 
 // gaining resources at breeding ground
 // & fly back
@@ -1543,7 +1509,7 @@ int main(int argc, char **argv)
 		
 		if (generation % skip == 0)
 		 {
-			 write_spring_stats(DataFile, generation, 1000);
+			 write_spring_stats(DataFile, generation, 5000);
 		  }
 		
 		// all individuals that wanted to migrate have migrated now
@@ -1566,11 +1532,13 @@ int main(int argc, char **argv)
 			}
 		
 		// Individuals reproduce after they migrated to the summer spot
-        summer_reproduction(DataFile);
+		Nvacancies = 0;
+		
+		summer_reproduction(DataFile);
         
 		if (generation % skip == 0)
 		 {
-			 write_summer_stats(DataFile, generation, 1000);
+			 write_summer_stats(DataFile, generation, 5000);
 		  }
 		
         // set autumn migration stats to 0 before postbreeding_dynamics starts
@@ -1616,7 +1584,7 @@ int main(int argc, char **argv)
 	  
 		if (generation % skip == 0)
 		{
-			write_autumn_stats(DataFile, generation, 1000);
+			write_autumn_stats(DataFile, generation, 5000);
 		}
 		
 		// all individuals who remain at the summer grounds die
@@ -1632,7 +1600,7 @@ int main(int argc, char **argv)
 		
 		if (generation % skip == 0)
         {
-            write_winter_stats(DataFile, generation, 1000); 
+            write_winter_stats(DataFile, generation, 5000); 
         }
 				
     } // ENDS: GENERATION
