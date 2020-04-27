@@ -458,7 +458,9 @@ void write_winter_stats(ofstream &DataFile, int generation, int timestep)
 
 void write_summer_stats(ofstream &DataFile, int generation, int timestep)
 {
-    double mean_theta_a[2] = { 0.0, 0.0 };
+    double val;
+	
+	double mean_theta_a[2] = { 0.0, 0.0 };
     double ss_theta_a[2] = { 0.0, 0.0 };
     double mean_theta_b[2] = { 0.0, 0.0 };
     double ss_theta_b[2] = { 0.0, 0.0 };
@@ -470,16 +472,12 @@ void write_summer_stats(ofstream &DataFile, int generation, int timestep)
 
     double mean_resources = 0.0;
     double ss_resources = 0.0;
-
-    double val;
 	
-	double summer_cost = 0.0;
-	mean_summer_cost = 0.0;
-	ss_summer_cost = 0.0;
+	double mean_summer_cost = 0.0;
+	double ss_summer_cost = 0.0;
 	
-	double fecundity = 0.0;
-	mean_fecundity = 0.0;
-	ss_fecundity = 0.0;
+	double mean_fecundity = 0.0;
+	double ss_fecundity = 0.0;
    	
     for (int i = 0; i < (summer_pop - Nvacancies); ++i)  // for each individual in the summer population:
     {
@@ -503,13 +501,13 @@ void write_summer_stats(ofstream &DataFile, int generation, int timestep)
         mean_resources += val;
         ss_resources += val * val;
 		
-		summer_cost = SummerPop[i].cost;
-		mean_summer_cost += summer_cost;
-		ss_summer_cost += summer_cost;
+		val = SummerPop[i].cost;
+		mean_summer_cost += val;
+		ss_summer_cost += val * val;
 		
-		fecundity = SummerPop[i].fecundity;
-		mean_fecundity += fecundity;
-		ss_fecundity += fecundity;
+		val = SummerPop[i].fecundity;
+		mean_fecundity += val;
+		ss_fecundity += val * val;
 
 	}
 
@@ -1141,7 +1139,7 @@ void summer_reproduction(ofstream &DataFile)
         // no reproduction through female function
         if (SummerPop[i].resources < breeding_threshold)
         {
-            SummerPop[i].fecunity = 0.0;
+            SummerPop[i].fecundity = 0.0;
 			continue;  // breaks current iteration in the loop and proceeds to the next one
         }
 
