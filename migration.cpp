@@ -122,6 +122,8 @@ double var_age = 0.0;
 double ss_age = 0.0;
 double mean_summer_cost = 0.0;
 double ss_summer_cost = 0.0;
+double mean_fecundity = 0.0;
+double ss_fecundity = 0.0;
 
 // keep track of the current number of 
 // individuals in various seasons/demographics
@@ -326,6 +328,8 @@ void write_data_headers(ofstream &DataFile)
         << "offspring_pop;"
 		<< "mean_reproductive_cost;"
 		<< "var_reproductive_cost;"
+		<< "mean_fecundity"
+		<< "var_fecundity"
 		
 		// AUTUMN MIGRATION STATS
         << "mean_autumn_staging_size;"
@@ -473,6 +477,10 @@ void write_summer_stats(ofstream &DataFile, int generation, int timestep)
 	double summer_cost = 0.0;
 	mean_summer_cost = 0.0;
 	ss_summer_cost = 0.0;
+	
+	double fecundity = 0.0;
+	mean_fecundity = 0.0;
+	ss_fecundity = 0.0;
    	
     for (int i = 0; i < summer_pop; ++i)  // for each individual in the summer population:
     {
@@ -499,6 +507,10 @@ void write_summer_stats(ofstream &DataFile, int generation, int timestep)
 		summer_cost = SummerPop[i].cost;
 		mean_summer_cost += summer_cost;
 		ss_summer_cost += summer_cost;
+		
+		fecundity = SummerPop[i].fecundity;
+		mean_fecundity += fecundity;
+		ss_fecundity += fecundity;
 
 	}
 
@@ -511,6 +523,7 @@ void write_summer_stats(ofstream &DataFile, int generation, int timestep)
         mean_phi_b[1] /= summer_pop;
         mean_resources /= summer_pop;
 		mean_summer_cost /= summer_pop;
+		mean_fecundity /= summer_pop;
         
         ss_theta_a[1] /= summer_pop; 
         ss_theta_b[1] /= summer_pop; 
@@ -518,6 +531,7 @@ void write_summer_stats(ofstream &DataFile, int generation, int timestep)
         ss_phi_b[1] /= summer_pop;
         ss_resources /= summer_pop; 
 		ss_summer_cost /= summer_pop;
+		ss_fecundity /= summer_pop;
     }
 
 	
@@ -537,9 +551,11 @@ void write_summer_stats(ofstream &DataFile, int generation, int timestep)
 		<< breeder_pop << ";"
         << offspring_pop << ";"
 		<< mean_summer_cost << ";"
-		<< (ss_summer_cost - mean_summer_cost * mean_summer_cost) << ";";
-// ENDS: write summer stats
-}
+		<< (ss_summer_cost - mean_summer_cost * mean_summer_cost) << ";"
+		<< mean_fecundity << ";"
+		<< (ss_fecundity - mean_fecundity * mean_fecundity) << ";";
+
+}  // ENDS: write summer stats
 
 void write_spring_stats(ofstream &DataFile, int generation, int timestep)
 {
