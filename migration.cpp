@@ -428,7 +428,6 @@ void write_winter_stats(ofstream &DataFile, int generation, int timestep)
         mean_phi_b[0] /=  winter_pop;
         mean_resources /=  winter_pop;
 		mean_age /= winter_pop;
-		mean_cost /= winter_pop;
          
         ss_theta_a[0] /= winter_pop; 
         ss_theta_b[0] /= winter_pop; 
@@ -825,11 +824,8 @@ double get_migration_cost_absolute(int const flock_size, int const max_flock_siz
     // as this is a proportional cost, it should be bounded between 0 and 1
     // hence costs decay as a fraction of the maximum flock size N
     // if it would just decay with flock size it may well be that 
-    double total_migration_cost = max_migration_cost * (1.0 - migration_cost_decay * 
+    double migration_cost = max_migration_cost * (1.0 - migration_cost_decay * 
             pow((double) flock_size / max_flock_size, migration_cost_power));
-
-    // make sure function is bounded between 0 and 1
-    total_migration_cost = clamp(total_migration_cost, 0.0, 1.0);
 
     return(total_migration_cost);
 }
@@ -1050,11 +1046,11 @@ void spring_dynamics(int t)
 		// must be calculated before migration-induced mortality or non-survivors will be excluded
 		// THIS IS WHERE WE MAKE A CHANGE (20/04/20), because we have now decided we want to calculate group size based on survivors. But we haven't (as of 27/04/2020) decided how we'll do that.
 		cost = min_migration_cost + (max_migration_cost - min_migration_cost) * pow(1 - ((NFlock - 1)/(N - 1)), migration_cost_power);
-		SummerPop[i].cost = cost;
-
+		
         // resources are reduced due to migration,
 		SummerPop[i].resources = SummerPop[i].resources - cost;
 		SummerPop[i].resources = clamp(SummerPop[i].resources, 0.0, resource_max);
+		SummerPop[i].cost = cost;
 
 		// death due to starvation
         if (SummerPop[i].resources < resource_starvation_threshold)
@@ -1448,12 +1444,11 @@ void postbreeding_dynamics(int t)
     for (int i = winter_pop_old; i < winter_pop; ++i)
     {	
 		cost = min_migration_cost + (max_migration_cost - min_migration_cost) * pow(1 - ((NFlock - 1)/(N - 1)), migration_cost_power);
-		mean_cost += cost;
-		ss_cost += cost * cost;
 
         // resources are reduced due to migration,
 		WinterPop[i].resources = WinterPop[i].resources - cost;
 		WinterPop[i].resources = clamp(SummerPop[i].resources, 0.0, resource_max);
+		WinterPop[i].cost = cost;
 		
 		
 		// death due to starvation
@@ -1461,7 +1456,7 @@ void postbreeding_dynamics(int t)
         {
             WinterPop[i] = WinterPop[winter_pop - 1];
             --winter_pop;
-            --i;
+            --i; 
         }
 
     } // Ends: update resource levels of winter arrivals
