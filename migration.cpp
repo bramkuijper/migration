@@ -32,7 +32,7 @@ uniform_real_distribution<> uniform(0.0,1.0);
 // function
 
 // number of individuals in population
-const int N = 1000;
+const int N = 500;
 
 // number of generations
 long int number_generations = 5000;
@@ -328,8 +328,8 @@ void write_data_headers(ofstream &DataFile)
         << "offspring_pop;"
 		<< "mean_reproductive_cost;"
 		<< "var_reproductive_cost;"
-		<< "mean_fecundity"
-		<< "var_fecundity"
+		<< "mean_fecundity;"
+		<< "var_fecundity;"
 		
 		// AUTUMN MIGRATION STATS
         << "mean_autumn_staging_size;"
@@ -621,7 +621,7 @@ void write_spring_stats(ofstream &DataFile, int generation, int timestep)
 		<< mean_spring_flock_size << ";" 
 		<< var_spring_flock_size << ";"
 		<< mean_spring_cost << ";"
-		<< (ss_spring_cost = mean_spring_cost * mean_spring_cost) << ";";
+		<< (ss_spring_cost - mean_spring_cost * mean_spring_cost) << ";";
 
 }  // ENDS: write data for spring migrants
 
@@ -725,7 +725,9 @@ void init_population()
 		
 		WinterPop[i].age = 0;
 		
-		WinterPop[i].cost = 0;  
+		WinterPop[i].cost = 0.0; 
+		
+		WinterPop[i].fecundity = 0.0; 
 		
     }
 
