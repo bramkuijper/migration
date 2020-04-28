@@ -1009,8 +1009,8 @@ void spring_dynamics(int t)
 		// Resource cost of migration to the individual
 		// must be calculated before migration-induced mortality or non-survivors will be excluded
 		// THIS IS WHERE WE MAKE A CHANGE (20/04/20), because we have now decided we want to calculate group size based on survivors. But we haven't (as of 27/04/2020) decided how we'll do that.
-		cost = min_migration_cost + (max_migration_cost - min_migration_cost) * pow(1 - ((NFlock - 1)/(N - 1)), migration_cost_power);
-		
+		//cost = min_migration_cost + (max_migration_cost - min_migration_cost) * pow(1 - ((NFlock - 1)/(N - 1)), migration_cost_power);
+		cost = min_migration_cost + (max_migration_cost - min_migration_cost) / pow(NFlock, migration_cost_power);
         // resources are reduced due to migration,
 		SummerPop[i].resources = SummerPop[i].resources - cost;
 		SummerPop[i].resources = clamp(SummerPop[i].resources, 0.0, resource_max);
@@ -1407,8 +1407,8 @@ void postbreeding_dynamics(int t)
     // been added to the pool dependent on their flock size
     for (int i = winter_pop_old; i < winter_pop; ++i)
     {	
-		cost = min_migration_cost + (max_migration_cost - min_migration_cost) * pow(1 - ((NFlock - 1)/(N - 1)), migration_cost_power);
-
+		cost = min_migration_cost + (max_migration_cost - min_migration_cost) / pow(NFlock, migration_cost_power);
+       
         // resources are reduced due to migration,
 		WinterPop[i].resources = WinterPop[i].resources - cost;
 		WinterPop[i].resources = clamp(SummerPop[i].resources, 0.0, resource_max);
