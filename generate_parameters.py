@@ -40,7 +40,7 @@ offspring_cost_magnifier = [ 1.5, 2, 3] # The relative difference in resource co
 
 executable = "./xmigration"
 
-counter = 2
+counter = 1
 
 # should jobs run on the background
 # only do this if the number of jobs is smaller
@@ -54,7 +54,7 @@ if background:
     backgroundstr = "&"
 
 
-number_replicates = 1
+number_replicates = 3
 
 for rep_i in range(0, number_replicates):
     for init_phi_a_i in init_phi_a:
