@@ -34,13 +34,13 @@ min_migration_cost = [ 10 ]
 migration_cost_power = [ 2, 5, 10 ]
 
 # reproductive cost parameters
-min_offspring_cost = [ 5 ]
-offspring_cost_magnifier = [ 1, 1.5, 2, 3] # The relative difference in resource cost per offspring having migrated at the earliest opportunity versus the last
+min_offspring_cost = [ 10 ]
+offspring_cost_magnifier = [ 1.5, 2, 3] # The relative difference in resource cost per offspring having migrated at the earliest opportunity versus the last
 
 
 executable = "./xmigration"
 
-counter = 1
+counter = 2
 
 # should jobs run on the background
 # only do this if the number of jobs is smaller
