@@ -135,6 +135,7 @@ int spring_migrant_pop = 0;
 int summer_pop = 0;
 int autumn_pop_start = 0;
 int breeder_pop = 0;
+int nonreproductive_pop = 0;
 int offspring_pop = 0;
 int autumn_nonmigrant_pop = 0;
 int autumn_migrant_pop = 0;
@@ -325,6 +326,7 @@ void write_data_headers(ofstream &DataFile)
 	    << "mean_phi_b_summer;"
 	    << "var_phi_b_summer;"
         << "breeder_pop;"
+		<< "nonreproductive_pop;"
         << "offspring_pop;"
 		<< "mean_reproductive_cost;"
 		<< "var_reproductive_cost;"
@@ -546,6 +548,7 @@ void write_summer_stats(ofstream &DataFile, int generation, int timestep)
         << mean_phi_b[1] << ";"
         << (ss_phi_b[1] - mean_phi_b[1] * mean_phi_b[1]) << ";"
 		<< breeder_pop << ";"
+		<< nonreproductive_pop << ";"
         << offspring_pop << ";"
 		<< mean_summer_cost << ";"
 		<< (ss_summer_cost - mean_summer_cost * mean_summer_cost) << ";"
@@ -1009,9 +1012,8 @@ void spring_dynamics(int t)
 		// Resource cost of migration to the individual
 		// must be calculated before migration-induced mortality or non-survivors will be excluded
 		// THIS IS WHERE WE MAKE A CHANGE (20/04/20), because we have now decided we want to calculate group size based on survivors. But we haven't (as of 27/04/2020) decided how we'll do that.
-		//cost = min_migration_cost + (max_migration_cost - min_migration_cost) * pow(1 - ((NFlock - 1)/(N - 1)), migration_cost_power);
 		cost = min_migration_cost + (max_migration_cost - min_migration_cost) / pow(NFlock, migration_cost_power);
-        // resources are reduced due to migration,
+        
 		SummerPop[i].resources = SummerPop[i].resources - cost;
 		SummerPop[i].resources = clamp(SummerPop[i].resources, 0.0, resource_max);
 		SummerPop[i].cost = cost;
@@ -1026,13 +1028,6 @@ void spring_dynamics(int t)
 		
     } // ENDS: updating resources of migrants
 
-
-//    cout << 
-//        "mean_spring_flock_size: " << (n_spring_flocks == 0 ? 0 : (double) mean_spring_flock_size / n_spring_flocks) << " ";
-//        
-//    cout << "summer cost: " << (summer_pop == 0 ? 0 : mean_cost / summer_pop) << " ";
-//    cout << "total mean cost: " << mean_cost << " " << endl;
-	
 } // ENDS SPRING DYNAMICS (looping through t)
 
 // mutation of a certain allele with value val
@@ -1140,6 +1135,10 @@ void summer_reproduction(ofstream &DataFile)
         if (SummerPop[i].resources < breeding_threshold)
         {
             SummerPop[i].fecundity = 0.0;
+			SummerPop[i].cost = 0.0;
+			
+			++nonreproductive_pop;  // Tally of non-reproductive adults.
+			
 			continue;  // breaks current iteration in the loop and proceeds to the next one
         }
 
@@ -1172,6 +1171,9 @@ void summer_reproduction(ofstream &DataFile)
             ++resource_integer;
         }
         
+		// record resources invested into reproduction
+		SummerPop[i].cost = SummerPop[i].resources;
+		
 		// reset mother's resource value to zero
 		SummerPop[i].resources = 0;
 		
@@ -1589,6 +1591,7 @@ int main(int argc, char **argv)
         summer_pop = 0;
         staging_pop = 0;
 		breeder_pop = 0;
+		nonreproductive_pop = 0;
 		summer_pop_old = 0;  // 06/02/20: Again, to track summer_pop_old
 		spring_nonmigrant_pop = 0;
 		spring_migrant_pop = 0;
