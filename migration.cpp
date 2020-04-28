@@ -76,7 +76,6 @@ double sdmu_theta = 0.0;
 double sdmu_phi = 0.0;
 
 // migration cost function
-double migration_cost_decay = 0.0;
 double migration_cost_power = 0.0;
 double max_migration_cost = 0.0;
 double min_migration_cost = 0.0;
@@ -230,9 +229,9 @@ void init_arguments(int argc, char **argv)
     migration_cost_power = atof(argv[19]);
     tmax = atoi(argv[20]);
 	twinter = atoi(argv[21]);
-	resource_max = atoi(argv[22]);
-	min_offspring_cost = atoi(argv[23]);
-	offspring_cost_magnifier = atoi(argv[24]);
+	resource_max = atof(argv[22]);
+	min_offspring_cost = atof(argv[23]);
+	offspring_cost_magnifier = atof(argv[24]);
 		
     // some bounds checking on parameters
     // probability of encountering a good environment
@@ -282,7 +281,6 @@ void write_parameters(ofstream &DataFile)  // at end of outputted file
             << "tmax;" << tmax << endl
 			<< "twinter;" << twinter << endl
             << "N;" << N << endl
-            << "migration_cost_decay;" << migration_cost_decay << endl
             << "migration_cost_power;" << migration_cost_power << endl
             << "max_migration_cost;" << max_migration_cost << endl
 			<< "min_offspring_cost;" << min_offspring_cost << endl
