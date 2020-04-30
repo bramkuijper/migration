@@ -32,10 +32,10 @@ uniform_real_distribution<> uniform(0.0,1.0);
 // function
 
 // number of individuals in population
-const int N = 2000;
+const int N = 500;
 
 // number of generations
-long int number_generations = 50000;
+long int number_generations = 5000;
 
 // initial values for phi (social dependency) and theta (resource dependency)
 // a is an intercept, b is a gradient
@@ -258,7 +258,7 @@ void init_arguments(int argc, char **argv)
 	
 	assert(resource_max > 0);
 	
-	assert(max_migration_cost > min_migration_cost);
+	assert(max_migration_cost >= min_migration_cost);
 
 }
 
@@ -1108,6 +1108,9 @@ void create_offspring(
 void summer_reproduction(ofstream &DataFile)
 {
 	
+	mean_resources = 0.0;
+	ss_resources = 0.0;
+	
 	// auxiliary variables storing current mom and dad
     Individual mother, father;
 
@@ -1137,7 +1140,7 @@ void summer_reproduction(ofstream &DataFile)
     // just discard the last individual
     for (int i = 0; i < summer_pop; ++i)
     {
-		rv = StagingPool[i].resources;
+		rv = SummerPop[i].resources;
 		mean_resources += rv;
 		ss_resources += rv * rv;
 		
