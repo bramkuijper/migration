@@ -35,7 +35,7 @@ uniform_real_distribution<> uniform(0.0,1.0);
 const int N = 500;
 
 // number of generations
-long int number_generations = 5000;
+long int number_generations = 2500;
 
 // initial values for phi (social dependency) and theta (resource dependency)
 // a is an intercept, b is a gradient
@@ -899,7 +899,7 @@ void spring_dynamics(int t)
         
 		// individuals must acquire the resources necessary for migration and reproduction before
 		// they can consider migrating. 
-		if (WinterPop[i].resources < resource_reproduction_threshold)
+		if (WinterPop[i].resources < breeding_threshold)
 		{
 			continue;
 		}
@@ -1491,6 +1491,18 @@ int main(int argc, char **argv)
 		rgood = rgood_init;
 		rbad = rbad_init;  
 		
+		
+		// Allow populations to become established (individuals must acquire resources)
+		if(generation <= 1000)  
+			{	
+				breeding_threshold = resource_reproduction_threshold * generation / 1000;
+			}
+		else
+			{
+				breeding_threshold = resource_reproduction_threshold;
+			}
+		
+		
 		// CHANGING RESOURCE AVAILABILITY MID-SIMULATION (if desired)
 		if(generation > number_generations*1)  //EXPERIMENTAL SWITCH
 			{	
@@ -1547,16 +1559,6 @@ int main(int argc, char **argv)
 
         // let individuals die with a certain probability 
         mortality();
-		
-		// Allow populations to become established (individuals must acquire resources)
-		if(generation < 1000)  
-			{	
-				breeding_threshold = resource_reproduction_threshold * (generation / 1000);
-			}
-		else
-			{
-				breeding_threshold = resource_reproduction_threshold;
-			}
 		
 		// Individuals reproduce after they migrated to the summer spot
 		Nvacancies = 0;
