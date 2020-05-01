@@ -2,10 +2,10 @@
 
 # generate all parameter combinations to run the migration simulation
 
-init_theta_a = [0.005] # [0.001, 0.005, 0.01, 0.05, 0.1, 0.5]
-init_theta_b = [0] #[ 0.0, 0.25, 0.5, 0.75, 1 ]
-init_phi_a = [0.005] #[0.001, 0.005, 0.01, 0.05, 0.1, 0.5]
-init_phi_b = [0] #[ 0.0, 0.25, 0.5, 0.75, 1 ]
+init_theta_a = [0.0005]
+init_theta_b = [0]
+init_phi_a = [0.0005]
+init_phi_b = [0]
 
 tmax = 5000
 twinter = 5000
@@ -29,7 +29,7 @@ sdmu_theta = 0.01
 sdmu_phi = 0.01
     
 # migration cost parameters
-max_migration_cost = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60] # [0.75, 0.625, 0.5, 0.375, 0.25, 0.2, 0.15, 0.125, 0.1, 0.075, 0.05, 0.025, 0.01]
+max_migration_cost = [ 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70 ] 
 min_migration_cost = [ 10 ]
 migration_cost_power = [ 2 ]
 
@@ -54,7 +54,7 @@ if background:
     backgroundstr = "&"
 
 
-number_replicates = 10
+number_replicates = 8
 
 for rep_i in range(0, number_replicates):
     for init_phi_a_i in init_phi_a:
