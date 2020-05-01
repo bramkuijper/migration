@@ -601,7 +601,7 @@ void write_spring_stats(ofstream &DataFile, int generation, int timestep)
 		ss_signal_timing /= summer_pop;
 		mean_spring_cost /= summer_pop;
 		ss_spring_cost /= summer_pop;
-		mean_resources /=summer_pop;
+		mean_resources /= summer_pop;
 		ss_resources /= summer_pop;
     }
 
@@ -836,10 +836,7 @@ void winter_dynamics(int t)
 
 // the dynamics of the population at the wintering ground in spring, time t
 void spring_dynamics(int t)
-{
-	mean_resources = 0.0;
-	ss_resources = 0.0;
-	
+{	
 	// individuals can continue to forage
     // individuals can continue to accumulate resources
     // individuals make dispersal decisions
@@ -1181,7 +1178,7 @@ void summer_reproduction(ofstream &DataFile)
         // translate maternal resources to numbers of offspring
         //
         // first round to lowest integer
-        resource_integer = floor((SummerPop[i].resources - breeding_threshold) / (min_offspring_cost + ((tmax + SummerPop[i].timing) / tmax) * offspring_cost_magnifier));  // 17/04/20: Prior to resetting mothers' resource values, mother.resources was divided by five to reduce family size
+        resource_integer = floor((SummerPop[i].resources - breeding_threshold) / (min_offspring_cost + (SummerPop[i].timing * (offspring_cost_magnifier - 1) / tmax)));  // 17/04/20: Prior to resetting mothers' resource values, mother.resources was divided by five to reduce family size
 
         // TODO (slightly digressing): can we come up with an analytical 
         // description of this rounding process of w into integer values?
@@ -1255,8 +1252,6 @@ void summer_reproduction(ofstream &DataFile)
 // & fly back
 void postbreeding_dynamics(int t)
 {
-	mean_resources = 0.0;
-	ss_resources = 0.0;
 	
 	// determine probability of encountering a good resource:
     //  if the time is later than t_good_ends
@@ -1384,6 +1379,10 @@ void postbreeding_dynamics(int t)
         if (uniform(rng_r) < pdisperse)
         {
 			
+			rv = StagingPool[i].resources;  // Record individual's resource value at departure
+			mean_resources += rv;
+			ss_resources += rv * rv;
+			
 			WinterPop[winter_pop] = StagingPool[i];  // Individual moves from staging pool to first empty position in WinterPop
 			lat = WinterPop[winter_pop].latency;
 			mean_latency += lat;
@@ -1391,10 +1390,6 @@ void postbreeding_dynamics(int t)
 			++winter_pop;
             
             assert(winter_pop <= N);
-
-			rv = StagingPool[i].resources;
-			mean_resources += rv;
-			ss_resources += rv * rv;
 
             // delete this individual from the staging population
             StagingPool[i] = StagingPool[staging_pop - 1];
@@ -1489,6 +1484,7 @@ int main(int argc, char **argv)
 		ss_cost = 0.0;
 		spring_pop_start = 0.0;
 		autumn_pop_start = 0.0;
+		
 
         staging_pop = 0.0;  // Set staging population count to zero before winter dynamics
 		
@@ -1517,9 +1513,11 @@ int main(int argc, char **argv)
 			winter_dynamics(t);
 		}
 		
+		// time during spring during which individuals can migrate (or carry on foraging)
+		mean_resources = 0.0;
+		ss_resources = 0.0;
+		rv = 0;
 		
-		// time during spring
-        // during which individuals can migrate (or carry on foraging)
 		for (int t = 0; t < tmax; ++t)
         {
             spring_dynamics(t);
@@ -1584,6 +1582,8 @@ int main(int argc, char **argv)
 		ss_autumn_staging_size = 0.0;
 		mean_autumn_cost = 0.0;
 		ss_autumn_cost = 0.0;
+		mean_resources = 0.0;
+		ss_resources = 0.0;
 		rv = 0;
 		
         autumn_pop_start = summer_pop;
