@@ -32,10 +32,10 @@ uniform_real_distribution<> uniform(0.0,1.0);
 // function
 
 // number of individuals in population
-const int N = 2000;
+const int N = 500;
 
 // number of generations
-long int number_generations = 50000;
+long int number_generations = 5000;
 
 // initial values for phi (social dependency) and theta (resource dependency)
 // a is an intercept, b is a gradient
@@ -221,7 +221,7 @@ void init_arguments(int argc, char **argv)
     t_good_ends = atoi(argv[7]);
     rgood_init = atof(argv[8]);
     rbad_init = atof(argv[9]);
-	preparation_penalty = atof(argv[10])
+	preparation_penalty = atof(argv[10]);
     arrival_resource_decay = atof(argv[11]);
     resource_reproduction_threshold = atof(argv[12]);
     resource_starvation_threshold = atof(argv[13]);
@@ -752,7 +752,7 @@ void init_population()
 // ground individuals die, as well as the individuals who have
 // stayed at the wintering ground
 
-double migration_cost(int const NFlock)
+double migration_cost(int NFlock)
 {
 	cost = min_migration_cost + (max_migration_cost - min_migration_cost) / pow(NFlock, migration_cost_power)
 	// Flock size of 1 (i.e., travelling alone) yields the maximum cost
