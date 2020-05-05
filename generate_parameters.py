@@ -16,11 +16,12 @@ t_good_ends = [ 1500 ]
 
 rgood = [ 0.01 ] # Changed from 1 on 27 November 2019
 rbad = [ 0.005 ] # Changed from 0.5 on 27 November 2019
+preparation_penalty = 0.0 # The reduction in resource acquisition, relative to the normal feeding phase.
 
 arrival_resource_decay = [0.1] # [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9] changed 19 Nov 2019. Outcome was that for value of 0.01, the winter population size was < 25. On 27th Nov, I fixed it to 0.1 as values of 0.2 were associated with very low population sizes.
 resource_reproduction_threshold = [50]  # [1]
 resource_starvation_threshold = [0.0]
-resource_max = 500
+resource_max = 100
 
 # mutation rates
 mu_theta = 0.01
@@ -92,6 +93,7 @@ for rep_i in range(0, number_replicates):
                                                                                 + str(t_good_ends_i) + " "
                                                                                 + str(rgood_i) + " "
                                                                                 + str(rbad_i) + " "
+                                                                                + str(preparation_penalty) + " "
                                                                                 + str(arrival_resource_decay_i) + " "
                                                                                 + str(resource_reproduction_threshold_i) + " "
                                                                                 + str(resource_starvation_threshold_i) + " "

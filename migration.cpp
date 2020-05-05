@@ -59,6 +59,7 @@ double rgood_init = 0.0;
 double rbad_init = 0.0;
 double rgood = 0.0;
 double rbad = 0.0;
+double preparation_penalty = 0.0;
 
 double resource_reproduction_threshold = 0.0;  // minimum resource level necessary to reproduce 
 double resource_starvation_threshold = 0.0;  // minimum resource level necessary to survive
@@ -220,21 +221,22 @@ void init_arguments(int argc, char **argv)
     t_good_ends = atoi(argv[7]);
     rgood_init = atof(argv[8]);
     rbad_init = atof(argv[9]);
-    arrival_resource_decay = atof(argv[10]);
-    resource_reproduction_threshold = atof(argv[11]);
-    resource_starvation_threshold = atof(argv[12]);
-    mu_theta = atof(argv[13]);
-    mu_phi = atof(argv[14]);
-    sdmu_theta = atof(argv[15]);
-    sdmu_phi = atof(argv[16]);
-    max_migration_cost = atof(argv[17]);
-	min_migration_cost = atof(argv[18]);
-    migration_cost_power = atof(argv[19]);
-    tmax = atoi(argv[20]);
-	twinter = atoi(argv[21]);
-	resource_max = atof(argv[22]);
-	min_offspring_cost = atof(argv[23]);
-	offspring_cost_magnifier = atof(argv[24]);
+	preparation_penalty = atof(argv[10])
+    arrival_resource_decay = atof(argv[11]);
+    resource_reproduction_threshold = atof(argv[12]);
+    resource_starvation_threshold = atof(argv[13]);
+    mu_theta = atof(argv[14]);
+    mu_phi = atof(argv[15]);
+    sdmu_theta = atof(argv[16]);
+    sdmu_phi = atof(argv[17]);
+    max_migration_cost = atof(argv[18]);
+	min_migration_cost = atof(argv[19]);
+    migration_cost_power = atof(argv[20]);
+    tmax = atoi(argv[21]);
+	twinter = atoi(argv[22]);
+	resource_max = atof(argv[23]);
+	min_offspring_cost = atof(argv[24]);
+	offspring_cost_magnifier = atof(argv[25]);
 		
     // some bounds checking on parameters
     // probability of encountering a good environment
@@ -275,6 +277,7 @@ void write_parameters(ofstream &DataFile)  // at end of outputted file
             << "t_good_ends;" << t_good_ends << endl
             << "rgood_init;" << rgood_init << endl
             << "rbad_init;" << rbad_init << endl
+			<< "preparation_penalty;" << preparation_penalty << endl
             << "arrival_resource_decay;" << arrival_resource_decay << endl
 			<< "resource_max;"  << resource_max << endl
             << "resource_reproduction_threshold;" << resource_reproduction_threshold << endl
@@ -748,6 +751,14 @@ void init_population()
 // If this function is called in summer, however, both the summer
 // ground individuals die, as well as the individuals who have
 // stayed at the wintering ground
+
+double migration_cost(int const NFlock)
+{
+	cost = min_migration_cost + (max_migration_cost - min_migration_cost) / pow(NFlock, migration_cost_power)
+	// Flock size of 1 (i.e., travelling alone) yields the maximum cost
+	return(cost)
+}  // ENDS: migration cost function
+
 void mortality()
 {
     for (int i = 0; i < winter_pop;++i)
@@ -874,11 +885,11 @@ void spring_dynamics(int t)
         // continue to forage at the staging site
         if (uniform(rng_r) < pgood) // good resource chosen
         {
-            StagingPool[i].resources += rgood;
+            StagingPool[i].resources += rgood * preparation_penalty;
         }
         else
         {
-            StagingPool[i].resources += rbad;
+            StagingPool[i].resources += rbad * preparation_penalty;
         }
 	
 	StagingPool[i].resources = clamp(StagingPool[i].resources, 0.0, resource_max);	
@@ -1021,11 +1032,11 @@ void spring_dynamics(int t)
 		// Resource cost of migration to the individual
 		// must be calculated before migration-induced mortality or non-survivors will be excluded
 		// THIS IS WHERE WE MAKE A CHANGE (20/04/20), because we have now decided we want to calculate group size based on survivors. But we haven't (as of 27/04/2020) decided how we'll do that.
-		cost = min_migration_cost + (max_migration_cost - min_migration_cost) / pow(NFlock, migration_cost_power);
+		//cost = min_migration_cost + (max_migration_cost - min_migration_cost) / pow(NFlock, migration_cost_power);
         
-		SummerPop[i].resources = SummerPop[i].resources - cost;
+		SummerPop[i].resources = SummerPop[i].resources - migration_cost(NFlock);
 		SummerPop[i].resources = clamp(SummerPop[i].resources, 0.0, resource_max);
-		SummerPop[i].cost = cost;
+		SummerPop[i].cost = migration_cost(NFlock);
 
 		// death due to starvation
         if (SummerPop[i].resources < resource_starvation_threshold)
