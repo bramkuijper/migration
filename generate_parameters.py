@@ -37,6 +37,7 @@ migration_cost_power = [2]
 min_offspring_cost = [ 10 ]
 offspring_cost_magnifier = [ 1.5 ] # The relative difference in resource cost per offspring having migrated at the earliest opportunity versus the last
 
+number_replicates = 2
 
 executable = "./xmigration"
 
@@ -52,9 +53,6 @@ backgroundstr = ""
 
 if background:
     backgroundstr = "&"
-
-
-number_replicates = 1
 
 for rep_i in range(0, number_replicates):
     for init_phi_a_i in init_phi_a:
