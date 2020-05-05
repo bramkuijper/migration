@@ -32,10 +32,10 @@ uniform_real_distribution<> uniform(0.0,1.0);
 // function
 
 // number of individuals in population
-const int N = 2000;
+const int N = 500;
 
 // number of generations
-long int number_generations = 50000;
+long int number_generations = 5000;
 
 // initial values for phi (social dependency) and theta (resource dependency)
 // a is an intercept, b is a gradient
@@ -326,15 +326,7 @@ void write_data_headers(ofstream &DataFile)
 		<< "summer_pop;"
 	    << "mean_prereproductive_resources;"
 	    << "var_prereproductive_resources;"
-	    << "mean_theta_a_summer;"
-	    << "var_theta_a_summer;"
-	    << "mean_theta_b_summer;"
-	    << "var_theta_b_summer;"
-	    << "mean_phi_a_summer;"
-	    << "var_phi_a_summer;"
-	    << "mean_phi_b_summer;"
-	    << "var_phi_b_summer;"
-        << "breeder_pop;"
+	    << "breeder_pop;"
 		<< "nonreproductive_pop;"
         << "offspring_pop;"
 		<< "mean_reproductive_cost;"
