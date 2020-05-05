@@ -32,10 +32,10 @@ uniform_real_distribution<> uniform(0.0,1.0);
 // function
 
 // number of individuals in population
-const int N = 500;
+const int N = 2000;
 
 // number of generations
-long int number_generations = 5000;
+long int number_generations = 200000;
 
 // initial values for phi (social dependency) and theta (resource dependency)
 // a is an intercept, b is a gradient
@@ -65,10 +65,6 @@ double resource_reproduction_threshold = 0.0;  // minimum resource level necessa
 double resource_starvation_threshold = 0.0;  // minimum resource level necessary to survive
 double resource_max = 0.0;  // maximum resource value an individual can achieve
 double breeding_threshold = 0.0;
-
-// how quickly resources decay per day arriving later than 0
-// TODO: do we really need this?
-double arrival_resource_decay = 0.0;
 
 // mutation rates
 double mu_theta = 0.0;
@@ -223,21 +219,20 @@ void init_arguments(int argc, char **argv)
     rgood_init = atof(argv[8]);
     rbad_init = atof(argv[9]);
 	preparation_penalty = atof(argv[10]);
-    arrival_resource_decay = atof(argv[11]);
-    resource_reproduction_threshold = atof(argv[12]);
-    resource_starvation_threshold = atof(argv[13]);
-    mu_theta = atof(argv[14]);
-    mu_phi = atof(argv[15]);
-    sdmu_theta = atof(argv[16]);
-    sdmu_phi = atof(argv[17]);
-    max_migration_cost = atof(argv[18]);
-	min_migration_cost = atof(argv[19]);
-    migration_cost_power = atof(argv[20]);
-    tmax = atoi(argv[21]);
-	twinter = atoi(argv[22]);
-	resource_max = atof(argv[23]);
-	min_offspring_cost = atof(argv[24]);
-	offspring_cost_magnifier = atof(argv[25]);
+    resource_reproduction_threshold = atof(argv[11]);
+    resource_starvation_threshold = atof(argv[12]);
+    mu_theta = atof(argv[13]);
+    mu_phi = atof(argv[14]);
+    sdmu_theta = atof(argv[15]);
+    sdmu_phi = sdmu_theta;
+    max_migration_cost = atof(argv[17]);
+	min_migration_cost = atof(argv[18]);
+    migration_cost_power = atof(argv[19]);
+    tmax = atoi(argv[20]);
+	twinter = atoi(argv[21]);
+	resource_max = atof(argv[22]);
+	min_offspring_cost = atof(argv[23]);
+	offspring_cost_magnifier = atof(argv[24]);
 		
     // some bounds checking on parameters
     // probability of encountering a good environment
@@ -279,8 +274,7 @@ void write_parameters(ofstream &DataFile)  // at end of outputted file
             << "rgood_init;" << rgood_init << endl
             << "rbad_init;" << rbad_init << endl
 			<< "preparation_penalty;" << preparation_penalty << endl
-            << "arrival_resource_decay;" << arrival_resource_decay << endl
-			<< "resource_max;"  << resource_max << endl
+            << "resource_max;"  << resource_max << endl
             << "resource_reproduction_threshold;" << resource_reproduction_threshold << endl
             << "resource_starvation_threshold;" << resource_starvation_threshold << endl
             << "mu_theta;" << mu_theta << endl
@@ -535,14 +529,6 @@ void write_summer_stats(ofstream &DataFile, int generation, int timestep)
         << summer_pop << ";"
 	    << mean_resources << ";"
 	    << (ss_resources - mean_resources * mean_resources) << ";"
-		<< mean_theta_a[1] << ";"
-        << (ss_theta_a[1] - mean_theta_a[1] * mean_theta_a[1]) << ";"
-        << mean_theta_b[1] << ";"
-        << (ss_theta_b[1] - mean_theta_b[1] * mean_theta_b[1]) << ";"
-        << mean_phi_a[1] << ";"
-        << (ss_phi_a[1] - mean_phi_a[1] * mean_phi_a[1]) << ";"
-        << mean_phi_b[1] << ";"
-        << (ss_phi_b[1] - mean_phi_b[1] * mean_phi_b[1]) << ";"
 		<< breeder_pop << ";"
 		<< nonreproductive_pop << ";"
         << offspring_pop << ";"

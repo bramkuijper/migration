@@ -11,14 +11,13 @@ tmax = 5000
 twinter = 5000
 
 pmort = [ 0.05 ]  # Short simulations on 27 November suggested pmort of 0.2 was too high. After further simulations, I decided to fix it at 0.05
-pgood_init = [ 1.0 ] # Deleted 0.5 option on 27 November 2019
-t_good_ends = [ 1500 ]
+pgood_init = [ 0.5 ] # Deleted 0.5 option on 27 November 2019
+t_good_ends = [ 5000 ]
 
 rgood = [ 0.01 ] # Changed from 1 on 27 November 2019
 rbad = [ 0.005 ] # Changed from 0.5 on 27 November 2019
 preparation_penalty = 0.0 # The reduction in resource acquisition, relative to the normal feeding phase.
 
-arrival_resource_decay = [0.1] # [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9] changed 19 Nov 2019. Outcome was that for value of 0.01, the winter population size was < 25. On 27th Nov, I fixed it to 0.1 as values of 0.2 were associated with very low population sizes.
 resource_reproduction_threshold = [50]  # [1]
 resource_starvation_threshold = [0.0]
 resource_max = 100
@@ -26,13 +25,13 @@ resource_max = 100
 # mutation rates
 mu_theta = 0.01
 mu_phi = 0.01
-sdmu_theta = 0.01
-sdmu_phi = 0.01
+sdmu_theta = [0.001, 0.005, 0.01]
+sdmu_phi = sdmu_theta
     
 # migration cost parameters
-max_migration_cost = [ 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70 ] 
-min_migration_cost = [ 10 ]
-migration_cost_power = [ 2 ]
+max_migration_cost = [20] #[ 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70 ] 
+min_migration_cost = [10]
+migration_cost_power = [2]
 
 # reproductive cost parameters
 min_offspring_cost = [ 10 ]
@@ -55,7 +54,7 @@ if background:
     backgroundstr = "&"
 
 
-number_replicates = 8
+number_replicates = 1
 
 for rep_i in range(0, number_replicates):
     for init_phi_a_i in init_phi_a:
@@ -67,9 +66,9 @@ for rep_i in range(0, number_replicates):
                             for t_good_ends_i in t_good_ends:
                                 for rgood_i in rgood:
                                     for rbad_i in rbad:
-                                        for arrival_resource_decay_i in arrival_resource_decay:
-                                            for resource_reproduction_threshold_i in resource_reproduction_threshold:
-                                                for resource_starvation_threshold_i in resource_starvation_threshold:
+                                        for resource_reproduction_threshold_i in resource_reproduction_threshold:
+                                            for resource_starvation_threshold_i in resource_starvation_threshold:
+                                                for sdmu_theta_i in sdmu_theta:
                                                     for max_migration_cost_i in max_migration_cost:
                                                         for min_migration_cost_i in min_migration_cost:
                                                             for migration_cost_power_i in migration_cost_power:
@@ -94,13 +93,12 @@ for rep_i in range(0, number_replicates):
                                                                                 + str(rgood_i) + " "
                                                                                 + str(rbad_i) + " "
                                                                                 + str(preparation_penalty) + " "
-                                                                                + str(arrival_resource_decay_i) + " "
                                                                                 + str(resource_reproduction_threshold_i) + " "
                                                                                 + str(resource_starvation_threshold_i) + " "
                                                                                 + str(mu_theta) + " "
                                                                                 + str(mu_phi) + " "
-                                                                                + str(sdmu_theta) + " "
-                                                                                + str(sdmu_phi) + " "
+                                                                                + str(sdmu_theta_i) + " "
+                                                                                + str(sdmu_theta_i) + " "
                                                                                 + str(max_migration_cost_i) + " "
                                                                                 + str(min_migration_cost_i) + " "
                                                                                 + str(migration_cost_power_i) + " "
