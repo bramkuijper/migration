@@ -32,10 +32,10 @@ uniform_real_distribution<> uniform(0.0,1.0);
 // function
 
 // number of individuals in population
-const int N = 500;
+const int N = 2000;
 
 // number of generations
-long int number_generations = 5000;
+long int number_generations = 50000;
 
 // initial values for phi (social dependency) and theta (resource dependency)
 // a is an intercept, b is a gradient
@@ -80,6 +80,7 @@ double sdmu_phi = 0.0;
 double migration_cost_power = 0.0;
 double max_migration_cost = 0.0;
 double min_migration_cost = 0.0;
+double cost = 0.0;
 
 // reproductive cost function
 double min_offspring_cost = 0.0;
@@ -754,9 +755,9 @@ void init_population()
 
 double migration_cost(int NFlock)
 {
-	cost = min_migration_cost + (max_migration_cost - min_migration_cost) / pow(NFlock, migration_cost_power)
+	cost = min_migration_cost + (max_migration_cost - min_migration_cost) / pow(NFlock, migration_cost_power);
 	// Flock size of 1 (i.e., travelling alone) yields the maximum cost
-	return(cost)
+	return(cost);
 }  // ENDS: migration cost function
 
 void mortality()
@@ -1022,7 +1023,7 @@ void spring_dynamics(int t)
 		ss_spring_flock_size += NFlock * NFlock;  // Also serves as sum of squares of spring migrant population size
 	}
 	
-	double cost = 0.0;
+
 	
 	// update resource levels for all new individuals that have just
     // been added to the summer pool dependent on their flock size
@@ -1437,8 +1438,6 @@ void postbreeding_dynamics(int t)
     if (winter_pop_old < winter_pop){
 		++n_autumn_flocks;
 	}
-
-    double cost = 0.0;
 	
 	// update resource levels for all new individuals that have just
     // been added to the pool dependent on their flock size
