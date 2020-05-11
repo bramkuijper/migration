@@ -25,11 +25,11 @@ resource_max = 100
 # mutation rates
 mu_theta = 0.01
 mu_phi = 0.01
-sdmu_theta = [0.001, 0.005, 0.01]
+sdmu_theta = [0.01]
 sdmu_phi = sdmu_theta
     
 # migration cost parameters
-max_migration_cost = [20] #[ 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70 ] 
+max_migration_cost = [ 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70 ] 
 min_migration_cost = [10]
 migration_cost_power = [2]
 
@@ -37,7 +37,7 @@ migration_cost_power = [2]
 min_offspring_cost = [ 10 ]
 offspring_cost_magnifier = [ 1.5 ] # The relative difference in resource cost per offspring having migrated at the earliest opportunity versus the last
 
-number_replicates = 2
+number_replicates = 8
 
 executable = "./xmigration"
 
