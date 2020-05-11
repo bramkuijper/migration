@@ -149,6 +149,19 @@ double ss_autumn_migrant_pop = 0.0;
 double ss_spring_staging_size = 0.0;
 double ss_autumn_staging_size = 0.0;
 
+double previous_mean_theta_a = 0.0;
+double previous_mean_theta_b = 0.0;
+double previous_mean_phi_a = 0.0;
+double previous_mean_phi_b = 0.0;
+double current_mean_theta_a = 0.0;
+double current_mean_theta_b = 0.0;
+double current_mean_phi_a = 0.0;
+double current_mean_phi_b = 0.0;
+double selection_differential_theta_a = 0.0;
+double selection_differential_theta_b = 0.0;
+double selection_differential_phi_a = 0.0;
+double selection_differential_phi_b = 0.0;
+
 struct Individual 
 {
     double resources;
@@ -327,6 +340,10 @@ void write_data_headers(ofstream &DataFile)
 		<< "var_reproductive_cost;"
 		<< "mean_fecundity;"
 		<< "var_fecundity;"
+		<< "selection_differential_theta_a;"
+		<< "selection_differential_theta_b;"
+		<< "selection_differential_phi_a;"
+		<< "selection_differential_phi_b;"
 		
 		// AUTUMN MIGRATION STATS
         << "mean_autumn_staging_size;"
@@ -522,7 +539,6 @@ void write_summer_stats(ofstream &DataFile, int generation, int timestep)
 		ss_summer_cost /= breeder_pop;
 		ss_fecundity /= breeder_pop;
     }
-
 	
     // write statistics to a file
     DataFile 
@@ -535,7 +551,11 @@ void write_summer_stats(ofstream &DataFile, int generation, int timestep)
 		<< mean_summer_cost << ";"
 		<< (ss_summer_cost - mean_summer_cost * mean_summer_cost) << ";"
 		<< mean_fecundity << ";"
-		<< (ss_fecundity - mean_fecundity * mean_fecundity) << ";";
+		<< (ss_fecundity - mean_fecundity * mean_fecundity) << ";"
+		<< selection_differential_theta_a << ";"
+		<< selection_differential_theta_b << ";"
+		<< selection_differential_phi_a << ";"
+		<< selection_differential_phi_b << ";";
 
 }  // ENDS: write summer stats
 
@@ -1212,7 +1232,29 @@ void summer_reproduction(ofstream &DataFile)
     assert(Nvacancies >= 0);
 
     int random_kid = 0;
-
+	
+	double val_t_a;
+	double val_t_b;
+	double val_p_a;
+	double val_p_b;
+	
+	// Mean value of evolvable traits for the new cohort
+	for (int i = 0; i < offspring_pop; ++i)
+	{
+		val_t_a = 0.5 * (Kids[i].theta_a[0] + Kids[i].theta_a[1]);
+		current_mean_theta_a += val_t_a;
+		
+		val_t_b = 0.5 * (Kids[i].theta_b[0] + Kids[i].theta_b[1]);
+		current_mean_theta_b += val_t_b;
+		
+		val_p_a = 0.5 * (Kids[i].phi_a[0] + Kids[i].phi_a[1]);
+		current_mean_phi_a += val_p_a;
+		
+		val_p_b = 0.5 * (Kids[i].phi_b[0] + Kids[i].phi_b[1]);
+		current_mean_phi_b += val_p_b;
+	
+	}
+	
     // recruit new individuals to the summer pool
     for (int i = 0; i < Nvacancies; ++i)
     {
@@ -1552,14 +1594,34 @@ int main(int argc, char **argv)
 		Nvacancies = 0;
 		rv = 0;
 		
+	  	current_mean_theta_a = 0.0;
+	  	current_mean_theta_b = 0.0;
+	  	current_mean_phi_a = 0.0;
+	  	current_mean_phi_b = 0.0;
+		
 		summer_reproduction(DataFile);
+		
+		current_mean_theta_a /= offspring_pop;
+		current_mean_theta_b /= offspring_pop;
+		current_mean_phi_a /= offspring_pop;
+		current_mean_phi_b /= offspring_pop;
+		
+		selection_differential_theta_a = current_mean_theta_a - previous_mean_theta_a;
+		selection_differential_theta_b = current_mean_theta_b - previous_mean_theta_b;
+		selection_differential_phi_a = current_mean_phi_a - previous_mean_phi_a;
+		selection_differential_phi_b = current_mean_phi_b - previous_mean_phi_b;
+		
+		previous_mean_theta_a = current_mean_theta_a;
+		previous_mean_theta_b = current_mean_theta_b;
+		previous_mean_phi_a = current_mean_phi_a;
+		previous_mean_phi_b = current_mean_phi_b;
         
 		if (generation % skip == 0)
 		 {
 			 write_summer_stats(DataFile, generation, 5000);
 		  }
 		
-        // set autumn migration stats to 0 before postbreeding_dynamics starts
+		// set autumn migration stats to 0 before postbreeding_dynamics starts
         mean_autumn_flock_size = 0.0;
         mean_autumn_staging_size = 0.0;
 		var_autumn_flock_size = 0.0;
