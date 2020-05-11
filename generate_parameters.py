@@ -16,11 +16,11 @@ t_good_ends = [ 5000 ]
 
 rgood = [ 0.01 ] # Changed from 1 on 27 November 2019
 rbad = [ 0.005 ] # Changed from 0.5 on 27 November 2019
-preparation_penalty = 0.0 # The reduction in resource acquisition, relative to the normal feeding phase.
+preparation_penalty = [-0.5, -0.25, 0.0, 0.25, 0.5, 0.75, 1.0] # The reduction in resource acquisition, relative to the normal feeding phase.
 
 resource_reproduction_threshold = [50]  # [1]
 resource_starvation_threshold = [0.0]
-resource_max = 100
+resource_max = [100]
 
 # mutation rates
 mu_theta = 0.01
@@ -29,7 +29,7 @@ sdmu_theta = [0.01]
 sdmu_phi = sdmu_theta
     
 # migration cost parameters
-max_migration_cost = [ 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70 ] 
+max_migration_cost = [20] 
 min_migration_cost = [10]
 migration_cost_power = [2]
 
@@ -64,45 +64,47 @@ for rep_i in range(0, number_replicates):
                             for t_good_ends_i in t_good_ends:
                                 for rgood_i in rgood:
                                     for rbad_i in rbad:
-                                        for resource_reproduction_threshold_i in resource_reproduction_threshold:
-                                            for resource_starvation_threshold_i in resource_starvation_threshold:
-                                                for sdmu_theta_i in sdmu_theta:
-                                                    for max_migration_cost_i in max_migration_cost:
-                                                        for min_migration_cost_i in min_migration_cost:
-                                                            for migration_cost_power_i in migration_cost_power:
-                                                                for min_offspring_cost_i in min_offspring_cost:
-                                                                    for offspring_cost_magnifier_i in offspring_cost_magnifier:
+                                        for preparation_penalty_i in preparation_penalty:
+                                            for resource_reproduction_threshold_i in resource_reproduction_threshold:
+                                                for resource_starvation_threshold_i in resource_starvation_threshold:
+                                                    for resource_max_i in resource_max:
+                                                        for sdmu_theta_i in sdmu_theta:
+                                                            for max_migration_cost_i in max_migration_cost:
+                                                                for min_migration_cost_i in min_migration_cost:
+                                                                    for migration_cost_power_i in migration_cost_power:
+                                                                        for min_offspring_cost_i in min_offspring_cost:
+                                                                            for offspring_cost_magnifier_i in offspring_cost_magnifier:
 
-                                                                        # increment the counter for the number of 
-                                                                        # runs
-                                                                        counter += 1
+                                                                                # increment the counter for the number of 
+                                                                                # runs
+                                                                                counter += 1
 
-        #                                                                print("echo " + str(counter))
+                #                                                                print("echo " + str(counter))
 
 
-                                                                        print(executable + " " 
-                                                                                + str(init_phi_a_i) + " "
-                                                                                + str(init_phi_b_i) + " "
-                                                                                + str(init_theta_a_i) + " "
-                                                                                + str(init_theta_b_i) + " "
-                                                                                + str(pmort_i) + " "
-                                                                                + str(pgood_init_i) + " "
-                                                                                + str(t_good_ends_i) + " "
-                                                                                + str(rgood_i) + " "
-                                                                                + str(rbad_i) + " "
-                                                                                + str(preparation_penalty) + " "
-                                                                                + str(resource_reproduction_threshold_i) + " "
-                                                                                + str(resource_starvation_threshold_i) + " "
-                                                                                + str(mu_theta) + " "
-                                                                                + str(mu_phi) + " "
-                                                                                + str(sdmu_theta_i) + " "
-                                                                                + str(sdmu_theta_i) + " "
-                                                                                + str(max_migration_cost_i) + " "
-                                                                                + str(min_migration_cost_i) + " "
-                                                                                + str(migration_cost_power_i) + " "
-                                                                                + str(tmax) + " " 
-                                                                                + str(twinter) + " "
-                                                                                + str(resource_max) + " "
-                                                                                + str(min_offspring_cost_i) + " "
-                                                                                + str(offspring_cost_magnifier_i) + " "
-                                                                                + backgroundstr)
+                                                                                print(executable + " " 
+                                                                                        + str(init_phi_a_i) + " "
+                                                                                        + str(init_phi_b_i) + " "
+                                                                                        + str(init_theta_a_i) + " "
+                                                                                        + str(init_theta_b_i) + " "
+                                                                                        + str(pmort_i) + " "
+                                                                                        + str(pgood_init_i) + " "
+                                                                                        + str(t_good_ends_i) + " "
+                                                                                        + str(rgood_i) + " "
+                                                                                        + str(rbad_i) + " "
+                                                                                        + str(preparation_penalty_i) + " "
+                                                                                        + str(resource_reproduction_threshold_i) + " "
+                                                                                        + str(resource_starvation_threshold_i) + " "
+                                                                                        + str(mu_theta) + " "
+                                                                                        + str(mu_phi) + " "
+                                                                                        + str(sdmu_theta_i) + " "
+                                                                                        + str(sdmu_theta_i) + " "
+                                                                                        + str(max_migration_cost_i) + " "
+                                                                                        + str(min_migration_cost_i) + " "
+                                                                                        + str(migration_cost_power_i) + " "
+                                                                                        + str(tmax) + " " 
+                                                                                        + str(twinter) + " "
+                                                                                        + str(resource_max_i) + " "
+                                                                                        + str(min_offspring_cost_i) + " "
+                                                                                        + str(offspring_cost_magnifier_i) + " "
+                                                                                        + backgroundstr)
