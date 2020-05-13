@@ -14,11 +14,11 @@ pmort = [ 0.05 ]  # Short simulations on 27 November suggested pmort of 0.2 was 
 pgood_init = [ 0.5 ] # Deleted 0.5 option on 27 November 2019
 t_good_ends = [ 5000 ]
 
-rgood = [ 0.01 ] # Changed from 1 on 27 November 2019
-rbad = [ 0.005 ] # Changed from 0.5 on 27 November 2019
-preparation_penalty = [-0.5, -0.25, 0.0, 0.25, 0.5, 0.75, 1.0] # The reduction in resource acquisition, relative to the normal feeding phase.
+rgood = [ 0.01 ]
+rbad = [ 0.005 ]
+preparation_penalty = [0.0] # The reduction in resource acquisition, relative to the normal feeding phase.
 
-resource_reproduction_threshold = [50]  # [1]
+resource_reproduction_threshold = [50]
 resource_starvation_threshold = [0.0]
 resource_max = [100]
 
@@ -29,7 +29,7 @@ sdmu_theta = [0.01]
 sdmu_phi = sdmu_theta
     
 # migration cost parameters
-max_migration_cost = [20] 
+max_migration_cost = [10, 12, 14, 16, 18, 20] 
 min_migration_cost = [10]
 migration_cost_power = [2]
 
