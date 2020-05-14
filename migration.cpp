@@ -1601,6 +1601,9 @@ int main(int argc, char **argv)
 		
 		summer_reproduction(DataFile);
 		
+		if (generation % skip == 0)
+		 {
+		
 		current_mean_theta_a /= offspring_pop;
 		current_mean_theta_b /= offspring_pop;
 		current_mean_phi_a /= offspring_pop;
@@ -1615,10 +1618,8 @@ int main(int argc, char **argv)
 		previous_mean_theta_b = current_mean_theta_b;
 		previous_mean_phi_a = current_mean_phi_a;
 		previous_mean_phi_b = current_mean_phi_b;
-        
-		if (generation % skip == 0)
-		 {
-			 write_summer_stats(DataFile, generation, 5000);
+		
+		write_summer_stats(DataFile, generation, 5000);
 		  }
 		
 		// set autumn migration stats to 0 before postbreeding_dynamics starts
