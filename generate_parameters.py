@@ -10,7 +10,7 @@ init_phi_b = [0]
 tmax = 5000
 twinter = 5000
 
-pmort = [ 0.05 ]  # Short simulations on 27 November suggested pmort of 0.2 was too high. After further simulations, I decided to fix it at 0.05
+pmort = [0.01, 0.02, 0.04, 0.06, 0.08, 0.1, 0.12, 0.14, 0.16, 0.18, 0.2, 0.22]
 pgood_init = [ 0.5 ] # Deleted 0.5 option on 27 November 2019
 t_good_ends = [ 5000 ]
 
@@ -29,7 +29,7 @@ sdmu_theta = [0.01]
 sdmu_phi = sdmu_theta
     
 # migration cost parameters
-max_migration_cost = [10, 12, 14, 16, 18, 20] 
+max_migration_cost = [20] 
 min_migration_cost = [10]
 migration_cost_power = [2]
 
