@@ -299,6 +299,7 @@ void write_parameters(ofstream &DataFile)  // at end of outputted file
             << "N;" << N << endl
             << "migration_cost_power;" << migration_cost_power << endl
             << "max_migration_cost;" << max_migration_cost << endl
+			<< "min_migration_cost;" << min_migration_cost << endl
 			<< "min_offspring_cost;" << min_offspring_cost << endl
 			<< "offspring_cost_magnifier;" << offspring_cost_magnifier << endl
             << "seed;" << seed << endl;
@@ -1029,10 +1030,6 @@ void spring_dynamics(int t)
 		
     {		
 		// Resource cost of migration to the individual
-		// must be calculated before migration-induced mortality or non-survivors will be excluded
-		// THIS IS WHERE WE MAKE A CHANGE (20/04/20), because we have now decided we want to calculate group size based on survivors. But we haven't (as of 27/04/2020) decided how we'll do that.
-		//cost = min_migration_cost + (max_migration_cost - min_migration_cost) / pow(NFlock, migration_cost_power);
-        
 		SummerPop[i].resources = SummerPop[i].resources - migration_cost(NFlock);
 		SummerPop[i].resources = clamp(SummerPop[i].resources, 0.0, resource_max);
 		SummerPop[i].cost = migration_cost(NFlock);
