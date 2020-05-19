@@ -1156,7 +1156,7 @@ void summer_reproduction(ofstream &DataFile)
 
         // if mom does not meet minimum standards
         // no reproduction through female function
-        if (SummerPop[i].resources < breeding_threshold * SummerPop[i].timing / tmax  // Cost of clutch size of one. Further offspring incur a smaller, incremental cost that also increases through the season (below)
+        if (SummerPop[i].resources < breeding_threshold * SummerPop[i].timing / tmax)  // Cost of clutch size of one. Further offspring incur a smaller, incremental cost that also increases through the season (below)
         {
             SummerPop[i].fecundity = 0.0;
 			SummerPop[i].cost = 0.0;
