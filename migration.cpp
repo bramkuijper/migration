@@ -1156,7 +1156,7 @@ void summer_reproduction(ofstream &DataFile)
 
         // if mom does not meet minimum standards
         // no reproduction through female function
-        if (SummerPop[i].resources < breeding_threshold)
+        if (SummerPop[i].resources < breeding_threshold * SummerPop[i].timing / tmax  // Cost of clutch size of one. Further offspring incur a smaller, incremental cost that also increases through the season (below)
         {
             SummerPop[i].fecundity = 0.0;
 			SummerPop[i].cost = 0.0;
@@ -1184,8 +1184,8 @@ void summer_reproduction(ofstream &DataFile)
 
         // translate maternal resources to numbers of offspring
         //
-        // first round to lowest integer
-        resource_integer = floor((SummerPop[i].resources - breeding_threshold) / (min_offspring_cost + (SummerPop[i].timing * (offspring_cost_magnifier - 1) / tmax)));  // 17/04/20: Prior to resetting mothers' resource values, mother.resources was divided by five to reduce family size
+        // first round to lowest integer (+ 1 to account for first offspring, cost of which is represented by the phenologically-sensitive breeding_threshold)
+        resource_integer = 1 + floor((SummerPop[i].resources - (breeding_threshold * SummerPop[i].timing / tmax)) / (min_offspring_cost + (SummerPop[i].timing * (offspring_cost_magnifier - 1) / tmax)));
 
         // TODO (slightly digressing): can we come up with an analytical 
         // description of this rounding process of w into integer values?
