@@ -10,7 +10,7 @@ init_phi_b = [0]
 tmax = 5000
 twinter = 5000
 
-pmort = [0.01, 0.02, 0.04, 0.06, 0.08, 0.1, 0.12, 0.14, 0.16, 0.18, 0.2, 0.22]
+pmort = [0.05]
 pgood_init = [ 0.5 ] # Deleted 0.5 option on 27 November 2019
 t_good_ends = [ 5000 ]
 
@@ -29,7 +29,7 @@ sdmu_theta = [0.01]
 sdmu_phi = sdmu_theta
     
 # migration cost parameters
-max_migration_cost = [20] 
+max_migration_cost = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25] 
 min_migration_cost = [10]
 migration_cost_power = [2]
 
