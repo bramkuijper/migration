@@ -16,7 +16,7 @@ t_good_ends = [ 5000 ]
 
 rgood = [ 0.01 ]
 rbad = [ 0.005 ]
-preparation_penalty = [0.0] # The reduction in resource acquisition, relative to the normal feeding phase.
+preparation_penalty = [-0.2, -0.1, 0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0] # The reduction in resource acquisition, relative to the normal feeding phase.
 
 resource_reproduction_threshold = [50]
 resource_starvation_threshold = [0.0]
@@ -29,7 +29,7 @@ sdmu_theta = [0.01]
 sdmu_phi = sdmu_theta
     
 # migration cost parameters
-max_migration_cost = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25] 
+max_migration_cost = [20] 
 min_migration_cost = [10]
 migration_cost_power = [2]
 
