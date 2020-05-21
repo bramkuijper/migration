@@ -1137,7 +1137,8 @@ void summer_reproduction(ofstream &DataFile)
 
     // auxiliary variable specifing the rounded amount of a mother's
     // resources
-    int resource_integer;
+    int resource_integer = 0;
+	double offspring_equivalence = 0.0;
 
     /// auxilary variable specifying the identity of the randomly sampled
     // father
@@ -1202,11 +1203,13 @@ void summer_reproduction(ofstream &DataFile)
         // translate maternal resources to numbers of offspring
         //
         // first round to lowest integer (+ 1 to account for first offspring, cost of which is represented by the phenologically-sensitive breeding_threshold)
-        resource_integer = 1 + floor((SummerPop[i].resources - (breeding_threshold * (tmax + SummerPop[i].timing - 1) / tmax)) / (min_offspring_cost + ((SummerPop[i].timing - 1) * (offspring_cost_magnifier) / tmax)));
-
+        //resource_integer = 1 + floor((SummerPop[i].resources - (breeding_threshold * (tmax + SummerPop[i].timing - 1) / tmax)) / (min_offspring_cost + ((SummerPop[i].timing - 1) * offspring_cost_magnifier * min_offspring_cost / tmax)));
+        offspring_equivalence = 1 + (SummerPop[i].resources - (breeding_threshold * (tmax + SummerPop[i].timing - 1) / tmax)) / (min_offspring_cost + (min_offspring_cost * offspring_cost_magnifier * (SummerPop[i].timing - 1) / tmax));
+		resource_integer = floor(offspring_equivalence);
+		
         // TODO (slightly digressing): can we come up with an analytical 
         // description of this rounding process of w into integer values?
-        if (uniform(rng_r) < SummerPop[i].resources - resource_integer)
+        if (uniform(rng_r) < offspring_equivalence - resource_integer)
         {
             // make an additional offspring (adding stochasticity to fecundity)
             ++resource_integer;
