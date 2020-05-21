@@ -32,10 +32,10 @@ uniform_real_distribution<> uniform(0.0,1.0);
 // function
 
 // number of individuals in population
-const int N = 1500;
+const int N = 500;
 
 // number of generations
-long int number_generations = 200000;
+long int number_generations = 2000;
 
 // initial values for phi (social dependency) and theta (resource dependency)
 // a is an intercept, b is a gradient
@@ -117,10 +117,14 @@ double ss_signal_timing = 0.0;
 double mean_age = 0.0;
 double var_age = 0.0;
 double ss_age = 0.0;
-double mean_summer_cost = 0.0;
-double ss_summer_cost = 0.0;
-double mean_fecundity = 0.0;
-double ss_fecundity = 0.0;
+double mean_summer_cost_summerpop = 0.0;
+double ss_summer_cost_summerpop = 0.0;
+double mean_fecundity_summerpop = 0.0;
+double ss_fecundity_summerpop = 0.0;
+double mean_summer_cost_breederpop = 0.0;
+double ss_summer_cost_breederpop = 0.0;
+double mean_fecundity_breederpop = 0.0;
+double ss_fecundity_breederpop = 0.0;
 double mean_resources = 0.0;
 double ss_resources = 0.0;
 double rv =0.0;
@@ -337,14 +341,14 @@ void write_data_headers(ofstream &DataFile)
 	    << "breeder_pop;"
 		<< "nonreproductive_pop;"
         << "offspring_pop;"
-		<< "mean_reproductive_cost;"
-		<< "var_reproductive_cost;"
-		<< "mean_fecundity;"
-		<< "var_fecundity;"
-		<< "selection_differential_theta_a;"
-		<< "selection_differential_theta_b;"
-		<< "selection_differential_phi_a;"
-		<< "selection_differential_phi_b;"
+		<< "mean_reproductive_cost_breederpop;"
+		<< "var_reproductive_cost_breederpop;"
+		<< "mean_fecundity_breederpop;"
+		<< "var_fecundity_breederpop;"
+		<< "mean_reproductive_cost_summerpop;"
+		<< "var_reproductive_cost_summerpop;"
+		<< "mean_fecundity_summerpop;"
+		<< "var_fecundity_summerpop;"
 		
 		// AUTUMN MIGRATION STATS
         << "mean_autumn_staging_size;"
@@ -489,9 +493,17 @@ void write_summer_stats(ofstream &DataFile, int generation, int timestep)
 	
 	double mean_summer_cost = 0.0;
 	double ss_summer_cost = 0.0;
+	double mean_summer_cost_summerpop = 0.0;
+	double ss_summer_cost_summerpop = 0.0;
+	double mean_summer_cost_breederpop = 0.0;
+	double ss_summer_cost_breederpop = 0.0;
 	
 	double mean_fecundity = 0.0;
 	double ss_fecundity = 0.0;
+	double mean_fecundity_summerpop = 0.0;
+	double ss_fecundity_summerpop = 0.0;
+	double mean_fecundity_breederpop = 0.0;
+	double ss_fecundity_breederpop = 0.0;
    	
     for (int i = 0; i < (summer_pop - Nvacancies); ++i)  // for each individual in the summer population:
     {
@@ -529,16 +541,20 @@ void write_summer_stats(ofstream &DataFile, int generation, int timestep)
         mean_phi_a[1] /= summer_pop;
         mean_phi_b[1] /= summer_pop;
         mean_resources /= (breeder_pop + nonreproductive_pop);
-		mean_summer_cost /= summer_pop;
-		mean_fecundity /= summer_pop;
+		mean_summer_cost_summerpop = mean_summer_cost / summer_pop;
+		mean_fecundity_summerpop = mean_fecundity / summer_pop;
+		mean_summer_cost_breederpop = mean_summer_cost / breeder_pop;
+		mean_fecundity_breederpop = mean_fecundity / breeder_pop;
         
         ss_theta_a[1] /= summer_pop; 
         ss_theta_b[1] /= summer_pop; 
         ss_phi_a[1] /= summer_pop; 
         ss_phi_b[1] /= summer_pop;
         ss_resources /= (breeder_pop + nonreproductive_pop); 
-		ss_summer_cost /= breeder_pop;
-		ss_fecundity /= breeder_pop;
+		ss_summer_cost_summerpop = ss_summer_cost / summer_pop;
+		ss_fecundity_summerpop = ss_fecundity / summer_pop;
+		ss_summer_cost_breederpop = ss_summer_cost / breeder_pop;
+		ss_fecundity_breederpop = ss_fecundity / breeder_pop;
     }
 	
     // write statistics to a file
@@ -549,14 +565,14 @@ void write_summer_stats(ofstream &DataFile, int generation, int timestep)
 		<< breeder_pop << ";"
 		<< nonreproductive_pop << ";"
         << offspring_pop << ";"
-		<< mean_summer_cost << ";"
-		<< (ss_summer_cost - mean_summer_cost * mean_summer_cost) << ";"
-		<< mean_fecundity << ";"
-		<< (ss_fecundity - mean_fecundity * mean_fecundity) << ";"
-		<< selection_differential_theta_a << ";"
-		<< selection_differential_theta_b << ";"
-		<< selection_differential_phi_a << ";"
-		<< selection_differential_phi_b << ";";
+		<< mean_summer_cost_breederpop << ";"
+		<< (ss_summer_cost_breederpop - mean_summer_cost_breederpop * mean_summer_cost_breederpop) << ";"
+		<< mean_fecundity_breederpop << ";"
+		<< (ss_fecundity_breederpop - mean_fecundity_breederpop * mean_fecundity_breederpop) << ";"
+		<< mean_summer_cost_summerpop << ";"
+		<< (ss_summer_cost_summerpop - mean_summer_cost_summerpop * mean_summer_cost_summerpop) << ";"
+		<< mean_fecundity_summerpop << ";"
+		<< (ss_fecundity_summerpop - mean_fecundity_summerpop * mean_fecundity_summerpop) << ";";
 
 }  // ENDS: write summer stats
 
@@ -1033,6 +1049,7 @@ void spring_dynamics(int t)
 		SummerPop[i].resources = SummerPop[i].resources - migration_cost(NFlock);
 		SummerPop[i].resources = clamp(SummerPop[i].resources, 0.0, resource_max);
 		SummerPop[i].cost = migration_cost(NFlock);
+		SummerPop[i].fecundity = 0;
 
 		// death due to starvation
         if (SummerPop[i].resources < resource_starvation_threshold)
@@ -1156,7 +1173,7 @@ void summer_reproduction(ofstream &DataFile)
 
         // if mom does not meet minimum standards
         // no reproduction through female function
-        if (SummerPop[i].resources < breeding_threshold * SummerPop[i].timing / tmax)  // Cost of clutch size of one. Further offspring incur a smaller, incremental cost that also increases through the season (below)
+        if (SummerPop[i].resources < breeding_threshold * (tmax + SummerPop[i].timing - 1) / tmax)  // Cost of clutch size of one. Further offspring incur a smaller, incremental cost that also increases through the season (below)
         {
             SummerPop[i].fecundity = 0.0;
 			SummerPop[i].cost = 0.0;
@@ -1185,7 +1202,7 @@ void summer_reproduction(ofstream &DataFile)
         // translate maternal resources to numbers of offspring
         //
         // first round to lowest integer (+ 1 to account for first offspring, cost of which is represented by the phenologically-sensitive breeding_threshold)
-        resource_integer = 1 + floor((SummerPop[i].resources - (breeding_threshold * SummerPop[i].timing / tmax)) / (min_offspring_cost + (SummerPop[i].timing * (offspring_cost_magnifier - 1) / tmax)));
+        resource_integer = 1 + floor((SummerPop[i].resources - (breeding_threshold * (tmax + SummerPop[i].timing - 1) / tmax)) / (min_offspring_cost + ((SummerPop[i].timing - 1) * (offspring_cost_magnifier) / tmax)));
 
         // TODO (slightly digressing): can we come up with an analytical 
         // description of this rounding process of w into integer values?
