@@ -37,6 +37,8 @@ migration_cost_power = [2]
 min_offspring_cost = [ 10 ]
 offspring_cost_magnifier = [ 1.5 ] # The relative difference in resource cost per offspring having migrated at the earliest opportunity versus the last
 
+carryover_proportion = 0
+
 number_replicates = 8
 
 executable = "./xmigration"
@@ -107,4 +109,5 @@ for rep_i in range(0, number_replicates):
                                                                                         + str(resource_max_i) + " "
                                                                                         + str(min_offspring_cost_i) + " "
                                                                                         + str(offspring_cost_magnifier_i) + " "
+                                                                                        + str(carryover_proportion) + " "
                                                                                         + backgroundstr)

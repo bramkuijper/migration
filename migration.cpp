@@ -32,10 +32,10 @@ uniform_real_distribution<> uniform(0.0,1.0);
 // function
 
 // number of individuals in population
-const int N = 500;
+const int N = 1500;
 
 // number of generations
-long int number_generations = 2000;
+long int number_generations = 200000;
 
 // initial values for phi (social dependency) and theta (resource dependency)
 // a is an intercept, b is a gradient
@@ -81,6 +81,8 @@ double cost = 0.0;
 // reproductive cost function
 double min_offspring_cost = 0.0;
 double offspring_cost_magnifier = 0.0;
+
+double carryover_proportion = 0.0;  // proportion of an individual's resource value that can be carried over to the following year
 
 // max number of intervals per season (two seasons: summer, winter)
 int tmax = 5000;
@@ -250,6 +252,7 @@ void init_arguments(int argc, char **argv)
 	resource_max = atof(argv[22]);
 	min_offspring_cost = atof(argv[23]);
 	offspring_cost_magnifier = atof(argv[24]);
+	carryover_proportion = atof(argv[25]);
 		
     // some bounds checking on parameters
     // probability of encountering a good environment
@@ -306,6 +309,7 @@ void write_parameters(ofstream &DataFile)  // at end of outputted file
 			<< "min_migration_cost;" << min_migration_cost << endl
 			<< "min_offspring_cost;" << min_offspring_cost << endl
 			<< "offspring_cost_magnifier;" << offspring_cost_magnifier << endl
+			<< "carryover_proportion;" << carryover_proportion << endl
             << "seed;" << seed << endl;
 }
 
@@ -382,7 +386,8 @@ void write_data_headers(ofstream &DataFile)
 	    << "mean_phi_b_winter;"
 	    << "var_phi_b_winter;"
 		<< "mean_age;"
-		<< "var_age;"<< endl;
+		<< "var_age;"
+		<< endl;
 }
 
 
@@ -1495,6 +1500,8 @@ void postbreeding_dynamics(int t)
             --winter_pop;
             --i; 
         }
+		
+		WinterPop[i].resources *= carryover_proportion;
 
     } // Ends: update resource levels of winter arrivals
 
