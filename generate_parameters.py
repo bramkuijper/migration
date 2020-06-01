@@ -2,10 +2,10 @@
 
 # generate all parameter combinations to run the migration simulation
 
-init_theta_a = [0.5]  # Default is 0.0005
-init_theta_b = [0.5]  # Default is 0
-init_phi_a = [0.5]  # Default is 0.0005
-init_phi_b = [0.5]  # Default is 0
+init_theta_a = [0.0005]  # Default is 0.0005
+init_theta_b = [0]  # Default is 0
+init_phi_a = [0.0005]  # Default is 0.0005
+init_phi_b = [0]  # Default is 0
 
 tmax = 5000
 twinter = 5000
@@ -29,7 +29,7 @@ sdmu_theta = [0.01]
 sdmu_phi = sdmu_theta
     
 # migration cost parameters
-max_migration_cost = [20]  # Default is 20 
+max_migration_cost = [12.5, 15, 17.5]  # Default is 20 
 min_migration_cost = [10]
 migration_cost_power = [2]
 
