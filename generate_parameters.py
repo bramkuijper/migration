@@ -2,21 +2,21 @@
 
 # generate all parameter combinations to run the migration simulation
 
-init_theta_a = [0.0005]
-init_theta_b = [0]
-init_phi_a = [0.0005]
-init_phi_b = [0]
+init_theta_a = [0.5]  # Default is 0.0005
+init_theta_b = [0.5]  # Default is 0
+init_phi_a = [0.5]  # Default is 0.0005
+init_phi_b = [0.5]  # Default is 0
 
 tmax = 5000
 twinter = 5000
 
-pmort = [0.05]
+pmort = [0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1, 0.11, 0.12, 0.13, 0.14, 0.15, 0.16, 0.17, 0.18, 0.19, 0.2, 0.21, 0.22]  # Default is 0.05
 pgood_init = [ 0.5 ] # Deleted 0.5 option on 27 November 2019
 t_good_ends = [ 5000 ]
 
 rgood = [ 0.01 ]
 rbad = [ 0.005 ]
-preparation_penalty = [-0.2, -0.1, 0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0] # The reduction in resource acquisition, relative to the normal feeding phase.
+preparation_penalty = [0] # The reduction in resource acquisition, relative to the normal feeding phase.
 
 resource_reproduction_threshold = [50]
 resource_starvation_threshold = [0.0]
@@ -29,7 +29,7 @@ sdmu_theta = [0.01]
 sdmu_phi = sdmu_theta
     
 # migration cost parameters
-max_migration_cost = [20] 
+max_migration_cost = [20]  # Default is 20 
 min_migration_cost = [10]
 migration_cost_power = [2]
 
