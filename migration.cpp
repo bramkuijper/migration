@@ -1153,7 +1153,7 @@ void summer_reproduction(ofstream &DataFile)
     if (summer_pop == 1)
     {
         // quit if extinct 
-        write_parameters(DataFile);
+        //write_parameters(DataFile);
 
         exit(1);
     }
