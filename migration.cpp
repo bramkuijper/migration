@@ -931,10 +931,10 @@ void spring_dynamics(int t)
         
 		// individuals must acquire the resources necessary for migration and reproduction before
 		// they can consider migrating. 
-		if (WinterPop[i].resources < breeding_threshold)
-		{
-			continue;
-		}
+		//if (WinterPop[i].resources < breeding_threshold)
+		//{
+		//	continue;
+		//}
 		
 		// reaction norm dependent on resources
         // resulting in signaling a willingness to disperse
