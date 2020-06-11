@@ -29,13 +29,14 @@ sdmu_theta = [0.01]
 sdmu_phi = sdmu_theta
     
 # migration cost parameters
-max_migration_cost = [12.5, 15, 17.5]  # Default is 20 
+max_migration_cost = [20]  # Default is 20 
 min_migration_cost = [10]
 migration_cost_power = [2]
 
 # reproductive cost parameters
 min_offspring_cost = [ 10 ]
 offspring_cost_magnifier = [ 1.5 ] # The relative difference in resource cost per offspring having migrated at the earliest opportunity versus the last
+relative_mortality_risk_of_migration = 2
 
 carryover_proportion = 0
 
@@ -110,4 +111,5 @@ for rep_i in range(0, number_replicates):
                                                                                         + str(min_offspring_cost_i) + " "
                                                                                         + str(offspring_cost_magnifier_i) + " "
                                                                                         + str(carryover_proportion) + " "
+                                                                                        + str(relative_mortality_risk_of_migration) + " "
                                                                                         + backgroundstr)

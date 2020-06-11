@@ -46,6 +46,7 @@ double init_phi_b = 0.0;
 
 // mortality probability 
 double pmort = 0.0;
+double relative_mortality_risk_of_migration = 0.0;
 
 // initial probability per season to encounter a good resource patch
 double pgood_init = 0.0;
@@ -253,6 +254,7 @@ void init_arguments(int argc, char **argv)
 	min_offspring_cost = atof(argv[23]);
 	offspring_cost_magnifier = atof(argv[24]);
 	carryover_proportion = atof(argv[25]);
+	relative_mortality_risk_of_migration = atof(argv[26]);
 		
     // some bounds checking on parameters
     // probability of encountering a good environment
@@ -310,6 +312,7 @@ void write_parameters(ofstream &DataFile)  // at end of outputted file
 			<< "min_offspring_cost;" << min_offspring_cost << endl
 			<< "offspring_cost_magnifier;" << offspring_cost_magnifier << endl
 			<< "carryover_proportion;" << carryover_proportion << endl
+			<< "relative_mortality_risk_of_migration;" << relative_mortality_risk_of_migration << endl
             << "seed;" << seed << endl;
 }
 
@@ -801,7 +804,7 @@ void mortality()
     for (int i = 0; i < summer_pop;++i)
     {
         // individual dies; replace with end of the stack individual
-        if (uniform(rng_r) < pmort)
+        if (uniform(rng_r) < (pmort * relative_mortality_risk_of_migration))
         {
             SummerPop[i] = SummerPop[summer_pop - 1];
             --summer_pop;
