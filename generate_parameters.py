@@ -91,7 +91,6 @@ for rep_i in range(0, number_replicates):
                                                                                         + str(init_theta_a_i) + " "
                                                                                         + str(init_theta_b_i) + " "
                                                                                         + str(pmort_i) + " "
-                                                                                        + str(relative_mortality_risk_of_migration_i) + " "
                                                                                         + str(pgood_init) + " "
                                                                                         + str(t_good_ends_i) + " "
                                                                                         + str(rgood_i) + " "
@@ -112,4 +111,5 @@ for rep_i in range(0, number_replicates):
                                                                                         + str(min_offspring_cost_i) + " "
                                                                                         + str(offspring_cost_magnifier_i) + " "
                                                                                         + str(carryover_proportion) + " "
+                                                                                        + str(relative_mortality_risk_of_migration_i) + " "
                                                                                         + backgroundstr)
