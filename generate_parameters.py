@@ -40,7 +40,7 @@ relative_mortality_risk_of_migration = [1, 1.5, 2, 4]
 
 carryover_proportion = [0, 1]
 
-number_replicates = 4
+number_replicates = 8
 
 executable = "./xmigration"
 
