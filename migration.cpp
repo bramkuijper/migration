@@ -1,5 +1,3 @@
-// Trying to force a backup
-
 // Collective migration when resources vary
 // Bram Kuijper & Simon Evans
 // 2019
@@ -88,8 +86,8 @@ double offspring_cost_magnifier = 0.0;
 double carryover_proportion = 0.0;  // proportion of an individual's resource value that can be carried over to the following year
 
 // max number of intervals per season (two seasons: summer, winter)
-int tmax = 5000;
-int twinter = 0.0;
+int twinter = 0;
+int tspring = 5000;
 
 int skip = 100;
 
@@ -122,10 +120,6 @@ double ss_signal_timing = 0.0;
 double mean_age = 0.0;
 double var_age = 0.0;
 double ss_age = 0.0;
-double mean_summer_cost_summerpop = 0.0;
-double ss_summer_cost_summerpop = 0.0;
-double mean_fecundity_summerpop = 0.0;
-double ss_fecundity_summerpop = 0.0;
 double mean_summer_cost_breederpop = 0.0;
 double ss_summer_cost_breederpop = 0.0;
 double mean_fecundity_breederpop = 0.0;
@@ -148,7 +142,7 @@ int nonreproductive_pop = 0;
 int offspring_pop = 0;
 int autumn_nonmigrant_pop = 0;
 int autumn_migrant_pop = 0;
-int n_spring_flocks = 0;  // recording the number of spring flocks (tmax - n(unusued departure intervals))
+int n_spring_flocks = 0;  // recording the number of spring flocks (tspring - n(unusued departure intervals))
 int n_autumn_flocks = 0;
 int summer_pop_old = 0;  // 06/02/20: So that I can track summer_pop old
 int Nvacancies = 0;
@@ -157,19 +151,6 @@ double ss_spring_migrant_pop = 0.0;
 double ss_autumn_migrant_pop = 0.0;
 double ss_spring_staging_size = 0.0;
 double ss_autumn_staging_size = 0.0;
-
-double previous_mean_theta_a = 0.0;
-double previous_mean_theta_b = 0.0;
-double previous_mean_phi_a = 0.0;
-double previous_mean_phi_b = 0.0;
-double current_mean_theta_a = 0.0;
-double current_mean_theta_b = 0.0;
-double current_mean_phi_a = 0.0;
-double current_mean_phi_b = 0.0;
-double selection_differential_theta_a = 0.0;
-double selection_differential_theta_b = 0.0;
-double selection_differential_phi_a = 0.0;
-double selection_differential_phi_b = 0.0;
 
 struct Individual 
 {
@@ -250,7 +231,7 @@ void init_arguments(int argc, char **argv)
     max_migration_cost = atof(argv[17]);
 	min_migration_cost = atof(argv[18]);
     migration_cost_power = atof(argv[19]);
-    tmax = atoi(argv[20]);
+    tspring = atoi(argv[20]);
 	twinter = atoi(argv[21]);
 	resource_max = atof(argv[22]);
 	min_offspring_cost = atof(argv[23]);
@@ -265,13 +246,13 @@ void init_arguments(int argc, char **argv)
     assert(pgood_init <= 1.0);
     
     //max number of days per season > 0
-    assert(tmax > 0);
+    assert(tspring > 0);
 	assert(twinter >= 0);
 
     // probability that encountering good resource should be
     // set to 0 after t_good_ends timesteps
     assert(t_good_ends >= 0);
-    assert(t_good_ends <= tmax);
+    assert(t_good_ends <= tspring);
 
     // resource increments
     assert(rgood_init > 0);
@@ -305,7 +286,7 @@ void write_parameters(ofstream &DataFile)  // at end of outputted file
             << "mu_phi;" << mu_phi << endl
             << "sdmu_theta;" << sdmu_theta << endl
             << "sdmu_phi;" << sdmu_phi << endl
-            << "tmax;" << tmax << endl
+            << "tspring;" << tspring << endl
 			<< "twinter;" << twinter << endl
             << "N;" << N << endl
             << "migration_cost_power;" << migration_cost_power << endl
@@ -354,10 +335,6 @@ void write_data_headers(ofstream &DataFile)
 		<< "var_reproductive_cost_breederpop;"
 		<< "mean_fecundity_breederpop;"
 		<< "var_fecundity_breederpop;"
-		<< "mean_reproductive_cost_summerpop;"
-		<< "var_reproductive_cost_summerpop;"
-		<< "mean_fecundity_summerpop;"
-		<< "var_fecundity_summerpop;"
 		
 		// AUTUMN MIGRATION STATS
         << "mean_autumn_staging_size;"
@@ -503,15 +480,11 @@ void write_summer_stats(ofstream &DataFile, int generation, int timestep)
 	
 	double mean_summer_cost = 0.0;
 	double ss_summer_cost = 0.0;
-	double mean_summer_cost_summerpop = 0.0;
-	double ss_summer_cost_summerpop = 0.0;
 	double mean_summer_cost_breederpop = 0.0;
 	double ss_summer_cost_breederpop = 0.0;
 	
 	double mean_fecundity = 0.0;
 	double ss_fecundity = 0.0;
-	double mean_fecundity_summerpop = 0.0;
-	double ss_fecundity_summerpop = 0.0;
 	double mean_fecundity_breederpop = 0.0;
 	double ss_fecundity_breederpop = 0.0;
    	
@@ -551,8 +524,6 @@ void write_summer_stats(ofstream &DataFile, int generation, int timestep)
         mean_phi_a[1] /= summer_pop;
         mean_phi_b[1] /= summer_pop;
         mean_resources /= (breeder_pop + nonreproductive_pop);
-		mean_summer_cost_summerpop = mean_summer_cost / summer_pop;
-		mean_fecundity_summerpop = mean_fecundity / summer_pop;
 		mean_summer_cost_breederpop = mean_summer_cost / breeder_pop;
 		mean_fecundity_breederpop = mean_fecundity / breeder_pop;
         
@@ -561,8 +532,6 @@ void write_summer_stats(ofstream &DataFile, int generation, int timestep)
         ss_phi_a[1] /= summer_pop; 
         ss_phi_b[1] /= summer_pop;
         ss_resources /= (breeder_pop + nonreproductive_pop); 
-		ss_summer_cost_summerpop = ss_summer_cost / summer_pop;
-		ss_fecundity_summerpop = ss_fecundity / summer_pop;
 		ss_summer_cost_breederpop = ss_summer_cost / breeder_pop;
 		ss_fecundity_breederpop = ss_fecundity / breeder_pop;
     }
@@ -578,11 +547,7 @@ void write_summer_stats(ofstream &DataFile, int generation, int timestep)
 		<< mean_summer_cost_breederpop << ";"
 		<< (ss_summer_cost_breederpop - mean_summer_cost_breederpop * mean_summer_cost_breederpop) << ";"
 		<< mean_fecundity_breederpop << ";"
-		<< (ss_fecundity_breederpop - mean_fecundity_breederpop * mean_fecundity_breederpop) << ";"
-		<< mean_summer_cost_summerpop << ";"
-		<< (ss_summer_cost_summerpop - mean_summer_cost_summerpop * mean_summer_cost_summerpop) << ";"
-		<< mean_fecundity_summerpop << ";"
-		<< (ss_fecundity_summerpop - mean_fecundity_summerpop * mean_fecundity_summerpop) << ";";
+		<< (ss_fecundity_breederpop - mean_fecundity_breederpop * mean_fecundity_breederpop) << ";";
 
 }  // ENDS: write summer stats
 
@@ -1172,19 +1137,9 @@ void summer_reproduction(ofstream &DataFile)
     // just discard the last individual
     for (int i = 0; i < summer_pop; ++i)
     {
-		rv = SummerPop[i].resources;
-		mean_resources += rv;
-		ss_resources += rv * rv;
-		
-	    // get the mother
-        mother = SummerPop[i];
 
-        assert(mother.theta_b[1] >= 0.0);
-        assert(mother.theta_b[1] <= 1.0);
-
-        // if mom does not meet minimum standards
-        // no reproduction through female function
-        if (SummerPop[i].resources < breeding_threshold * (tmax + SummerPop[i].timing - 1) / tmax)  // Cost of clutch size of one. Further offspring incur a smaller, incremental cost that also increases through the season (below)
+        // if individual does not meet minimum standards then no reproduction through female function
+        if (SummerPop[i].resources < breeding_threshold * (tspring + SummerPop[i].timing - 1) / tspring)  // Cost of clutch size of one. Further offspring incur a smaller, incremental cost that also increases through the season (below)
         {
             SummerPop[i].fecundity = 0.0;
 			SummerPop[i].cost = 0.0;
@@ -1196,6 +1151,16 @@ void summer_reproduction(ofstream &DataFile)
 
         // update stats
         ++breeder_pop;
+		
+		rv = SummerPop[i].resources;
+		mean_resources += rv;
+		ss_resources += rv * rv;
+		
+	    // get the mother
+        mother = SummerPop[i];
+
+        assert(mother.theta_b[1] >= 0.0);
+        assert(mother.theta_b[1] <= 1.0);
 
         // now randomly select a father
         do {
@@ -1213,8 +1178,8 @@ void summer_reproduction(ofstream &DataFile)
         // translate maternal resources to numbers of offspring
         //
         // first round to lowest integer (+ 1 to account for first offspring, cost of which is represented by the phenologically-sensitive breeding_threshold)
-        //resource_integer = 1 + floor((SummerPop[i].resources - (breeding_threshold * (tmax + SummerPop[i].timing - 1) / tmax)) / (min_offspring_cost + ((SummerPop[i].timing - 1) * offspring_cost_magnifier * min_offspring_cost / tmax)));
-        offspring_equivalence = 1 + (SummerPop[i].resources - (breeding_threshold * (tmax + SummerPop[i].timing - 1) / tmax)) / (min_offspring_cost + (min_offspring_cost * offspring_cost_magnifier * (SummerPop[i].timing - 1) / tmax));
+        //resource_integer = 1 + floor((SummerPop[i].resources - (breeding_threshold * (tspring + SummerPop[i].timing - 1) / tspring)) / (min_offspring_cost + ((SummerPop[i].timing - 1) * offspring_cost_magnifier * min_offspring_cost / tspring)));
+        offspring_equivalence = 1 + (SummerPop[i].resources - (breeding_threshold * (tspring + SummerPop[i].timing - 1) / tspring)) / (min_offspring_cost + (min_offspring_cost * offspring_cost_magnifier * (SummerPop[i].timing - 1) / tspring));
 		resource_integer = floor(offspring_equivalence);
 		
         // TODO (slightly digressing): can we come up with an analytical 
@@ -1259,28 +1224,6 @@ void summer_reproduction(ofstream &DataFile)
     assert(Nvacancies >= 0);
 
     int random_kid = 0;
-	
-	double val_t_a;
-	double val_t_b;
-	double val_p_a;
-	double val_p_b;
-	
-	// Mean value of evolvable traits for the new cohort
-	for (int i = 0; i < offspring_pop; ++i)
-	{
-		val_t_a = 0.5 * (Kids[i].theta_a[0] + Kids[i].theta_a[1]);
-		current_mean_theta_a += val_t_a;
-		
-		val_t_b = 0.5 * (Kids[i].theta_b[0] + Kids[i].theta_b[1]);
-		current_mean_theta_b += val_t_b;
-		
-		val_p_a = 0.5 * (Kids[i].phi_a[0] + Kids[i].phi_a[1]);
-		current_mean_phi_a += val_p_a;
-		
-		val_p_b = 0.5 * (Kids[i].phi_b[0] + Kids[i].phi_b[1]);
-		current_mean_phi_b += val_p_b;
-	
-	}
 	
     // recruit new individuals to the summer pool
     for (int i = 0; i < Nvacancies; ++i)
@@ -1552,28 +1495,15 @@ int main(int argc, char **argv)
 		
 		
 		// Allow populations to become established (individuals must acquire resources)
-		if(generation <= 1000)  
+		if(generation < 5000)  
 			{	
-				breeding_threshold = resource_reproduction_threshold * generation / 1000;
+				breeding_threshold = resource_reproduction_threshold * generation / 5000;
 			}
 		else
 			{
 				breeding_threshold = resource_reproduction_threshold;
 			}
-		
-		
-		// CHANGING RESOURCE AVAILABILITY MID-SIMULATION (if desired)
-		if(generation > number_generations*1)  //EXPERIMENTAL SWITCH
-			{	
-				rgood = rgood_init/1;
-				rbad = rbad_init/1;
-			}
-		
-		if(generation > number_generations*1)  //EXPERIMENTAL SWITCH
-			{	
-				rgood = rgood_init/1;
-				rbad = rbad_init/1;
-			}	
+
 		
 		spring_pop_start = winter_pop;
 		
@@ -1589,7 +1519,7 @@ int main(int argc, char **argv)
 		ss_resources = 0.0;
 		rv = 0;
 		
-		for (int t = 0; t < tmax; ++t)
+		for (int t = 0; t < tspring; ++t)
         {
             spring_dynamics(t);
 			
@@ -1599,11 +1529,11 @@ int main(int argc, char **argv)
 			
         // now take averages over all timesteps that individuals did (can) join groups
         mean_spring_flock_size = n_spring_flocks > 0 ? mean_spring_flock_size / n_spring_flocks : 0;
-		mean_spring_staging_size /= tmax;
+		mean_spring_staging_size /= tspring;
 		
 		// now record variance in flock size and staging size over the season
 		var_spring_flock_size = n_spring_flocks > 0 ? (ss_spring_flock_size / n_spring_flocks) - (mean_spring_flock_size * mean_spring_flock_size) : 0;
-		var_spring_staging_size = (ss_spring_staging_size / tmax) - (mean_spring_staging_size * mean_spring_staging_size);	
+		var_spring_staging_size = (ss_spring_staging_size / tspring) - (mean_spring_staging_size * mean_spring_staging_size);	
 		
 		if (generation % skip == 0)
 		 {
@@ -1622,34 +1552,13 @@ int main(int argc, char **argv)
 		// Individuals reproduce after they migrated to the summer spot
 		Nvacancies = 0;
 		rv = 0;
-		
-	  	current_mean_theta_a = 0.0;
-	  	current_mean_theta_b = 0.0;
-	  	current_mean_phi_a = 0.0;
-	  	current_mean_phi_b = 0.0;
-		
+				
 		summer_reproduction(DataFile);
 		
 		if (generation % skip == 0)
-		 {
-		
-		current_mean_theta_a /= offspring_pop;
-		current_mean_theta_b /= offspring_pop;
-		current_mean_phi_a /= offspring_pop;
-		current_mean_phi_b /= offspring_pop;
-		
-		selection_differential_theta_a = current_mean_theta_a - previous_mean_theta_a;
-		selection_differential_theta_b = current_mean_theta_b - previous_mean_theta_b;
-		selection_differential_phi_a = current_mean_phi_a - previous_mean_phi_a;
-		selection_differential_phi_b = current_mean_phi_b - previous_mean_phi_b;
-		
-		previous_mean_theta_a = current_mean_theta_a;
-		previous_mean_theta_b = current_mean_theta_b;
-		previous_mean_phi_a = current_mean_phi_a;
-		previous_mean_phi_b = current_mean_phi_b;
-		
+		{
 		write_summer_stats(DataFile, generation, 5000);
-		  }
+		}
 		
 		// set autumn migration stats to 0 before postbreeding_dynamics starts
         mean_autumn_flock_size = 0.0;
@@ -1671,7 +1580,7 @@ int main(int argc, char **argv)
         autumn_pop_start = summer_pop;
 		
 		// time during summer during which individuals forage
-        for (int t = 0; t < tmax; ++t)
+        for (int t = 0; t < tspring; ++t)
         {
             postbreeding_dynamics(t);
 			
@@ -1687,11 +1596,11 @@ int main(int argc, char **argv)
 		
         // now take averages over all timesteps that individuals did (can) join groups
         mean_autumn_flock_size = n_autumn_flocks > 0 ?  mean_autumn_flock_size / n_autumn_flocks : 0;
-        mean_autumn_staging_size /= tmax;
+        mean_autumn_staging_size /= tspring;
 		
 		// now record variance in autumn flock size and staging size over the season
 		var_autumn_flock_size = n_autumn_flocks > 0 ? (ss_autumn_flock_size / n_autumn_flocks) - (mean_autumn_flock_size * mean_autumn_flock_size) : 0;
-		var_autumn_staging_size = (ss_autumn_staging_size / tmax) - (mean_autumn_staging_size * mean_autumn_staging_size);
+		var_autumn_staging_size = (ss_autumn_staging_size / tspring) - (mean_autumn_staging_size * mean_autumn_staging_size);
 		
 		autumn_nonmigrant_pop = summer_pop + staging_pop;
 	  
