@@ -534,7 +534,7 @@ void write_summer_stats(ofstream &DataFile, int generation, int timestep)
 	
     // write statistics to a file
     DataFile 
-        << (summer_pop - Nvacancies) << ";"
+        << (breeder_pop + nonreproductive_pop) << ";"
 	    << mean_resources << ";"
 	    << (ss_resources - mean_resources * mean_resources) << ";"
 		<< breeder_pop << ";"
@@ -1626,6 +1626,13 @@ int main(int argc, char **argv)
 		
         // let individuals die with a certain probability 
         mortality();
+		
+	    if (winter_pop <= 1)
+	    { 
+	        write_parameters(DataFile);
+
+	        exit(1);
+	    }
 				
     } // ENDS: GENERATION
 
