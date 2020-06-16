@@ -515,26 +515,26 @@ void write_summer_stats(ofstream &DataFile, int generation, int timestep)
     if (summer_pop > 0)
     {
         // calculate means and variances of the summer population
-        mean_theta_a[1] /= summer_pop;
-        mean_theta_b[1] /= summer_pop;
-        mean_phi_a[1] /= summer_pop;
-        mean_phi_b[1] /= summer_pop;
-        mean_resources /= summer_pop;
+        mean_theta_a[1] /= (summer_pop - Nvacancies);
+        mean_theta_b[1] /= (summer_pop - Nvacancies);
+        mean_phi_a[1] /= (summer_pop - Nvacancies);
+        mean_phi_b[1] /= (summer_pop - Nvacancies);
+        mean_resources /= (summer_pop - Nvacancies);
 		mean_summer_cost /= breeder_pop;
 		mean_fecundity /= breeder_pop;
         
-        ss_theta_a[1] /= summer_pop; 
-        ss_theta_b[1] /= summer_pop; 
-        ss_phi_a[1] /= summer_pop; 
-        ss_phi_b[1] /= summer_pop;
-        ss_resources /= summer_pop; 
+        ss_theta_a[1] /= (summer_pop - Nvacancies); 
+        ss_theta_b[1] /= (summer_pop - Nvacancies); 
+        ss_phi_a[1] /= (summer_pop - Nvacancies); 
+        ss_phi_b[1] /= (summer_pop - Nvacancies);
+        ss_resources /= (summer_pop - Nvacancies); 
 		ss_summer_cost /= breeder_pop;
 		ss_fecundity /= breeder_pop;
     }
 	
     // write statistics to a file
     DataFile 
-        << summer_pop << ";"
+        << (summer_pop - Nvacancies) << ";"
 	    << mean_resources << ";"
 	    << (ss_resources - mean_resources * mean_resources) << ";"
 		<< breeder_pop << ";"
