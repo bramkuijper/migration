@@ -32,10 +32,10 @@ uniform_real_distribution<> uniform(0.0,1.0);
 // function
 
 // number of individuals in population
-const int N = 2000;
+const int N = 400;
 
 // number of generations
-long int number_generations = 200000;
+long int number_generations = 4000;
 
 // initial values for phi (social dependency) and theta (resource dependency)
 // a is an intercept, b is a gradient
@@ -480,14 +480,10 @@ void write_summer_stats(ofstream &DataFile, int generation, int timestep)
 	
 	double mean_summer_cost = 0.0;
 	double ss_summer_cost = 0.0;
-	double mean_summer_cost_breederpop = 0.0;
-	double ss_summer_cost_breederpop = 0.0;
 	
 	double mean_fecundity = 0.0;
 	double ss_fecundity = 0.0;
-	double mean_fecundity_breederpop = 0.0;
-	double ss_fecundity_breederpop = 0.0;
-   	
+		
     for (int i = 0; i < (summer_pop - Nvacancies); ++i)  // for each individual in the summer population:
     {
 		val = 0.5 * (SummerPop[i].theta_a[0] + SummerPop[i].theta_a[1]);
@@ -523,17 +519,17 @@ void write_summer_stats(ofstream &DataFile, int generation, int timestep)
         mean_theta_b[1] /= summer_pop;
         mean_phi_a[1] /= summer_pop;
         mean_phi_b[1] /= summer_pop;
-        mean_resources /= (breeder_pop + nonreproductive_pop);
-		mean_summer_cost_breederpop = mean_summer_cost / breeder_pop;
-		mean_fecundity_breederpop = mean_fecundity / breeder_pop;
+        mean_resources /= summer_pop;
+		mean_summer_cost /= breeder_pop;
+		mean_fecundity /= breeder_pop;
         
         ss_theta_a[1] /= summer_pop; 
         ss_theta_b[1] /= summer_pop; 
         ss_phi_a[1] /= summer_pop; 
         ss_phi_b[1] /= summer_pop;
-        ss_resources /= (breeder_pop + nonreproductive_pop); 
-		ss_summer_cost_breederpop = ss_summer_cost / breeder_pop;
-		ss_fecundity_breederpop = ss_fecundity / breeder_pop;
+        ss_resources /= summer_pop; 
+		ss_summer_cost /= breeder_pop;
+		ss_fecundity /= breeder_pop;
     }
 	
     // write statistics to a file
@@ -544,10 +540,10 @@ void write_summer_stats(ofstream &DataFile, int generation, int timestep)
 		<< breeder_pop << ";"
 		<< nonreproductive_pop << ";"
         << offspring_pop << ";"
-		<< mean_summer_cost_breederpop << ";"
-		<< (ss_summer_cost_breederpop - mean_summer_cost_breederpop * mean_summer_cost_breederpop) << ";"
-		<< mean_fecundity_breederpop << ";"
-		<< (ss_fecundity_breederpop - mean_fecundity_breederpop * mean_fecundity_breederpop) << ";";
+		<< mean_summer_cost << ";"
+		<< (ss_summer_cost - mean_summer_cost * mean_summer_cost) << ";"
+		<< mean_fecundity << ";"
+		<< (ss_fecundity - mean_fecundity * mean_fecundity) << ";";
 
 }  // ENDS: write summer stats
 
@@ -1146,74 +1142,77 @@ void summer_reproduction(ofstream &DataFile)
 			
 			++nonreproductive_pop;  // Tally of non-reproductive adults.
 			
-			continue;  // breaks current iteration in the loop and proceeds to the next one
-        }
-
-        // update stats
-        ++breeder_pop;
+			//continue;  // breaks current iteration in the loop and proceeds to the next one
+        }  // Closes IF loop
 		
-		rv = SummerPop[i].resources;
-		mean_resources += rv;
-		ss_resources += rv * rv;
+		else 
+		{
+			
+	        // update stats
+	        ++breeder_pop;
 		
-	    // get the mother
-        mother = SummerPop[i];
+			rv = SummerPop[i].resources;
+			mean_resources += rv;
+			ss_resources += rv * rv;
+		
+		    // get the mother
+	        mother = SummerPop[i];
 
-        assert(mother.theta_b[1] >= 0.0);
-        assert(mother.theta_b[1] <= 1.0);
+	        assert(mother.theta_b[1] >= 0.0);
+	        assert(mother.theta_b[1] <= 1.0);
 
-        // now randomly select a father
-        do {
-            // sample integer uniformly between 0 and summer_pop
-            // (not including summer_pop itself)
-            father_id = summer_sample(rng_r);
-        }
-        while (father_id == i);
+	        // now randomly select a father
+	        do {
+	            // sample integer uniformly between 0 and summer_pop
+	            // (not including summer_pop itself)
+	            father_id = summer_sample(rng_r);
+	        }
+	        while (father_id == i);
 
-        father = SummerPop[father_id];
+	        father = SummerPop[father_id];
         
-        assert(father.theta_b[1] >= 0.0);
-        assert(father.theta_b[1] <= 1.0);
+	        assert(father.theta_b[1] >= 0.0);
+	        assert(father.theta_b[1] <= 1.0);
 
-        // translate maternal resources to numbers of offspring
-        //
-        // first round to lowest integer (+ 1 to account for first offspring, cost of which is represented by the phenologically-sensitive breeding_threshold)
-        //resource_integer = 1 + floor((SummerPop[i].resources - (breeding_threshold * (tspring + SummerPop[i].timing - 1) / tspring)) / (min_offspring_cost + ((SummerPop[i].timing - 1) * offspring_cost_magnifier * min_offspring_cost / tspring)));
-        offspring_equivalence = 1 + (SummerPop[i].resources - (breeding_threshold * (tspring + SummerPop[i].timing - 1) / tspring)) / (min_offspring_cost + (min_offspring_cost * offspring_cost_magnifier * (SummerPop[i].timing - 1) / tspring));
-		resource_integer = floor(offspring_equivalence);
+	        // translate maternal resources to numbers of offspring
+	        //
+	        // first round to lowest integer (+ 1 to account for first offspring, cost of which is represented by the phenologically-sensitive breeding_threshold)
+	        //resource_integer = 1 + floor((SummerPop[i].resources - (breeding_threshold * (tspring + SummerPop[i].timing - 1) / tspring)) / (min_offspring_cost + ((SummerPop[i].timing - 1) * offspring_cost_magnifier * min_offspring_cost / tspring)));
+	        offspring_equivalence = 1 + (SummerPop[i].resources - (breeding_threshold * (tspring + SummerPop[i].timing - 1) / tspring)) / (min_offspring_cost + (min_offspring_cost * offspring_cost_magnifier * (SummerPop[i].timing - 1) / tspring));
+			resource_integer = floor(offspring_equivalence);
 		
-        // TODO (slightly digressing): can we come up with an analytical 
-        // description of this rounding process of w into integer values?
-        if (uniform(rng_r) < offspring_equivalence - resource_integer)
-        {
-            // make an additional offspring (adding stochasticity to fecundity)
-            ++resource_integer;
-        }
+	        // TODO (slightly digressing): can we come up with an analytical 
+	        // description of this rounding process of w into integer values?
+	        if (uniform(rng_r) < offspring_equivalence - resource_integer)
+	        {
+	            // make an additional offspring (adding stochasticity to fecundity)
+	            ++resource_integer;
+	        }
         
-		// record resources invested into reproduction
-		SummerPop[i].cost = SummerPop[i].resources;
+			// record resources invested into reproduction
+			SummerPop[i].cost = SummerPop[i].resources;
 		
-		// reset mother's resource value to zero
-		SummerPop[i].resources = 0;
+			// reset mother's resource value to zero
+			SummerPop[i].resources = 0;
 		
-		// record mother's fecundity
-		SummerPop[i].fecundity = resource_integer;
+			// record mother's fecundity
+			SummerPop[i].fecundity = resource_integer;
 		
-        // for each parent create the number of offspring prescribed by their resource value + noise (i.e, resource_integer)
-        for (int kid_i = 0; kid_i < resource_integer; ++kid_i)
-        {
-            Individual kid;
+	        // for each parent create the number of offspring prescribed by their resource value + noise (i.e, resource_integer)
+	        for (int kid_i = 0; kid_i < resource_integer; ++kid_i)
+	        {
+	            Individual kid;
 
-            create_offspring(mother, father, kid);
+	            create_offspring(mother, father, kid);
 
-            // add kid to the stack
-            Kids.push_back(kid);
-        }
-    } // end for (int i = 0; i < summer_pop; ++i)
+	            // add kid to the stack
+	            Kids.push_back(kid);
+	        }
+		}  // Close ELSE loop
+	} // end for (int i = 0; i < summer_pop; ++i)
 
-    assert(breeder_pop <= summer_pop);
-	assert(nonreproductive_pop <= summer_pop);
-	
+	assert((breeder_pop + nonreproductive_pop) <= summer_pop);
+
 	offspring_pop = Kids.size();
 
     // number of dead individuals is the max population
@@ -1224,7 +1223,7 @@ void summer_reproduction(ofstream &DataFile)
     assert(Nvacancies >= 0);
 
     int random_kid = 0;
-	
+
     // recruit new individuals to the summer pool
     for (int i = 0; i < Nvacancies; ++i)
     {
@@ -1233,9 +1232,9 @@ void summer_reproduction(ofstream &DataFile)
         {
             break;
         }
-        
+    
         uniform_int_distribution<> kids_sample(0, Kids.size() - 1);
-        
+    
         random_kid = kids_sample(rng_r);
 
         // add random kid to population
@@ -1247,6 +1246,7 @@ void summer_reproduction(ofstream &DataFile)
         Kids.pop_back();
 
     }  // Ends recruitment of offspring (kids)
+		
 } // ENDS SUMMER REPRODUCTION
 
 
@@ -1495,9 +1495,9 @@ int main(int argc, char **argv)
 		
 		
 		// Allow populations to become established (individuals must acquire resources)
-		if(generation < 5000)  
+		if(generation < 2000)  
 			{	
-				breeding_threshold = resource_reproduction_threshold * generation / 5000;
+				breeding_threshold = resource_reproduction_threshold * generation / 2000;
 			}
 		else
 			{
@@ -1614,6 +1614,7 @@ int main(int argc, char **argv)
         staging_pop = 0;
 		breeder_pop = 0;
 		nonreproductive_pop = 0;
+		offspring_pop = 0;
 		summer_pop_old = 0;  // 06/02/20: Again, to track summer_pop_old
 		spring_nonmigrant_pop = 0;
 		spring_migrant_pop = 0;
