@@ -29,18 +29,18 @@ sdmu_theta = 0.01
 sdmu_phi = sdmu_theta
     
 # migration cost parameters
-max_migration_cost = [20, 15, 10]  # Default is 20 
-min_migration_cost = max_migration_cost
+max_migration_cost = [20, 10]  # Default is 20 
+min_migration_cost = 10
 migration_cost_power = [2]
 
 # reproductive cost parameters
 min_offspring_cost = [ 10 ]
 offspring_cost_magnifier = [ 1 ] # The relative difference in resource cost per offspring having migrated at the earliest opportunity versus the last
-relative_mortality_risk_of_migration = [1]
+relative_mortality_risk_of_migration = [1, 5]
 
 carryover_proportion = [0, 1]
 
-number_replicates = 1
+number_replicates = 5
 
 executable = "./xmigration"
 
@@ -102,7 +102,7 @@ for rep_i in range(0, number_replicates):
                                                                                     + str(sdmu_theta) + " "
                                                                                     + str(sdmu_theta) + " "
                                                                                     + str(max_migration_cost_i) + " "
-                                                                                    + str(max_migration_cost_i) + " "
+                                                                                    + str(min_migration_cost) + " "
                                                                                     + str(migration_cost_power_i) + " "
                                                                                     + str(tspring) + " " 
                                                                                     + str(twinter) + " "
