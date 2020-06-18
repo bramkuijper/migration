@@ -740,12 +740,12 @@ double migration_cost(int NFlock)
 	return(cost);
 }  // ENDS: migration cost function
 
-void mortality()
+void spring_mortality()
 {
     for (int i = 0; i < winter_pop;++i)
     {
         // individual dies; replace with end of the stack individual
-        if (uniform(rng_r) < pmort)
+        if (uniform(rng_r) < (pmort / relative_mortality_risk_of_migration))
         {
             WinterPop[i] = WinterPop[winter_pop - 1];
             --winter_pop;
@@ -761,7 +761,7 @@ void mortality()
     for (int i = 0; i < summer_pop;++i)
     {
         // individual dies; replace with end of the stack individual
-        if (uniform(rng_r) < (pmort * relative_mortality_risk_of_migration))
+        if (uniform(rng_r) < pmort)
         {
             SummerPop[i] = SummerPop[summer_pop - 1];
             --summer_pop;
@@ -773,17 +773,36 @@ void mortality()
 			SummerPop[i].signal_timing = 1;  // signal phenology is also reset to 1 for autumn
 			SummerPop[i].age += 1;
 		}
-		
     }
-	
-	if (winter_pop + staging_pop + summer+pop <= 1)  // Introduced to eliminate aborted simulations lacking the list of starting values, which prevents them being included by analyze_simulations.py (18th June 2020)
-	{
-		write_parameters(DataFile);
-		
-		exit(1);
-	}
+}
 
-    assert((winter_pop > 0 || staging_pop > 0) || summer_pop > 0);
+void autumn_mortality()
+{
+    for (int i = 0; i < spring_nonmigrant_pop;++i)
+		if (uniform(rng_r) < (pmort / relative_mortality_risk_of_migration))
+		{
+            WinterPop[i] = WinterPop[spring_nonmigrant_pop - 1];
+            --winter_pop;
+			--spring_nonmigrant_pop;
+            --i;
+		}
+	
+	
+	for (int i = spring_nonmigrant_pop; i < winter_pop;++i)
+    {
+        // individual dies; replace with end of the stack individual
+        if (uniform(rng_r) < (pmort))
+        {
+            WinterPop[i] = WinterPop[winter_pop - 1];
+            --winter_pop;
+            --i;
+        }
+		else
+		{
+			WinterPop[i].timing = 1;  // individual survives: timing is reset to 1 for time t+1
+			WinterPop[i].signal_timing = 1;
+		}
+    }
 }
 
 // remove individuals from the staging pool and put them
@@ -795,7 +814,6 @@ void clear_staging_pool()
     for (int i = 0; i < staging_pop; ++i)
     {
         WinterPop[winter_pop++] = StagingPool[i];
-
     }
 
     // just double check that winter_pop does not exceed max population size
@@ -1030,13 +1048,6 @@ void spring_dynamics(int t)
         } // ends: death due to starvation
 		
     } // ENDS: updating resources of migrants
-	
-	if (summer_pop + winter_pop + staging_pop <= 1)
-	{
-		write_parameters(DataFile);
-		
-		exit(1);
-	}
 
 } // ENDS SPRING DYNAMICS (looping through t)
 
@@ -1304,7 +1315,6 @@ void postbreeding_dynamics(int t)
 
     assert(summer_pop<= N);
     assert(summer_pop >= 0);
-    assert((summer_pop > 0 || winter_pop > 0) || staging_pop > 0);  // Might have no breeders in a given year, but non-zero population (is that right, Bram?)
 
     double psignal = 0.0;
 
@@ -1534,14 +1544,22 @@ int main(int argc, char **argv)
 			 write_spring_stats(DataFile, generation, 5000);
 		  }
 		
-		// all individuals that wanted to migrate have migrated now
         // all remainers are going to stay at wintering ground
 		spring_nonmigrant_pop = winter_pop + staging_pop;  
 		  
         clear_staging_pool();
+		
+		assert(winter_pop = spring_nonmigrant_pop);
 
         // let individuals die with a certain probability 
-        mortality();
+        spring_mortality();
+		
+		if (winter_pop + summer_pop <= 1)  // Introduced to eliminate aborted simulations lacking the list of starting values, which prevents them being included by analyze_simulations.py (18th June 2020)
+		{
+			write_parameters(DataFile);
+		
+			exit(1);
+		}
 		
 		// Individuals reproduce after they migrated to the summer spot
 		Nvacancies = 0;
@@ -1604,7 +1622,13 @@ int main(int argc, char **argv)
 		}
 		
         // let individuals die with a certain probability 
-        mortality();
+        autumn_mortality();
+		
+	    if (winter_pop <= 1)
+	    { 
+	        write_parameters(DataFile);
+	        exit(1);
+	    }
 		
 		// all individuals who remain at the summer grounds die
         summer_pop = 0;
@@ -1620,14 +1644,6 @@ int main(int argc, char **argv)
         {
             write_winter_stats(DataFile, generation, 5000); 
         }
-		
-		
-	    if (winter_pop <= 1)
-	    { 
-	        write_parameters(DataFile);
-
-	        exit(1);
-	    }
 				
     } // ENDS: GENERATION
 
