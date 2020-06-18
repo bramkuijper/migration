@@ -1003,8 +1003,6 @@ void spring_dynamics(int t)
 		ss_spring_flock_size += NFlock * NFlock;  // Also serves as sum of squares of spring migrant population size
 	}
 	
-
-	
 	// update resource levels for all new individuals that have just
     // been added to the summer pool dependent on their flock size
     for (int i = summer_pop_old; i < summer_pop; ++i)  // Selecting individuals that have been added to the summer pop this timepoint
@@ -1427,16 +1425,13 @@ void postbreeding_dynamics(int t)
     // been added to the pool dependent on their flock size
     for (int i = winter_pop_old; i < winter_pop; ++i)
     {	
-		cost = min_migration_cost + (max_migration_cost - min_migration_cost) / pow(NFlock, migration_cost_power);
-       
         // resources are reduced due to migration,
-		WinterPop[i].resources = WinterPop[i].resources - cost;
+		WinterPop[i].resources = WinterPop[i].resources - migration_cost(NFlock);
 		WinterPop[i].resources = clamp(SummerPop[i].resources, 0.0, resource_max);
-		WinterPop[i].cost = cost;
-		
+		WinterPop[i].cost = migration_cost(NFlock);
 		
 		// death due to starvation
-        if (WinterPop[i].resources < resource_starvation_threshold)
+        if (WinterPop[i].resources <= resource_starvation_threshold)
         {
             WinterPop[i] = WinterPop[winter_pop - 1];
             --winter_pop;
@@ -1603,13 +1598,16 @@ int main(int argc, char **argv)
 			write_autumn_stats(DataFile, generation, 5000);
 		}
 		
+        // let individuals die with a certain probability 
+        mortality();
+		
 		// all individuals who remain at the summer grounds die
         summer_pop = 0;
         staging_pop = 0;
 		breeder_pop = 0;
 		nonreproductive_pop = 0;
 		offspring_pop = 0;
-		summer_pop_old = 0;  // 06/02/20: Again, to track summer_pop_old
+		summer_pop_old = 0;
 		spring_nonmigrant_pop = 0;
 		spring_migrant_pop = 0;
 		
@@ -1618,8 +1616,6 @@ int main(int argc, char **argv)
             write_winter_stats(DataFile, generation, 5000); 
         }
 		
-        // let individuals die with a certain probability 
-        mortality();
 		
 	    if (winter_pop <= 1)
 	    { 
