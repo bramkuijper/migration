@@ -820,6 +820,7 @@ void clear_staging_pool()
 	assert(winter_pop <= N);
 
     staging_pop = 0;
+	spring_nonmigrant_pop = winter_pop;
 	
 }  // ENDS STAGING POOL CLEARANCE
 
@@ -1542,14 +1543,9 @@ int main(int argc, char **argv)
 		if (generation % skip == 0)
 		 {
 			 write_spring_stats(DataFile, generation, 5000);
-		  }
-		
-        // all remainers are going to stay at wintering ground
-		spring_nonmigrant_pop = winter_pop + staging_pop;  
+		  }  
 		  
         clear_staging_pool();
-		
-		assert(winter_pop = spring_nonmigrant_pop);
 
         // let individuals die with a certain probability 
         spring_mortality();
