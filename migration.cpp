@@ -775,6 +775,13 @@ void mortality()
 		}
 		
     }
+	
+	if (winter_pop + staging_pop + summer+pop <= 1)  // Introduced to eliminate aborted simulations lacking the list of starting values, which prevents them being included by analyze_simulations.py (18th June 2020)
+	{
+		write_parameters(DataFile);
+		
+		exit(1);
+	}
 
     assert((winter_pop > 0 || staging_pop > 0) || summer_pop > 0);
 }
@@ -1015,7 +1022,7 @@ void spring_dynamics(int t)
 		SummerPop[i].fecundity = 0;
 
 		// death due to starvation
-        if (SummerPop[i].resources < resource_starvation_threshold)
+        if (SummerPop[i].resources <= resource_starvation_threshold)
         {
             SummerPop[i] = SummerPop[summer_pop - 1];
             --summer_pop;
@@ -1023,6 +1030,13 @@ void spring_dynamics(int t)
         } // ends: death due to starvation
 		
     } // ENDS: updating resources of migrants
+	
+	if (summer_pop + winter_pop + staging_pop <= 1)
+	{
+		write_parameters(DataFile);
+		
+		exit(1);
+	}
 
 } // ENDS SPRING DYNAMICS (looping through t)
 
@@ -1106,15 +1120,6 @@ void summer_reproduction(ofstream &DataFile)
     /// auxilary variable specifying the identity of the randomly sampled
     // father
     int father_id;
-
-    // see if population is extinct. 13 Feb: TODO Need to change this. Population could be alive but no migrants that particular year.
-    if (summer_pop == 1)
-    {
-        // quit if extinct 
-        //write_parameters(DataFile);
-
-        exit(1);
-    }
 
     // use a flexible array for the kids
     vector<Individual> Kids;
