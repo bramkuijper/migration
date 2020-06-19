@@ -32,10 +32,10 @@ uniform_real_distribution<> uniform(0.0,1.0);
 // function
 
 // number of individuals in population
-const int N = 300;
+const int N = 2000;
 
 // number of generations
-long int number_generations = 4000;
+long int number_generations = 200000;
 
 // initial values for phi (social dependency) and theta (resource dependency)
 // a is an intercept, b is a gradient
@@ -148,6 +148,7 @@ int n_autumn_flocks = 0;
 int summer_pop_old = 0;  // 06/02/20: So that I can track summer_pop old
 int Nvacancies = 0;
 int NFlock = 0;
+int Nsurplus = 0;
 
 double ss_spring_migrant_pop = 0.0;
 double ss_autumn_migrant_pop = 0.0;
@@ -1515,7 +1516,15 @@ int main(int argc, char **argv)
 			}
 
 		// If individuals did not migrate to the breeding ground then the population size has potentially swollen above N. Random mortality returns population to N.
-			
+		uniform_int_distribution <> pop_sample(0, winter_pop - 1);
+		
+		do
+		{
+			WinterPop[pop_sample(rng_r)] = WinterPop[winter_pop - 1];
+			--winter_pop;
+		} 
+		while(winter_pop > N);
+		
 		assert(winter_pop <= N);
 		
 		spring_pop_start = winter_pop;
