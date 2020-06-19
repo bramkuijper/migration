@@ -32,10 +32,10 @@ uniform_real_distribution<> uniform(0.0,1.0);
 // function
 
 // number of individuals in population
-const int N = 2000;
+const int N = 300;
 
 // number of generations
-long int number_generations = 200000;
+long int number_generations = 4000;
 
 // initial values for phi (social dependency) and theta (resource dependency)
 // a is an intercept, b is a gradient
@@ -89,7 +89,7 @@ double carryover_proportion = 0.0;  // proportion of an individual's resource va
 int twinter = 0;
 int tspring = 5000;
 
-int skip = 100;
+int skip = 20;
 
 // stats of flock size and staging
 double mean_spring_flock_size = 0.0;
@@ -140,6 +140,7 @@ int autumn_pop_start = 0;
 int breeder_pop = 0;
 int nonreproductive_pop = 0;
 int offspring_pop = 0;
+int postbreeding_pop = 0;
 int autumn_nonmigrant_pop = 0;
 int autumn_migrant_pop = 0;
 int n_spring_flocks = 0;  // recording the number of spring flocks (tspring - n(unusued departure intervals))
@@ -334,6 +335,7 @@ void write_data_headers(ofstream &DataFile)
 		<< "var_reproductive_cost_breederpop;"
 		<< "mean_fecundity_breederpop;"
 		<< "var_fecundity_breederpop;"
+		<< "postbreeding_pop;"
 		
 		// AUTUMN MIGRATION STATS
         << "mean_autumn_staging_size;"
@@ -538,7 +540,8 @@ void write_summer_stats(ofstream &DataFile, int generation, int timestep)
 		<< mean_summer_cost << ";"
 		<< (ss_summer_cost - mean_summer_cost * mean_summer_cost) << ";"
 		<< mean_fecundity << ";"
-		<< (ss_fecundity - mean_fecundity * mean_fecundity) << ";";
+		<< (ss_fecundity - mean_fecundity * mean_fecundity) << ";"
+		<< postbreeding_pop << ";";
 
 }  // ENDS: write summer stats
 
@@ -1011,7 +1014,9 @@ void spring_dynamics(int t)
             
             assert(NFlock <= N);			
         
-		} else {
+		} 
+		
+		else {
 			StagingPool[i].latency += 1;  // If individual does not depart, increment its latency score
 			StagingPool[i].timing += 1;  // Also increment its timing score
 		}
@@ -1041,7 +1046,7 @@ void spring_dynamics(int t)
 		SummerPop[i].cost = migration_cost(NFlock);
 		SummerPop[i].fecundity = 0;
 
-		// death due to starvation
+		// migration-induced starvation
         if (SummerPop[i].resources <= resource_starvation_threshold)
         {
             SummerPop[i] = SummerPop[summer_pop - 1];
@@ -1227,8 +1232,7 @@ void summer_reproduction(ofstream &DataFile)
 
     // number of dead individuals is the max population
     // minus the current individuals in the summer population
-    // minus the current individuals who stayed at the wintering ground
-    Nvacancies = N - summer_pop - winter_pop;
+    Nvacancies = N - summer_pop;
 
     assert(Nvacancies >= 0);
 
@@ -1256,6 +1260,8 @@ void summer_reproduction(ofstream &DataFile)
         Kids.pop_back();
 
     }  // Ends recruitment of offspring (kids)
+	
+	postbreeding_pop = summer_pop;
 		
 } // ENDS SUMMER REPRODUCTION
 
@@ -1399,8 +1405,6 @@ void postbreeding_dynamics(int t)
 			mean_latency += lat;
 			ss_latency += (lat * lat);			
 			++winter_pop;
-            
-            assert(winter_pop <= N);
 
             // delete this individual from the staging population
             StagingPool[i] = StagingPool[staging_pop - 1];
@@ -1411,8 +1415,7 @@ void postbreeding_dynamics(int t)
 			
 			// but increment the number of individuals recorded as autumn migrants
 			++autumn_migrant_pop;
-			//++i;  // deleted this because I think it's a mistake (30 Oct 2019)
-
+			
             assert(staging_pop <= N);
             assert(staging_pop >= 0);
 
@@ -1444,7 +1447,7 @@ void postbreeding_dynamics(int t)
     {	
         // resources are reduced due to migration,
 		WinterPop[i].resources = WinterPop[i].resources - migration_cost(NFlock);
-		WinterPop[i].resources = clamp(SummerPop[i].resources, 0.0, resource_max);
+		WinterPop[i].resources = clamp(WinterPop[i].resources, 0.0, resource_max);
 		WinterPop[i].cost = migration_cost(NFlock);
 		
 		// death due to starvation
@@ -1511,6 +1514,9 @@ int main(int argc, char **argv)
 				breeding_threshold = resource_reproduction_threshold;
 			}
 
+		// If individuals did not migrate to the breeding ground then the population size has potentially swollen above N. Random mortality returns population to N.
+			
+		assert(winter_pop <= N);
 		
 		spring_pop_start = winter_pop;
 		
@@ -1630,7 +1636,8 @@ int main(int argc, char **argv)
 		
 		// all individuals who remain at the summer grounds die
         summer_pop = 0;
-        staging_pop = 0;
+        postbreeding_pop = 0;
+		staging_pop = 0;
 		breeder_pop = 0;
 		nonreproductive_pop = 0;
 		offspring_pop = 0;
