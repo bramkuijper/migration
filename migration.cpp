@@ -146,6 +146,7 @@ int n_spring_flocks = 0;  // recording the number of spring flocks (tspring - n(
 int n_autumn_flocks = 0;
 int summer_pop_old = 0;  // 06/02/20: So that I can track summer_pop old
 int Nvacancies = 0;
+int NFlock = 0;
 
 double ss_spring_migrant_pop = 0.0;
 double ss_autumn_migrant_pop = 0.0;
@@ -967,7 +968,7 @@ void spring_dynamics(int t)
     // keep track of flock size of individuals who will disperse
     // at this timestep. This should be initialized at 0 at each
     // timestep t
-    int NFlock = 0;
+    NFlock = 0;
 
     double pdisperse = 0.0;
 
@@ -1366,7 +1367,7 @@ void postbreeding_dynamics(int t)
     // group size)
     int winter_pop_old = winter_pop;
 
-    int NFlock = 0;
+    NFlock = 0;
 
     double pdisperse = 0.0;
 	mean_latency = 0.0;
@@ -1483,17 +1484,18 @@ int main(int argc, char **argv)
 		var_spring_staging_size = 0.0;
 		ss_spring_flock_size = 0.0;
 		n_spring_flocks = 0;
-		spring_migrant_pop = 0.0;
+		spring_migrant_pop = 0;
 		ss_spring_staging_size = 0.0;
 		mean_spring_cost = 0.0;
 		ss_spring_cost = 0.0;
 		mean_cost = 0.0;
 		ss_cost = 0.0;
-		spring_pop_start = 0.0;
-		autumn_pop_start = 0.0;
+		spring_pop_start = 0;
+		autumn_pop_start = 0;
+		summer_pop = 0;
 		
 
-        staging_pop = 0.0;  // Set staging population count to zero before winter dynamics
+        staging_pop = 0;  // Set staging population count to zero before winter dynamics
 		
 		rgood = rgood_init;
 		rbad = rbad_init;  
@@ -1513,7 +1515,7 @@ int main(int argc, char **argv)
 		spring_pop_start = winter_pop;
 		
 		
-		// Winter foraging (migration is not an option)
+		// Winter foraging (when migration is not an option)
 		for (int t = 0; t < twinter; ++t)
 		{
 			winter_dynamics(t);
@@ -1635,6 +1637,8 @@ int main(int argc, char **argv)
 		summer_pop_old = 0;
 		spring_nonmigrant_pop = 0;
 		spring_migrant_pop = 0;
+		autumn_nonmigrant_pop = 0;
+		autumn_migrant_pop = 0;
 		
 		if (generation % skip == 0)
         {
