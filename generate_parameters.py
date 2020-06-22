@@ -7,10 +7,10 @@ init_theta_b = [0]  # Default is 0
 init_phi_a = [0.0005]  # Default is 0.0005
 init_phi_b = [0]  # Default is 0
 
+twinter = 3000
 tspring = 5000
-twinter = 5000
 
-pmort = [0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1, 0.11, 0.12, 0.13, 0.14, 0.15, 0.16, 0.17, 0.18, 0.19, 0.2, 0.21, 0.22]  # Default is 0.05
+pmort = [0.02, 0.04, 0.06, 0.08, 0.1, 0.12, 0.14, 0.16, 0.18, 0.2, 0.22]  # Default is 0.05
 pgood_init = 0.5 # Deleted 0.5 option on 27 November 2019
 t_good_ends = [ 5000 ]
 
@@ -29,18 +29,18 @@ sdmu_theta = 0.01
 sdmu_phi = sdmu_theta
     
 # migration cost parameters
-max_migration_cost = [20, 10]  # Default is 20 
-min_migration_cost = 10
+max_migration_cost = [20, 40]  # Default is 20 
+min_migration_cost = max_migration_cost * 0.5
 migration_cost_power = [2]
 
 # reproductive cost parameters
 min_offspring_cost = [ 10 ]
 offspring_cost_magnifier = [ 1 ] # The relative difference in resource cost per offspring having migrated at the earliest opportunity versus the last
-relative_mortality_risk_of_migration = [1, 5]
+relative_mortality_risk_of_migration = [5]
 
-carryover_proportion = [0, 1]
+carryover_proportion = [1]
 
-number_replicates = 5
+number_replicates = 3
 
 executable = "./xmigration"
 
