@@ -1567,13 +1567,6 @@ int main(int argc, char **argv)
         // let individuals die with a certain probability 
         spring_mortality();
 		
-		if (winter_pop + summer_pop <= 1)  // Introduced to eliminate aborted simulations lacking the list of starting values, which prevents them being included by analyze_simulations.py (18th June 2020)
-		{
-			write_parameters(DataFile);
-		
-			exit(1);
-		}
-		
 		// Individuals reproduce after they migrated to the summer spot
 		Nvacancies = 0;
 		rv = 0;
@@ -1637,12 +1630,6 @@ int main(int argc, char **argv)
         // let individuals die with a certain probability 
         autumn_mortality();
 		
-	    if (winter_pop <= 1)
-	    { 
-	        write_parameters(DataFile);
-	        exit(1);
-	    }
-		
 		// all individuals who remain at the summer grounds die
         summer_pop = 0;
         postbreeding_pop = 0;
@@ -1660,6 +1647,12 @@ int main(int argc, char **argv)
         {
             write_winter_stats(DataFile, generation, 5000); 
         }
+		
+	    if (winter_pop <= 1)
+	    { 
+	        write_parameters(DataFile);
+	        exit(1);
+	    }
 				
     } // ENDS: GENERATION
 
