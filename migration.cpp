@@ -232,7 +232,7 @@ void init_arguments(int argc, char **argv)
     sdmu_theta = atof(argv[15]);
     sdmu_phi = sdmu_theta;
     max_migration_cost = atof(argv[17]);
-	min_migration_cost = atof(argv[18]);
+	min_migration_cost = atof(argv[17])/2;
     migration_cost_power = atof(argv[19]);
     tspring = atoi(argv[20]);
 	twinter = atoi(argv[21]);
