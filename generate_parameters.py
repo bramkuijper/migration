@@ -7,7 +7,7 @@ init_theta_b = [0]  # Default is 0
 init_phi_a = [0.0005]  # Default is 0.0005
 init_phi_b = [0]  # Default is 0
 
-twinter = 3000
+twinter = 5000
 tspring = 5000
 
 pmort = [0.02, 0.04, 0.06, 0.08, 0.1, 0.12, 0.14, 0.16, 0.18, 0.2, 0.22]  # Default is 0.05
@@ -29,14 +29,14 @@ sdmu_theta = 0.01
 sdmu_phi = sdmu_theta
     
 # migration cost parameters
-max_migration_cost = [20, 40]  # Default is 20 
-min_migration_cost = max_migration_cost * 0.5
+max_migration_cost = [20]  # Default is 20 
+min_migration_cost = [10]
 migration_cost_power = [2]
 
 # reproductive cost parameters
 min_offspring_cost = [ 10 ]
 offspring_cost_magnifier = [ 1 ] # The relative difference in resource cost per offspring having migrated at the earliest opportunity versus the last
-relative_mortality_risk_of_migration = [5]
+relative_mortality_risk_of_migration = [1]
 
 carryover_proportion = [1]
 
