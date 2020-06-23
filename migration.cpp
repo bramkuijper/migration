@@ -987,6 +987,7 @@ void spring_dynamics(int t)
         // within the staging pool
         pdisperse = 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1])
             + 0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) * (double) staging_pop_start / (staging_pop_start + winter_pop);  // TODO Does the '(double)' need to be here?
+		pdisperse = clamp(pdisperse, 0, 1);
 
         // yes individual goes
         if (uniform(rng_r) < pdisperse)
@@ -1092,29 +1093,29 @@ void create_offspring(
 
     // each parental allele has probability 0.5 to make it into offspring
     offspring.theta_a[0] = mutation(mother.theta_a[allele_sample(rng_r)], mu_theta, sdmu_theta);
-    offspring.theta_a[0] = clamp(offspring.theta_a[0], 0.0, 1.0);
+    //offspring.theta_a[0] = clamp(offspring.theta_a[0], 0.0, 1.0);
 
     offspring.theta_a[1] = mutation(father.theta_a[allele_sample(rng_r)], mu_theta, sdmu_theta);
-    offspring.theta_a[1] = clamp(offspring.theta_a[1], 0.0, 1.0);
+    //offspring.theta_a[1] = clamp(offspring.theta_a[1], 0.0, 1.0);
 
     offspring.theta_b[0] = mutation(mother.theta_b[allele_sample(rng_r)], mu_theta, sdmu_theta);
-    offspring.theta_b[0] = clamp(offspring.theta_b[0], 0.0, 1.0);
+    //offspring.theta_b[0] = clamp(offspring.theta_b[0], 0.0, 1.0);
 
     offspring.theta_b[1] = mutation(father.theta_b[allele_sample(rng_r)], mu_theta, sdmu_theta);
-    offspring.theta_b[1] = clamp(offspring.theta_b[1], 0.0, 1.0);
+    //offspring.theta_b[1] = clamp(offspring.theta_b[1], 0.0, 1.0);
 
     // inherit phi loci
     offspring.phi_a[0] = mutation(mother.phi_a[allele_sample(rng_r)], mu_phi, sdmu_phi);
-    offspring.phi_a[0] = clamp(offspring.phi_a[0], 0.0, 1.0);
+    //offspring.phi_a[0] = clamp(offspring.phi_a[0], 0.0, 1.0);
 
     offspring.phi_a[1] = mutation(father.phi_a[allele_sample(rng_r)], mu_phi, sdmu_phi);
-    offspring.phi_a[1] = clamp(offspring.phi_a[1], 0.0, 1.0);
+   //offspring.phi_a[1] = clamp(offspring.phi_a[1], 0.0, 1.0);
     
     offspring.phi_b[0] = mutation(mother.phi_b[allele_sample(rng_r)], mu_phi, sdmu_phi);
-    offspring.phi_b[0] = clamp(offspring.phi_b[0], 0.0, 1.0);
+    //offspring.phi_b[0] = clamp(offspring.phi_b[0], 0.0, 1.0);
 
     offspring.phi_b[1] = mutation(father.phi_b[allele_sample(rng_r)], mu_phi, sdmu_phi);
-    offspring.phi_b[1] = clamp(offspring.phi_b[1], 0.0, 1.0);
+    //offspring.phi_b[1] = clamp(offspring.phi_b[1], 0.0, 1.0);
 
 }  // ENDS OFFSPRING PRODUCTION
 
@@ -1392,6 +1393,7 @@ void postbreeding_dynamics(int t)
 
         pdisperse = 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1])
             + 0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) * (double) staging_pop_start / (staging_pop_start + summer_pop);
+		pdisperse = clamp(pdisperse, 0, 1);
 
         // yes individual goes
         if (uniform(rng_r) < pdisperse)
