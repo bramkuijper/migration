@@ -32,10 +32,10 @@ uniform_real_distribution<> uniform(0.0,1.0);
 // function
 
 // number of individuals in population
-const int N = 1000;
+const int N = 400;
 
 // number of generations
-long int number_generations = 100000;
+long int number_generations = 200;
 
 // initial values for phi (social dependency) and theta (resource dependency)
 // a is an intercept, b is a gradient
@@ -271,7 +271,7 @@ void init_arguments(int argc, char **argv)
 // write down all parameters in the file
 void write_parameters(ofstream &DataFile)  // at end of outputted file
 {
-    DataFile << endl << endl
+    DataFile
             << "init_theta_a;" << init_theta_a << endl
             << "init_theta_b;" << init_theta_b << endl
             << "init_phi_a;" << init_phi_a << endl
@@ -299,7 +299,8 @@ void write_parameters(ofstream &DataFile)  // at end of outputted file
 			<< "offspring_cost_magnifier;" << offspring_cost_magnifier << endl
 			<< "carryover_proportion;" << carryover_proportion << endl
 			<< "relative_mortality_risk_of_migration;" << relative_mortality_risk_of_migration << endl
-            << "seed;" << seed << endl;
+            << "seed;" << seed << endl
+			<< endl;
 }
 
 // list of the data headers at the start of the file
@@ -934,7 +935,7 @@ void spring_dynamics(int t)
             + 0.5 * (WinterPop[i].theta_b[0] + WinterPop[i].theta_b[1]) * WinterPop[i].resources / resource_max;
 
         // bound the probability
-        psignal = clamp(psignal, 0.0, 1.0);
+        psignal = clamp(psignal, 0.000, 1.0);
 
         // does individual want to signal to others to be ready for departure?
         if (uniform(rng_r) < psignal)
@@ -1175,8 +1176,8 @@ void summer_reproduction(ofstream &DataFile)
 		    // get the mother
 	        mother = SummerPop[i];
 
-	        assert(mother.theta_b[1] >= 0.0);
-	        assert(mother.theta_b[1] <= 1.0);
+	        //assert(mother.theta_b[1] >= 0.0);
+	        //assert(mother.theta_b[1] <= 1.0);
 
 	        // now randomly select a father
 	        do {
@@ -1188,8 +1189,8 @@ void summer_reproduction(ofstream &DataFile)
 
 	        father = SummerPop[father_id];
         
-	        assert(father.theta_b[1] >= 0.0);
-	        assert(father.theta_b[1] <= 1.0);
+	        //assert(father.theta_b[1] >= 0.0);
+	        //assert(father.theta_b[1] <= 1.0);
 
 	        // translate maternal resources to numbers of offspring
 	        //
@@ -1478,7 +1479,9 @@ int main(int argc, char **argv)
 
     init_arguments(argc, argv);
 
-    write_data_headers(DataFile);
+    write_parameters(DataFile);
+	
+	write_data_headers(DataFile);
 
     init_population();
 
@@ -1559,15 +1562,25 @@ int main(int argc, char **argv)
 		var_spring_flock_size = n_spring_flocks > 0 ? (ss_spring_flock_size / n_spring_flocks) - (mean_spring_flock_size * mean_spring_flock_size) : 0;
 		var_spring_staging_size = (ss_spring_staging_size / tspring) - (mean_spring_staging_size * mean_spring_staging_size);	
 		
-		if (generation % skip == 0)
+		if ((generation + 1) % skip == 0)
 		 {
 			 write_spring_stats(DataFile, generation, 5000);
 		  }  
 		  
         clear_staging_pool();
+		
+	    if (winter_pop <= 1)
+	    { 
+	        exit(1);
+	    }
 
         // let individuals die with a certain probability 
         spring_mortality();
+		
+	    if ((winter_pop + summer_pop) <= 1)
+	    { 
+	        exit(1);
+	    }
 		
 		// Individuals reproduce after they migrated to the summer spot
 		Nvacancies = 0;
@@ -1575,7 +1588,7 @@ int main(int argc, char **argv)
 				
 		summer_reproduction(DataFile);
 		
-		if (generation % skip == 0)
+		if ((generation + 1) % skip == 0)
 		{
 		write_summer_stats(DataFile, generation, 5000);
 		}
@@ -1624,10 +1637,15 @@ int main(int argc, char **argv)
 		
 		autumn_nonmigrant_pop = summer_pop + staging_pop;
 	  
-		if (generation % skip == 0)
+		if ((generation+1) % skip == 0)
 		{
 			write_autumn_stats(DataFile, generation, 5000);
 		}
+		
+	    if (winter_pop <= 1)
+	    { 
+	        exit(1);
+	    }
 		
         // let individuals die with a certain probability 
         autumn_mortality();
@@ -1645,18 +1663,15 @@ int main(int argc, char **argv)
 		autumn_nonmigrant_pop = 0;
 		autumn_migrant_pop = 0;
 		
-		if (generation % skip == 0)
+		if ((generation+1) % skip == 0)
         {
             write_winter_stats(DataFile, generation, 5000); 
         }
 		
 	    if (winter_pop <= 1)
 	    { 
-	        write_parameters(DataFile);
 	        exit(1);
 	    }
 				
     } // ENDS: GENERATION
-
-    write_parameters(DataFile);
 }
