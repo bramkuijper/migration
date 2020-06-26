@@ -32,10 +32,10 @@ uniform_real_distribution<> uniform(0.0,1.0);
 // function
 
 // number of individuals in population
-const int N = 400;
+const int N = 500;
 
 // number of generations
-long int number_generations = 200;
+long int number_generations = 100;
 
 // initial values for phi (social dependency) and theta (resource dependency)
 // a is an intercept, b is a gradient
@@ -89,7 +89,7 @@ double carryover_proportion = 0.0;  // proportion of an individual's resource va
 int twinter = 0;
 int tspring = 5000;
 
-int skip = 20;
+int skip = 1;
 
 // stats of flock size and staging
 double mean_spring_flock_size = 0.0;
@@ -184,9 +184,6 @@ struct Individual
 	
 	// resource cost of migration for individual
 	double cost;
-	
-	// maximum flock size they could have formed part of
-	int potential;
 	
 	// phenology of signalling
 	int signal_timing;
@@ -873,9 +870,7 @@ void spring_dynamics(int t)
     // foraging of individuals who are just at the wintering site
     // and who have yet to decide to go to the staging site
     for (int i = 0; i < winter_pop; ++i)
-    {
-        WinterPop[i].potential = 0;
-		
+    {		
 		if (uniform(rng_r) < pgood) // good resource chosen
         {
             WinterPop[i].resources += rgood;
@@ -935,7 +930,7 @@ void spring_dynamics(int t)
             + 0.5 * (WinterPop[i].theta_b[0] + WinterPop[i].theta_b[1]) * WinterPop[i].resources / resource_max;
 
         // bound the probability
-        psignal = clamp(psignal, 0.000, 1.0);
+        //psignal = clamp(psignal, 0, 1.0);
 
         // does individual want to signal to others to be ready for departure?
         if (uniform(rng_r) < psignal)
@@ -943,7 +938,6 @@ void spring_dynamics(int t)
             // add individual to the staging pool
             StagingPool[staging_pop] = WinterPop[i];
 			StagingPool[staging_pop].latency = 0;
-			StagingPool[staging_pop].potential = winter_pop + staging_pop;
             ++staging_pop; // increment the number of individuals in the staging pool
 
             assert(staging_pop <= N);
@@ -988,7 +982,7 @@ void spring_dynamics(int t)
         // within the staging pool
         pdisperse = 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1])
             + 0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) * (double) staging_pop_start / (staging_pop_start + winter_pop);  // TODO Does the '(double)' need to be here?
-		pdisperse = clamp(pdisperse, 0, 1);
+		//pdisperse = clamp(pdisperse, 0, 1);
 
         // yes individual goes
         if (uniform(rng_r) < pdisperse)
@@ -1285,13 +1279,10 @@ void postbreeding_dynamics(int t)
         pgood = 0;
     }
 
-    // foraging of individuals who are just at the breeding (Bram: am I correct that 
-	// this should be breeding rather than winter?) site
+    // foraging of individuals who are just at the breeding site
     // and who have yet to decide to go to the staging site
     for (int i = 0; i < summer_pop; ++i)
     {
-        SummerPop[i].potential = 0;
-		
 		if (uniform(rng_r) < pgood) // good resource chosen
         {
             SummerPop[i].resources += rgood;
@@ -1349,7 +1340,6 @@ void postbreeding_dynamics(int t)
             // add individual to the staging pool
             StagingPool[staging_pop] = SummerPop[i];
 			StagingPool[staging_pop].latency = 0.0;
-			StagingPool[staging_pop].potential = summer_pop + staging_pop;
             ++staging_pop; // increment the number of individuals in the staging pool
 
             assert(staging_pop <= N);
@@ -1417,7 +1407,7 @@ void postbreeding_dynamics(int t)
             --staging_pop;
             --i;
 			
-			// but increment the number of individuals recorded as autumn migrants
+			// increment the number of individuals recorded as autumn migrants
 			++autumn_migrant_pop;
 			
             assert(staging_pop <= N);
@@ -1467,6 +1457,9 @@ void postbreeding_dynamics(int t)
     } // Ends: update resource levels of winter arrivals
 
 } // ENDS: POST-BREEDING DYNAMICS 
+
+
+
 
 
 // THE KEY PART OF THE CODE
@@ -1535,11 +1528,16 @@ int main(int argc, char **argv)
 		spring_pop_start = winter_pop;
 		
 		
-		// Winter foraging (when migration is not an option)
+		// Winter foraging (during which time migration is not an option)
 		for (int t = 0; t < twinter; ++t)
 		{
 			winter_dynamics(t);
 		}
+		
+		if ((generation+1) % skip == 0)
+        {
+            write_winter_stats(DataFile, generation, 5000); 
+        }
 		
 		// time during spring during which individuals can migrate (or carry on foraging)
 		mean_resources = 0.0;
@@ -1568,11 +1566,6 @@ int main(int argc, char **argv)
 		  }  
 		  
         clear_staging_pool();
-		
-	    if (winter_pop <= 1)
-	    { 
-	        exit(1);
-	    }
 
         // let individuals die with a certain probability 
         spring_mortality();
