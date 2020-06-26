@@ -7,12 +7,12 @@ init_theta_b = [0]  # Default is 0
 init_phi_a = [0.0005]  # Default is 0.0005
 init_phi_b = [0]  # Default is 0
 
-twinter = 5000
-tspring = 5000
+twinter = 3000
+tspring = 7000
 
-pmort = [0.02, 0.04, 0.06, 0.08, 0.1, 0.12, 0.14, 0.16, 0.18, 0.2, 0.22]  # Default is 0.05
+pmort = [0.05]  # Default is 0.05
 pgood_init = 0.5 # Deleted 0.5 option on 27 November 2019
-t_good_ends = [ 5000 ]
+t_good_ends = [ 100000 ]
 
 rgood = [ 0.01 ]
 rbad = [ 0.005 ]
@@ -20,7 +20,7 @@ preparation_penalty = [0] # The reduction in resource acquisition, relative to t
 
 resource_reproduction_threshold = [50]
 resource_starvation_threshold = [0.0]
-resource_max = [100]
+resource_max = [200]
 
 # mutation rates
 mu_theta = 0.01
@@ -30,17 +30,17 @@ sdmu_phi = sdmu_theta
     
 # migration cost parameters
 max_migration_cost = [20]  # Default is 20 
-min_migration_cost = [10]
+min_migration_cost = 10
 migration_cost_power = [2]
 
 # reproductive cost parameters
 min_offspring_cost = [ 10 ]
 offspring_cost_magnifier = [ 1 ] # The relative difference in resource cost per offspring having migrated at the earliest opportunity versus the last
-relative_mortality_risk_of_migration = [1]
+relative_mortality_risk_of_migration = [5]
 
 carryover_proportion = [1]
 
-number_replicates = 3
+number_replicates = 1
 
 executable = "./xmigration"
 
@@ -104,8 +104,8 @@ for rep_i in range(0, number_replicates):
                                                                                     + str(max_migration_cost_i) + " "
                                                                                     + str(min_migration_cost) + " "
                                                                                     + str(migration_cost_power_i) + " "
-                                                                                    + str(tspring) + " " 
                                                                                     + str(twinter) + " "
+                                                                                    + str(tspring) + " " 
                                                                                     + str(resource_max_i) + " "
                                                                                     + str(min_offspring_cost_i) + " "
                                                                                     + str(offspring_cost_magnifier_i) + " "

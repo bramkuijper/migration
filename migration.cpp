@@ -32,10 +32,10 @@ uniform_real_distribution<> uniform(0.0,1.0);
 // function
 
 // number of individuals in population
-const int N = 500;
+const int N = 250;
 
 // number of generations
-long int number_generations = 100;
+long int number_generations = 200;
 
 // initial values for phi (social dependency) and theta (resource dependency)
 // a is an intercept, b is a gradient
@@ -89,7 +89,7 @@ double carryover_proportion = 0.0;  // proportion of an individual's resource va
 int twinter = 0;
 int tspring = 5000;
 
-int skip = 1;
+int skip = 10;
 
 // stats of flock size and staging
 double mean_spring_flock_size = 0.0;
@@ -231,8 +231,8 @@ void init_arguments(int argc, char **argv)
     max_migration_cost = atof(argv[17]);
 	min_migration_cost = atof(argv[17])/2;
     migration_cost_power = atof(argv[19]);
-    tspring = atoi(argv[20]);
-	twinter = atoi(argv[21]);
+	twinter = atoi(argv[20]);
+    tspring = atoi(argv[21]);
 	resource_max = atof(argv[22]);
 	min_offspring_cost = atof(argv[23]);
 	offspring_cost_magnifier = atof(argv[24]);
@@ -252,7 +252,7 @@ void init_arguments(int argc, char **argv)
     // probability that encountering good resource should be
     // set to 0 after t_good_ends timesteps
     assert(t_good_ends >= 0);
-    assert(t_good_ends <= tspring);
+    // assert(t_good_ends <= tspring);
 
     // resource increments
     assert(rgood_init > 0);
@@ -306,7 +306,7 @@ void write_data_headers(ofstream &DataFile)
     DataFile << "generation;"
         << "time_interval;"
 				
-		// SPRING MIGRATION STATS:
+		// SPRING MIGRATION STATS (17):
         << "mean_spring_staging_size;"
         << "var_spring_staging_size;"
         << "spring_migrant_pop;"
@@ -325,7 +325,7 @@ void write_data_headers(ofstream &DataFile)
 		<< "mean_spring_cost;"
 		<< "var_spring_cost;"
 		
-		// SUMMER STATS:	
+		// SUMMER STATS (9):	
 		<< "summer_pop;"
 	    << "breeder_pop;"
 		<< "nonreproductive_pop;"
@@ -336,7 +336,7 @@ void write_data_headers(ofstream &DataFile)
 		<< "var_fecundity_breederpop;"
 		<< "postbreeding_pop;"
 		
-		// AUTUMN MIGRATION STATS
+		// AUTUMN MIGRATION STATS (17)
         << "mean_autumn_staging_size;"
         << "var_autumn_staging_size;"
         << "autumn_migrant_pop;"
@@ -355,7 +355,7 @@ void write_data_headers(ofstream &DataFile)
 		<< "mean_autumn_cost;"
 		<< "var_autumn_cost;"
 	
-		// WINTER STATS:
+		// WINTER STATS (13):
 		<< "winter_pop;"
 		<< "mean_resources_winter;"
 	    << "var_resources_winter;"
@@ -1526,18 +1526,6 @@ int main(int argc, char **argv)
 		assert(winter_pop <= N);
 		
 		spring_pop_start = winter_pop;
-		
-		
-		// Winter foraging (during which time migration is not an option)
-		for (int t = 0; t < twinter; ++t)
-		{
-			winter_dynamics(t);
-		}
-		
-		if ((generation+1) % skip == 0)
-        {
-            write_winter_stats(DataFile, generation, 5000); 
-        }
 		
 		// time during spring during which individuals can migrate (or carry on foraging)
 		mean_resources = 0.0;
