@@ -32,10 +32,10 @@ uniform_real_distribution<> uniform(0.0,1.0);
 // function
 
 // number of individuals in population
-const int N = 250;
+const int N = 1000;
 
 // number of generations
-long int number_generations = 200;
+long int number_generations = 50000;
 
 // initial values for phi (social dependency) and theta (resource dependency)
 // a is an intercept, b is a gradient
@@ -907,7 +907,7 @@ void spring_dynamics(int t)
     assert(winter_pop <= N);
     assert(winter_pop >= 0);  
     assert((winter_pop > 0 || staging_pop > 0) || summer_pop > 0);  
-
+	assert((winter_pop + staging_pop + summer_pop <= N);  
     double psignal = 0.0;
 
     // individuals decide whether to go to staging site
