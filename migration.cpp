@@ -32,10 +32,10 @@ uniform_real_distribution<> uniform(0.0,1.0);
 // function
 
 // number of individuals in population
-const int N = 200;
+const int N = 50;
 
 // number of generations
-long int number_generations = 200;
+long int number_generations = 10;
 
 // initial values for phi (social dependency) and theta (resource dependency)
 // a is an intercept, b is a gradient
@@ -631,7 +631,7 @@ void write_autumn_stats(ofstream &DataFile, int generation, int timestep)
 	int calendar;
 	double autumn_cost;
 	
-	for (int i = autumn_nonmigrant_pop; i < winter_pop; ++i)	
+	for (int i = spring_nonmigrant_pop; i < winter_pop; ++i)	
 	{
 		lat = WinterPop[i].latency;  // the migratory latency of individual i
 		mean_latency += lat;
@@ -748,7 +748,7 @@ void spring_mortality()
     for (int i = 0; i < winter_pop;++i)
     {
         // random mortality of non-migrants
-        if (uniform(rng_r) < (sqrt(1 - pmort) / relative_mortality_risk_of_migration))
+        if (uniform(rng_r) < ((1 - sqrt(1 - pmort)) / relative_mortality_risk_of_migration))
         {
             WinterPop[i] = WinterPop[winter_pop - 1];
             --winter_pop;
@@ -772,7 +772,7 @@ void spring_mortality()
         } // ends: death due to starvation
 		
 		// random mortality of migrants
-        else if (uniform(rng_r) < sqrt(1 - pmort))
+        else if (uniform(rng_r) < 1-sqrt(1 - pmort))
         {
             SummerPop[i] = SummerPop[summer_pop - 1];
             --summer_pop;
@@ -804,7 +804,7 @@ void autumn_mortality()
 			}
 				
 		//random mortality
-	    else if (uniform(rng_r) < sqrt(1 - pmort))
+	    else if (uniform(rng_r) < 1 - sqrt(1 - pmort))
 	        {
 	            WinterPop[i] = WinterPop[winter_pop - 1];
 	            --winter_pop;
@@ -834,8 +834,7 @@ void autumn_mortality()
 // back in the original population
 void clear_staging_pool()
 {
-	// put individuals from staging pool (which haven't migrated) 
-    // back in the original population
+	// put individuals still in the staging pool (i.e., those that signalled but didn't depart) back in the original population
     for (int i = 0; i < staging_pop; ++i)
     {
         WinterPop[winter_pop++] = StagingPool[i];
@@ -999,7 +998,9 @@ void spring_dynamics(int t)
     // actual spring dispersal from winter to summer population
     for (int i = 0; i < staging_pop; ++i)
     {
-        // later we will consider collective dispersal decisions
+        assert(staging_pop < N);
+		
+		// later we will consider collective dispersal decisions
         // for now, individuals leave dependent on the current amount of individuals
         // within the staging pool
         pdisperse = 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1])
@@ -1025,7 +1026,6 @@ void spring_dynamics(int t)
             --staging_pop;
             --i;
 
-            assert(staging_pop < N);
             assert(staging_pop >= 0);
 
             // increase flock size
@@ -1061,7 +1061,7 @@ void spring_dynamics(int t)
     {		
 		// Resource cost of migration to the individual
 		SummerPop[i].cost = migration_cost(NFlock);
-		SummerPop[i].resources = SummerPop[i].resources - migration_cost(NFlock);
+		SummerPop[i].resources -= migration_cost(NFlock);
 		SummerPop[i].resources = clamp(SummerPop[i].resources, 0.0, resource_max);
 		SummerPop[i].fecundity = 0;
 		
