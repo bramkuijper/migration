@@ -32,14 +32,10 @@ uniform_real_distribution<> uniform(0.0,1.0);
 // function
 
 // number of individuals in population
-<<<<<<< HEAD
 const int N = 200;
-=======
-const int N = 400;
->>>>>>> 3b3df4ce06c9090faf7c9d69831916fd1c12433d
 
 // number of generations
-long int number_generations = 2000;
+long int number_generations = 200;
 
 // initial values for phi (social dependency) and theta (resource dependency)
 // a is an intercept, b is a gradient
@@ -89,9 +85,9 @@ double offspring_cost_magnifier = 0.0;
 
 double carryover_proportion = 0.0;  // proportion of an individual's resource value that can be carried over to the following year
 
-// max number of intervals per season (two seasons: tspring serves for both spring and autumn seasons)
+// max number of intervals per season (two seasons: summer, winter)
 int twinter = 0;
-int tspring = 0;
+int tspring = 5000;
 
 int skip = 1;
 
@@ -751,7 +747,7 @@ void spring_mortality()
 {
     for (int i = 0; i < winter_pop;++i)
     {
-        // individual dies; replace with end of the stack individual
+        // random mortality of non-migrants
         if (uniform(rng_r) < (pmort / relative_mortality_risk_of_migration))
         {
             WinterPop[i] = WinterPop[winter_pop - 1];
@@ -767,13 +763,22 @@ void spring_mortality()
 	
     for (int i = 0; i < summer_pop;++i)
     {
-        // individual dies; replace with end of the stack individual
-        if (uniform(rng_r) < pmort)
+		// migration-induced starvation
+        if (SummerPop[i].resources <= resource_starvation_threshold)
+        {
+            SummerPop[i] = SummerPop[summer_pop - 1];
+            --summer_pop;
+            --i;
+        } // ends: death due to starvation
+		
+		// random mortality of migrants
+        else if (uniform(rng_r) < pmort)
         {
             SummerPop[i] = SummerPop[summer_pop - 1];
             --summer_pop;
             --i;
         }
+		
 		else
 		{
 			SummerPop[i].timing = 1;  // individual survives: timing is reset to 1 for autumn migration
@@ -1056,18 +1061,10 @@ void spring_dynamics(int t)
 		
     {		
 		// Resource cost of migration to the individual
+		SummerPop[i].cost = migration_cost(NFlock);
 		SummerPop[i].resources = SummerPop[i].resources - migration_cost(NFlock);
 		SummerPop[i].resources = clamp(SummerPop[i].resources, 0.0, resource_max);
-		SummerPop[i].cost = migration_cost(NFlock);
 		SummerPop[i].fecundity = 0;
-
-		// migration-induced starvation
-        if (SummerPop[i].resources <= resource_starvation_threshold)
-        {
-            SummerPop[i] = SummerPop[summer_pop - 1];
-            --summer_pop;
-            --i;
-        } // ends: death due to starvation
 		
     } // ENDS: updating resources of migrants
 
@@ -1458,18 +1455,9 @@ void postbreeding_dynamics(int t)
     for (int i = winter_pop_old; i < winter_pop; ++i)
     {	
         // resources are reduced due to migration,
+		WinterPop[i].cost = migration_cost(NFlock);
 		WinterPop[i].resources = WinterPop[i].resources - migration_cost(NFlock);
 		WinterPop[i].resources = clamp(WinterPop[i].resources, 0.0, resource_max);
-		WinterPop[i].cost = migration_cost(NFlock);
-		
-		// death due to starvation
-        if (WinterPop[i].resources <= resource_starvation_threshold)
-        {
-            WinterPop[i] = WinterPop[winter_pop - 1];
-            --winter_pop;
-            --i; 
-        }
-		
 		WinterPop[i].resources *= carryover_proportion;
 
     } // Ends: update resource levels of winter arrivals
