@@ -793,7 +793,7 @@ void autumn_mortality()
     
 	// death due to starvation
 	// migrants
-	for (int i = spring_nonmigrant_pop; i < (winter_pop -1); ++i)
+	for (int i = spring_nonmigrant_pop; i < (winter_pop - 1); ++i)
 		
 		// migration-induced mortality
 		if (WinterPop[i].resources <= resource_starvation_threshold)        
@@ -1134,9 +1134,10 @@ void create_offspring(
 // resources and arrival time
 void summer_reproduction(ofstream &DataFile)
 {
-	
+	// the next three lines are now duplicated in the main text of the model at the bottom of the script, so I think this is redundant
 	mean_resources = 0.0;
 	ss_resources = 0.0;
+	rv = 0.0;
 	
 	// auxiliary variables storing current mom and dad
     Individual mother, father;
@@ -1572,6 +1573,10 @@ int main(int argc, char **argv)
 		Nvacancies = 0;
 		rv = 0;
 				
+		mean_resources = 0.0;
+		ss_resources = 0.0;
+		rv = 0.0;
+		
 		summer_reproduction(DataFile);
 		
 		if ((generation + 1) % skip == 0)
