@@ -748,7 +748,7 @@ void spring_mortality()
     for (int i = 0; i < winter_pop;++i)
     {
         // random mortality of non-migrants
-        if (uniform(rng_r) < (pmort / relative_mortality_risk_of_migration))
+        if (uniform(rng_r) < (sqrt(1 - pmort) / relative_mortality_risk_of_migration))
         {
             WinterPop[i] = WinterPop[winter_pop - 1];
             --winter_pop;
@@ -772,7 +772,7 @@ void spring_mortality()
         } // ends: death due to starvation
 		
 		// random mortality of migrants
-        else if (uniform(rng_r) < pmort)
+        else if (uniform(rng_r) < sqrt(1 - pmort))
         {
             SummerPop[i] = SummerPop[summer_pop - 1];
             --summer_pop;
@@ -793,7 +793,7 @@ void autumn_mortality()
     
 	// death due to starvation
 	// migrants
-	for (int i = spring_nonmigrant_pop; i < winter_pop -1)
+	for (int i = spring_nonmigrant_pop; i < (winter_pop -1); ++i)
 		
 		// migration-induced mortality
 		if (WinterPop[i].resources <= resource_starvation_threshold)        
@@ -804,7 +804,7 @@ void autumn_mortality()
 			}
 				
 		//random mortality
-	    else if (uniform(rng_r) < (pmort))
+	    else if (uniform(rng_r) < sqrt(1 - pmort))
 	        {
 	            WinterPop[i] = WinterPop[winter_pop - 1];
 	            --winter_pop;
@@ -828,7 +828,6 @@ void autumn_mortality()
 			--spring_nonmigrant_pop;
             --i;
 		} // ends: random mortality
-    }
 }
 
 // remove individuals from the staging pool and put them
