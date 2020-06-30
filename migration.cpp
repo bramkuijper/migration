@@ -32,7 +32,7 @@ uniform_real_distribution<> uniform(0.0,1.0);
 // function
 
 // number of individuals in population
-const int N = 300;
+const int N = 200;
 
 // number of generations
 long int number_generations = 200;
@@ -89,7 +89,7 @@ double carryover_proportion = 0.0;  // proportion of an individual's resource va
 int twinter = 0;
 int tspring = 5000;
 
-int skip = 10;
+int skip = 1;
 
 // stats of flock size and staging
 double mean_spring_flock_size = 0.0;
@@ -781,30 +781,44 @@ void spring_mortality()
 
 void autumn_mortality()
 {
-    for (int i = 0; i < spring_nonmigrant_pop;++i)
+    
+	// death due to starvation
+	// migrants
+	for (int i = spring_nonmigrant_pop; i < winter_pop -1)
+		
+		// migration-induced mortality
+		if (WinterPop[i].resources <= resource_starvation_threshold)        
+			{            
+				WinterPop[i] = WinterPop[winter_pop - 1];           
+				--winter_pop;            
+				--i;
+			}
+				
+		//random mortality
+	    else if (uniform(rng_r) < (pmort))
+	        {
+	            WinterPop[i] = WinterPop[winter_pop - 1];
+	            --winter_pop;
+	            --i;
+	        } 
+			
+		else
+			{
+				WinterPop[i].timing = 1;  // individual survives: timing is reset to 1, ready for spring phenology monitoring
+				WinterPop[i].signal_timing = 1;
+			} 
+	
+	// non-migrants
+	for (int i = 0; i < spring_nonmigrant_pop;++i)       
+		
+		// random mortality
 		if (uniform(rng_r) < (pmort / relative_mortality_risk_of_migration))
 		{
             WinterPop[i] = WinterPop[spring_nonmigrant_pop - 1];
             --winter_pop;
 			--spring_nonmigrant_pop;
             --i;
-		}
-	
-	
-	for (int i = spring_nonmigrant_pop; i < winter_pop;++i)
-    {
-        // individual dies; replace with end of the stack individual
-        if (uniform(rng_r) < (pmort))
-        {
-            WinterPop[i] = WinterPop[winter_pop - 1];
-            --winter_pop;
-            --i;
-        }
-		else
-		{
-			WinterPop[i].timing = 1;  // individual survives: timing is reset to 1 for time t+1
-			WinterPop[i].signal_timing = 1;
-		}
+		} // ends: random mortality
     }
 }
 
@@ -906,7 +920,7 @@ void spring_dynamics(int t)
 
     assert(winter_pop <= N);
     assert(winter_pop >= 0);  
-    assert((winter_pop > 0 || staging_pop > 0) || summer_pop > 0);  
+    assert(winter_pop > 0 || staging_pop > 0 || summer_pop > 0);  
 	assert(winter_pop + staging_pop + summer_pop <= N);  
     double psignal = 0.0;
 
