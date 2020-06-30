@@ -32,10 +32,14 @@ uniform_real_distribution<> uniform(0.0,1.0);
 // function
 
 // number of individuals in population
+<<<<<<< HEAD
 const int N = 200;
+=======
+const int N = 400;
+>>>>>>> 3b3df4ce06c9090faf7c9d69831916fd1c12433d
 
 // number of generations
-long int number_generations = 200;
+long int number_generations = 2000;
 
 // initial values for phi (social dependency) and theta (resource dependency)
 // a is an intercept, b is a gradient
@@ -85,9 +89,9 @@ double offspring_cost_magnifier = 0.0;
 
 double carryover_proportion = 0.0;  // proportion of an individual's resource value that can be carried over to the following year
 
-// max number of intervals per season (two seasons: summer, winter)
+// max number of intervals per season (two seasons: tspring serves for both spring and autumn seasons)
 int twinter = 0;
-int tspring = 5000;
+int tspring = 0;
 
 int skip = 1;
 
