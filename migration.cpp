@@ -32,7 +32,7 @@ uniform_real_distribution<> uniform(0.0,1.0);
 // function
 
 // number of individuals in population
-const int N = 100;
+const int N = 400;
 
 // number of generations
 long int number_generations = 50;
@@ -87,7 +87,7 @@ double carryover_proportion = 0.0;  // proportion of an individual's resource va
 
 // max number of intervals per season (two seasons: summer, winter)
 int twinter = 0;
-int tspring = 5000;
+int tspring = 0;
 
 int skip = 1;
 
@@ -292,7 +292,6 @@ void write_parameters(ofstream &DataFile)  // at end of outputted file
             << "migration_cost_power;" << migration_cost_power << endl
             << "max_migration_cost;" << max_migration_cost << endl
 			<< "min_migration_cost;" << min_migration_cost << endl
-			<< "min_offspring_cost;" << min_offspring_cost << endl
 			<< "offspring_cost_magnifier;" << offspring_cost_magnifier << endl
 			<< "carryover_proportion;" << carryover_proportion << endl
 			<< "relative_mortality_risk_of_migration;" << relative_mortality_risk_of_migration << endl
