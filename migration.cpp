@@ -32,10 +32,10 @@ uniform_real_distribution<> uniform(0.0,1.0);
 // function
 
 // number of individuals in population
-const int N = 50;
+const int N = 100;
 
 // number of generations
-long int number_generations = 10;
+long int number_generations = 50;
 
 // initial values for phi (social dependency) and theta (resource dependency)
 // a is an intercept, b is a gradient
@@ -935,15 +935,7 @@ void spring_dynamics(int t)
     // i.e., prepare for dispersal
     // signal to disperse
     for (int i = 0; i < winter_pop; ++i) 
-    {
-        
-		// individuals must acquire the resources necessary for migration and reproduction before
-		// they can consider migrating. 
-		//if (WinterPop[i].resources < breeding_threshold)
-		//{
-		//	continue;
-		//}
-		
+    {	
 		// reaction norm dependent on resources
         // resulting in signaling a willingness to disperse
         // => go to the staging level
@@ -951,7 +943,7 @@ void spring_dynamics(int t)
             + 0.5 * (WinterPop[i].theta_b[0] + WinterPop[i].theta_b[1]) * WinterPop[i].resources / resource_max;
 
         // bound the probability
-        //psignal = clamp(psignal, 0, 1.0);
+        psignal = clamp(psignal, 0, 1);
 
         // does individual want to signal to others to be ready for departure?
         if (uniform(rng_r) < psignal)
@@ -1005,7 +997,7 @@ void spring_dynamics(int t)
         // within the staging pool
         pdisperse = 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1])
             + 0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) * (double) staging_pop_start / (staging_pop_start + winter_pop);  // TODO Does the '(double)' need to be here?
-		//pdisperse = clamp(pdisperse, 0, 1);
+		pdisperse = clamp(pdisperse, 0, 1);
 
         // yes individual goes
         if (uniform(rng_r) < pdisperse)
