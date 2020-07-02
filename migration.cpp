@@ -849,7 +849,7 @@ void clear_staging_pool()
     // just double check that winter_pop does not exceed max population size
 	assert(winter_pop <= N);
 	assert(winter_pop >= staging_pop);
-
+	
     staging_pop = 0;
 	spring_nonmigrant_pop = winter_pop;
 	
@@ -1567,12 +1567,12 @@ int main(int argc, char **argv)
 		var_spring_flock_size = n_spring_flocks > 0 ? (ss_spring_flock_size / n_spring_flocks) - (mean_spring_flock_size * mean_spring_flock_size) : 0;
 		var_spring_staging_size = (ss_spring_staging_size / tspring) - (mean_spring_staging_size * mean_spring_staging_size);	
 		
+		clear_staging_pool();
+		
 		if ((generation + 1) % skip == 0)
 		 {
 			 write_spring_stats(DataFile, generation);
 		  }  
-		  
-        clear_staging_pool();
 
         // let individuals die with a certain probability 
         spring_mortality();
