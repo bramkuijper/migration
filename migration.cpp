@@ -149,6 +149,7 @@ int summer_pop_old = 0;  // 06/02/20: So that I can track summer_pop old
 int Nvacancies = 0;
 int NFlock = 0;
 int Nsurplus = 0;
+int autumn_migrant_deaths = 0;
 
 double ss_spring_migrant_pop = 0.0;
 double ss_autumn_migrant_pop = 0.0;
@@ -355,7 +356,8 @@ void write_data_headers(ofstream &DataFile)
 		<< "mean_autumn_cost;"
 		<< "var_autumn_cost;"
 	
-		// WINTER STATS (13):
+		// WINTER STATS (14):
+		<< "autumn_migrant_deaths;"		
 		<< "winter_pop;"
 		<< "mean_resources_winter;"
 	    << "var_resources_winter;"
@@ -750,7 +752,7 @@ void spring_mortality()
 	for (int i = 0; i < winter_pop;++i)
     {
         // random mortality of non-migrants
-        if (uniform(rng_r) < 1 - sqrt(1 - (pmort / relative_mortality_risk_of_migration)))
+        if (uniform(rng_r) < pmort / relative_mortality_risk_of_migration)
         {
             WinterPop[i] = WinterPop[winter_pop - 1];
             --winter_pop;
@@ -803,6 +805,8 @@ void autumn_mortality()
 				WinterPop[i] = WinterPop[winter_pop - 1];           
 				--winter_pop;            
 				--i;
+				
+				++autumn_migrant_deaths;
 			}
 				
 		//random mortality
@@ -811,6 +815,8 @@ void autumn_mortality()
 	            WinterPop[i] = WinterPop[winter_pop - 1];
 	            --winter_pop;
 	            --i;
+				
+				++autumn_migrant_deaths;
 	        } 
 			
 		else
@@ -819,17 +825,11 @@ void autumn_mortality()
 				WinterPop[i].signal_timing = 1;
 			} 
 	
-	// Those that remained at wintering ground
-	for (int i = 0; i < spring_nonmigrant_pop;++i)       
-		
-		// random mortality
-		if (uniform(rng_r) < 1 - sqrt(1 - (pmort / relative_mortality_risk_of_migration)))
-		{
-            WinterPop[i] = WinterPop[spring_nonmigrant_pop - 1];
-            --winter_pop;
-			--spring_nonmigrant_pop;
-            --i;
-		} // ends: random mortality
+	// NON-MIGRANTS MORTALITY WAS DEALT WITH IN SPRING_MORTALITY()
+	// (they effectively have two bouts of mortality in one go
+	// ('pmort' being the annual mortality probability, 
+	// modified by 'relative_mortality_risk')
+	
 }
 
 // remove individuals from the staging pool and put them
@@ -1495,9 +1495,7 @@ int main(int argc, char **argv)
 		spring_pop_start = 0;
 		autumn_pop_start = 0;
 		summer_pop = 0;
-		
-
-        staging_pop = 0;  // Set staging population count to zero before winter dynamics
+		staging_pop = 0;  // Set staging population count to zero before winter dynamics
 		
 		rgood = rgood_init;
 		rbad = rbad_init;  
@@ -1599,6 +1597,7 @@ int main(int argc, char **argv)
 		mean_resources = 0.0;
 		ss_resources = 0.0;
 		rv = 0;
+		autumn_migrant_deaths = 0;
 		
         autumn_pop_start = summer_pop;
 		
