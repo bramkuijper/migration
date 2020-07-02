@@ -18,7 +18,7 @@ rgood = [ 0.01 ]
 rbad = [ 0.005 ]
 preparation_penalty = [0] # The reduction in resource acquisition, relative to the normal feeding phase.
 
-resource_reproduction_threshold = [50]
+resource_reproduction_threshold = [40]
 resource_starvation_threshold = [0.0]
 resource_max = [200]
 
