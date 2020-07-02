@@ -89,7 +89,7 @@ double carryover_proportion = 0.0;  // proportion of an individual's resource va
 int twinter = 0;
 int tspring = 0;
 
-int skip = 1;
+int skip = 200;
 
 // stats of flock size and staging
 double mean_spring_flock_size = 0.0;
@@ -306,7 +306,8 @@ void write_data_headers(ofstream &DataFile)
         << "time_interval;"
 				
 		// SPRING MIGRATION STATS (17):
-        << "mean_spring_staging_size;"
+		<< "spring_pop;"
+		<< "mean_spring_staging_size;"
         << "var_spring_staging_size;"
         << "spring_migrant_pop;"
 		<< "spring_nonmigrant_pop;"
@@ -595,7 +596,8 @@ void write_spring_stats(ofstream &DataFile, int generation, int timestep)
     DataFile
         << generation << ";"
         << timestep << ";" 
-        << mean_spring_staging_size << ";" 
+		<< spring_pop_start << ";"
+		<< mean_spring_staging_size << ";" 
 		<< var_spring_staging_size << ";"
 		<< spring_migrant_pop << ";"
 		<< spring_nonmigrant_pop << ";"
