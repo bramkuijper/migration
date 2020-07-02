@@ -746,10 +746,11 @@ double migration_cost(int NFlock)
 
 void spring_mortality()
 {
-    for (int i = 0; i < winter_pop;++i)
+    // NON-MIGRANTS
+	for (int i = 0; i < winter_pop;++i)
     {
         // random mortality of non-migrants
-        if (uniform(rng_r) < ((1 - sqrt(1 - pmort)) / relative_mortality_risk_of_migration))
+        if (uniform(rng_r) < 1 - sqrt(1 - (pmort / relative_mortality_risk_of_migration)))
         {
             WinterPop[i] = WinterPop[winter_pop - 1];
             --winter_pop;
@@ -762,6 +763,7 @@ void spring_mortality()
 		}
     }
 	
+	// MIGRANTS
     for (int i = 0; i < summer_pop;++i)
     {
 		// migration-induced starvation
@@ -792,9 +794,8 @@ void spring_mortality()
 void autumn_mortality()
 {
     
-	// death due to starvation
-	// migrants
-	for (int i = spring_nonmigrant_pop; i < (winter_pop - 1); ++i)
+	// MIGRANTS
+	for (int i = spring_nonmigrant_pop; i < winter_pop; ++i)
 		
 		// migration-induced mortality
 		if (WinterPop[i].resources <= resource_starvation_threshold)        
@@ -818,11 +819,11 @@ void autumn_mortality()
 				WinterPop[i].signal_timing = 1;
 			} 
 	
-	// non-migrants
+	// Those that remained at wintering ground
 	for (int i = 0; i < spring_nonmigrant_pop;++i)       
 		
 		// random mortality
-		if (uniform(rng_r) < (pmort / relative_mortality_risk_of_migration))
+		if (uniform(rng_r) < 1 - sqrt(1 - (pmort / relative_mortality_risk_of_migration)))
 		{
             WinterPop[i] = WinterPop[spring_nonmigrant_pop - 1];
             --winter_pop;
@@ -1525,6 +1526,11 @@ int main(int argc, char **argv)
 		assert(winter_pop <= N);
 		
 		spring_pop_start = winter_pop;
+		
+	    if (winter_pop <= 1)
+	    { 
+	        exit(1);
+	    }
 		
 		// time during spring during which individuals can migrate (or carry on foraging)
 		mean_resources = 0.0;
