@@ -32,10 +32,10 @@ uniform_real_distribution<> uniform(0.0,1.0);
 // function
 
 // number of individuals in population
-const int N = 1000;
+const int N = 50;
 
 // number of generations
-long int number_generations = 50000;
+long int number_generations = 50;
 
 // initial values for phi (social dependency) and theta (resource dependency)
 // a is an intercept, b is a gradient
@@ -89,7 +89,7 @@ double carryover_proportion = 0.0;  // proportion of an individual's resource va
 int twinter = 0;
 int tspring = 0;
 
-int skip = 200;
+int skip = 2;
 
 // stats of flock size and staging
 double mean_spring_flock_size = 0.0;
@@ -843,7 +843,8 @@ void clear_staging_pool()
 	// put individuals still in the staging pool (i.e., those that signalled but didn't depart) back in the original population
     for (int i = 0; i < staging_pop; ++i)
     {
-        WinterPop[winter_pop++] = StagingPool[i];
+        WinterPop[winter_pop] = StagingPool[i];
+		winter_pop++;
     }
 
     // just double check that winter_pop does not exceed max population size
