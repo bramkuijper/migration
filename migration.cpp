@@ -150,6 +150,7 @@ int Nvacancies = 0;
 int NFlock = 0;
 int Nsurplus = 0;
 int autumn_migrant_deaths = 0;
+int remainer_pop = 0;
 
 double ss_spring_migrant_pop = 0.0;
 double ss_autumn_migrant_pop = 0.0;
@@ -356,8 +357,9 @@ void write_data_headers(ofstream &DataFile)
 		<< "mean_autumn_cost;"
 		<< "var_autumn_cost;"
 	
-		// WINTER STATS (14):
+		// WINTER STATS (15):
 		<< "autumn_migrant_deaths;"		
+		<< "remainer_pop;"
 		<< "winter_pop;"
 		<< "mean_resources_winter;"
 	    << "var_resources_winter;"
@@ -449,6 +451,8 @@ void write_winter_stats(ofstream &DataFile, int generation, int timestep)
 	
     // write statistics to a file
     DataFile 
+		<< autumn_migrant_deaths << ";"
+		<< remainer_pop << ";"
 		<< winter_pop << ";"
         << mean_resources << ";"
         << (ss_resources - mean_resources * mean_resources) << ";"
@@ -1496,6 +1500,7 @@ int main(int argc, char **argv)
 		autumn_pop_start = 0;
 		summer_pop = 0;
 		staging_pop = 0;  // Set staging population count to zero before winter dynamics
+		remainer_pop = 0;
 		
 		rgood = rgood_init;
 		rbad = rbad_init;  
@@ -1565,6 +1570,8 @@ int main(int argc, char **argv)
 	    { 
 	        exit(1);
 	    }
+		
+		remainer_pop = winter_pop;
 		
 		// Individuals reproduce after they migrated to the summer spot
 		Nvacancies = 0;
