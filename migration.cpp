@@ -1646,6 +1646,8 @@ int main(int argc, char **argv)
         // let individuals die with a certain probability 
         autumn_mortality();
 		
+		assert(winter_pop = remainer_pop + autumn_migrant_pop - autumn_migrant_deaths);
+		
 		// all individuals who remain at the summer grounds die
         summer_pop = 0;
         postbreeding_pop = 0;
