@@ -32,10 +32,10 @@ uniform_real_distribution<> uniform(0.0,1.0);
 // function
 
 // number of individuals in population
-const int N = 50;
+const int N = 200;
 
 // number of generations
-long int number_generations = 50;
+long int number_generations = 20;
 
 // initial values for phi (social dependency) and theta (resource dependency)
 // a is an intercept, b is a gradient
@@ -89,7 +89,7 @@ double carryover_proportion = 0.0;  // proportion of an individual's resource va
 int twinter = 0;
 int tspring = 0;
 
-int skip = 2;
+int skip = 1;
 
 // stats of flock size and staging
 double mean_spring_flock_size = 0.0;
@@ -291,6 +291,7 @@ void write_parameters(ofstream &DataFile)  // at top of outputted file
             << "tspring;" << tspring << endl
 			<< "twinter;" << twinter << endl
             << "N;" << N << endl
+			<< "number_generations" << number_generations << endl
             << "migration_cost_power;" << migration_cost_power << endl
             << "max_migration_cost;" << max_migration_cost << endl
 			<< "min_migration_cost;" << min_migration_cost << endl
@@ -1496,14 +1497,25 @@ int main(int argc, char **argv)
 		ss_spring_cost = 0.0;
 		mean_cost = 0.0;
 		ss_cost = 0.0;
+		staging_pop = 0;
 		spring_pop_start = 0;
 		autumn_pop_start = 0;
 		summer_pop = 0;
+		breeder_pop = 0;
+		nonreproductive_pop = 0;
+		offspring_pop = 0;
+		summer_pop_old = 0;
+		postbreeding_pop = 0;
 		staging_pop = 0;  // Set staging population count to zero before winter dynamics
 		remainer_pop = 0;
 		
 		rgood = rgood_init;
 		rbad = rbad_init;  
+
+		spring_nonmigrant_pop = 0;
+		spring_migrant_pop = 0;
+		autumn_nonmigrant_pop = 0;
+		autumn_migrant_pop = 0;
 		
 		
 		// Allow populations to become established (individuals must acquire resources)
@@ -1519,12 +1531,11 @@ int main(int argc, char **argv)
 		// If individuals did not migrate to the breeding ground then the population size has potentially swollen above N. Random mortality returns population to N.
 		uniform_int_distribution <> pop_sample(0, winter_pop - 1);
 		
-		do
+		while(winter_pop > N)
 		{
 			WinterPop[pop_sample(rng_r)] = WinterPop[winter_pop - 1];
 			--winter_pop;
 		} 
-		while(winter_pop > N);
 		
 		assert(winter_pop <= N);
 		
@@ -1656,7 +1667,7 @@ int main(int argc, char **argv)
 		nonreproductive_pop = 0;
 		offspring_pop = 0;
 		summer_pop_old = 0;
-		//spring_nonmigrant_pop = 0;
+		spring_nonmigrant_pop = 0;
 		spring_migrant_pop = 0;
 		autumn_nonmigrant_pop = 0;
 		autumn_migrant_pop = 0;
