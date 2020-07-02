@@ -305,7 +305,6 @@ void write_parameters(ofstream &DataFile)  // at top of outputted file
 void write_data_headers(ofstream &DataFile)
 {
     DataFile << "generation;"
-        << "time_interval;"
 				
 		// SPRING MIGRATION STATS (17):
 		<< "spring_pop;"
@@ -378,7 +377,7 @@ void write_data_headers(ofstream &DataFile)
 
 
 // write data for winter population (post mortality)
-void write_winter_stats(ofstream &DataFile, int generation, int timestep)
+void write_winter_stats(ofstream &DataFile)
 {
     double mean_theta_a[2] = { 0.0, 0.0 };
     double ss_theta_a[2] = { 0.0, 0.0 };
@@ -470,7 +469,7 @@ void write_winter_stats(ofstream &DataFile, int generation, int timestep)
 // ENDS: write data both for winter population and ends line entry in DataFile
 }
 
-void write_summer_stats(ofstream &DataFile, int generation, int timestep)
+void write_summer_stats(ofstream &DataFile)
 {
     double val;
 	
@@ -550,7 +549,7 @@ void write_summer_stats(ofstream &DataFile, int generation, int timestep)
 
 }  // ENDS: write summer stats
 
-void write_spring_stats(ofstream &DataFile, int generation, int timestep)
+void write_spring_stats(ofstream &DataFile, int generation)
 {
 	mean_latency = 0.0;
 	ss_latency = 0.0;
@@ -601,7 +600,6 @@ void write_spring_stats(ofstream &DataFile, int generation, int timestep)
     // write statistics to a file
     DataFile
         << generation << ";"
-        << timestep << ";" 
 		<< spring_pop_start << ";"
 		<< mean_spring_staging_size << ";" 
 		<< var_spring_staging_size << ";"
@@ -623,7 +621,7 @@ void write_spring_stats(ofstream &DataFile, int generation, int timestep)
 
 }  // ENDS: write data for spring migrants
 
-void write_autumn_stats(ofstream &DataFile, int generation, int timestep)
+void write_autumn_stats(ofstream &DataFile)
 {
 	mean_latency = 0.0;
 	ss_latency = 0.0;
@@ -1560,7 +1558,7 @@ int main(int argc, char **argv)
 		
 		if ((generation + 1) % skip == 0)
 		 {
-			 write_spring_stats(DataFile, generation, 5000);
+			 write_spring_stats(DataFile, generation);
 		  }  
 		  
         clear_staging_pool();
@@ -1587,7 +1585,7 @@ int main(int argc, char **argv)
 		
 		if ((generation + 1) % skip == 0)
 		{
-		write_summer_stats(DataFile, generation, 5000);
+		write_summer_stats(DataFile);
 		}
 		
 		// set autumn migration stats to 0 before postbreeding_dynamics starts
@@ -1637,7 +1635,7 @@ int main(int argc, char **argv)
 	  
 		if ((generation+1) % skip == 0)
 		{
-			write_autumn_stats(DataFile, generation, 5000);
+			write_autumn_stats(DataFile);
 		}
 		
 	    if (winter_pop <= 1)
@@ -1665,7 +1663,7 @@ int main(int argc, char **argv)
 		
 		if ((generation+1) % skip == 0)
         {
-            write_winter_stats(DataFile, generation, 5000); 
+            write_winter_stats(DataFile); 
         }
 		
 	    if (winter_pop <= 1)
