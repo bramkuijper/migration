@@ -1537,7 +1537,9 @@ int main(int argc, char **argv)
 		//	WinterPop[pop_sample(rng_r)] = WinterPop[winter_pop - 1];
 		//	--winter_pop;
 			//} 
-		
+			
+			// TODO Check that it is phenologically non-random to simply take the first N individuals as the population for year t+1
+	
 		assert(winter_pop <= N);
 		
 		spring_pop_start = winter_pop;
