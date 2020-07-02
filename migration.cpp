@@ -32,10 +32,13 @@ uniform_real_distribution<> uniform(0.0,1.0);
 // function
 
 // number of individuals in population
-const int N = 200;
+const int N = 1000;
 
 // number of generations
-long int number_generations = 20;
+long int number_generations = 5000;
+
+// sampling interval
+int skip = 50;
 
 // initial values for phi (social dependency) and theta (resource dependency)
 // a is an intercept, b is a gradient
@@ -88,8 +91,6 @@ double carryover_proportion = 0.0;  // proportion of an individual's resource va
 // max number of intervals per season (two seasons: summer, winter)
 int twinter = 0;
 int tspring = 0;
-
-int skip = 1;
 
 // stats of flock size and staging
 double mean_spring_flock_size = 0.0;
@@ -291,7 +292,7 @@ void write_parameters(ofstream &DataFile)  // at top of outputted file
             << "tspring;" << tspring << endl
 			<< "twinter;" << twinter << endl
             << "N;" << N << endl
-			<< "number_generations" << number_generations << endl
+			<< "number_generations;" << number_generations << endl
             << "migration_cost_power;" << migration_cost_power << endl
             << "max_migration_cost;" << max_migration_cost << endl
 			<< "min_migration_cost;" << min_migration_cost << endl
