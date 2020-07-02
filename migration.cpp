@@ -268,7 +268,7 @@ void init_arguments(int argc, char **argv)
 }
 
 // write down all parameters in the file
-void write_parameters(ofstream &DataFile)  // at end of outputted file
+void write_parameters(ofstream &DataFile)  // at top of outputted file
 {
     DataFile
             << "init_theta_a;" << init_theta_a << endl
@@ -301,7 +301,7 @@ void write_parameters(ofstream &DataFile)  // at end of outputted file
 			<< endl;
 }
 
-// list of the data headers at the start of the file
+// list of the data headers 
 void write_data_headers(ofstream &DataFile)
 {
     DataFile << "generation;"
@@ -638,7 +638,7 @@ void write_autumn_stats(ofstream &DataFile, int generation, int timestep)
 	int calendar;
 	double autumn_cost;
 	
-	for (int i = spring_nonmigrant_pop; i < winter_pop; ++i)	
+	for (int i = remainer_pop; i < winter_pop; ++i)	
 	{
 		lat = WinterPop[i].latency;  // the migratory latency of individual i
 		mean_latency += lat;
@@ -801,7 +801,7 @@ void autumn_mortality()
 {
     
 	// MIGRANTS
-	for (int i = spring_nonmigrant_pop; i < winter_pop; ++i)
+	for (int i = remainer_pop; i < winter_pop; ++i)
 		
 		// migration-induced mortality
 		if (WinterPop[i].resources <= resource_starvation_threshold)        
@@ -849,6 +849,7 @@ void clear_staging_pool()
 
     // just double check that winter_pop does not exceed max population size
 	assert(winter_pop <= N);
+	assert(winter_pop >= staging_pop);
 
     staging_pop = 0;
 	spring_nonmigrant_pop = winter_pop;
@@ -1657,7 +1658,7 @@ int main(int argc, char **argv)
 		nonreproductive_pop = 0;
 		offspring_pop = 0;
 		summer_pop_old = 0;
-		spring_nonmigrant_pop = 0;
+		//spring_nonmigrant_pop = 0;
 		spring_migrant_pop = 0;
 		autumn_nonmigrant_pop = 0;
 		autumn_migrant_pop = 0;
