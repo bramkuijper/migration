@@ -1520,9 +1520,9 @@ int main(int argc, char **argv)
 		
 		
 		// Allow populations to become established (individuals must acquire resources)
-		if(generation < 2000)  
+		if(generation < 10000)  
 			{	
-				breeding_threshold = resource_reproduction_threshold * generation / 2000;
+				breeding_threshold = resource_reproduction_threshold * generation / 10000;
 			}
 		else
 			{
