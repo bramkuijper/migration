@@ -1102,29 +1102,29 @@ void create_offspring(
 
     // each parental allele has probability 0.5 to make it into offspring
     offspring.theta_a[0] = mutation(mother.theta_a[allele_sample(rng_r)], mu_theta, sdmu_theta);
-    //offspring.theta_a[0] = clamp(offspring.theta_a[0], 0.0, 1.0);
+    offspring.theta_a[0] = clamp(offspring.theta_a[0], 0.0, 1.0);
 
     offspring.theta_a[1] = mutation(father.theta_a[allele_sample(rng_r)], mu_theta, sdmu_theta);
-    //offspring.theta_a[1] = clamp(offspring.theta_a[1], 0.0, 1.0);
+    offspring.theta_a[1] = clamp(offspring.theta_a[1], 0.0, 1.0);
 
     offspring.theta_b[0] = mutation(mother.theta_b[allele_sample(rng_r)], mu_theta, sdmu_theta);
-    //offspring.theta_b[0] = clamp(offspring.theta_b[0], 0.0, 1.0);
+    offspring.theta_b[0] = clamp(offspring.theta_b[0], 0.0, 1.0);
 
     offspring.theta_b[1] = mutation(father.theta_b[allele_sample(rng_r)], mu_theta, sdmu_theta);
-    //offspring.theta_b[1] = clamp(offspring.theta_b[1], 0.0, 1.0);
+    offspring.theta_b[1] = clamp(offspring.theta_b[1], 0.0, 1.0);
 
     // inherit phi loci
     offspring.phi_a[0] = mutation(mother.phi_a[allele_sample(rng_r)], mu_phi, sdmu_phi);
-    //offspring.phi_a[0] = clamp(offspring.phi_a[0], 0.0, 1.0);
+    offspring.phi_a[0] = clamp(offspring.phi_a[0], 0.0, 1.0);
 
     offspring.phi_a[1] = mutation(father.phi_a[allele_sample(rng_r)], mu_phi, sdmu_phi);
-   //offspring.phi_a[1] = clamp(offspring.phi_a[1], 0.0, 1.0);
+	offspring.phi_a[1] = clamp(offspring.phi_a[1], 0.0, 1.0);
     
     offspring.phi_b[0] = mutation(mother.phi_b[allele_sample(rng_r)], mu_phi, sdmu_phi);
-    //offspring.phi_b[0] = clamp(offspring.phi_b[0], 0.0, 1.0);
+    offspring.phi_b[0] = clamp(offspring.phi_b[0], 0.0, 1.0);
 
     offspring.phi_b[1] = mutation(father.phi_b[allele_sample(rng_r)], mu_phi, sdmu_phi);
-    //offspring.phi_b[1] = clamp(offspring.phi_b[1], 0.0, 1.0);
+    offspring.phi_b[1] = clamp(offspring.phi_b[1], 0.0, 1.0);
 
 }  // ENDS OFFSPRING PRODUCTION
 
