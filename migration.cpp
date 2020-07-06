@@ -773,7 +773,7 @@ void spring_mortality()
     for (int i = 0; i < summer_pop;++i)
     {
 		// migration-induced starvation
-        if (SummerPop[i].resources <= resource_starvation_threshold)
+        if (SummerPop[i].resources < resource_starvation_threshold)
         {
             SummerPop[i] = SummerPop[summer_pop - 1];
             --summer_pop;
@@ -804,7 +804,7 @@ void autumn_mortality()
 	for (int i = remainer_pop; i < winter_pop; ++i)
 		
 		// migration-induced mortality
-		if (WinterPop[i].resources <= resource_starvation_threshold)        
+		if (WinterPop[i].resources < resource_starvation_threshold)        
 			{            
 				WinterPop[i] = WinterPop[winter_pop - 1];           
 				--winter_pop;            
@@ -874,7 +874,7 @@ void winter_dynamics(int t)
             WinterPop[i].resources += rbad;
         }
 		
-	WinterPop[i].resources = clamp(WinterPop[i].resources, 0.0, resource_max); // individuals can reach a (uniform) maximum resource value
+	WinterPop[i].resources = min(WinterPop[i].resources, resource_max); // individuals can reach a (uniform) maximum resource value
     
 	} // ok, resource dynamic done
 
@@ -909,7 +909,7 @@ void spring_dynamics(int t)
             WinterPop[i].resources += rbad;
         }
 		
-	WinterPop[i].resources = clamp(WinterPop[i].resources, 0.0, resource_max);
+	WinterPop[i].resources = min(WinterPop[i].resources, resource_max);
 		 
     } // ok, resource dynamic done
 
@@ -929,7 +929,7 @@ void spring_dynamics(int t)
             StagingPool[i].resources += rbad * preparation_penalty;
         }
 	
-	StagingPool[i].resources = clamp(StagingPool[i].resources, 0.0, resource_max);	
+	StagingPool[i].resources = min(StagingPool[i].resources, resource_max);	
 		
     } // ENDS staging site foraging loop
 
@@ -1062,7 +1062,7 @@ void spring_dynamics(int t)
 		// Resource cost of migration to the individual
 		SummerPop[i].cost = migration_cost(NFlock);
 		SummerPop[i].resources -= migration_cost(NFlock);
-		SummerPop[i].resources = clamp(SummerPop[i].resources, 0.0, resource_max);
+		SummerPop[i].resources = min(SummerPop[i].resources, resource_max);
 		SummerPop[i].fecundity = 0;
 		
     } // ENDS: updating resources of migrants
@@ -1307,7 +1307,7 @@ void postbreeding_dynamics(int t)
             SummerPop[i].resources += rbad;
         }
     
-	SummerPop[i].resources = clamp(SummerPop[i].resources, 0.0, resource_max);
+	SummerPop[i].resources = min(SummerPop[i].resources, resource_max);
 	
     } // ok resource dynamic done
 
@@ -1326,7 +1326,7 @@ void postbreeding_dynamics(int t)
             StagingPool[i].resources += rbad;
         }
     
-	StagingPool[i].resources = clamp(StagingPool[i].resources, 0.0, resource_max);
+	StagingPool[i].resources = min(StagingPool[i].resources, resource_max);
 	
 	}
 
@@ -1457,7 +1457,7 @@ void postbreeding_dynamics(int t)
         // resources are reduced due to migration,
 		WinterPop[i].cost = migration_cost(NFlock);
 		WinterPop[i].resources = WinterPop[i].resources - migration_cost(NFlock);
-		WinterPop[i].resources = clamp(WinterPop[i].resources, 0.0, resource_max);
+		WinterPop[i].resources = min(WinterPop[i].resources, resource_max);  // Individual resource values cannot exceed resource max
 		WinterPop[i].resources *= carryover_proportion;
 
     } // Ends: update resource levels of winter arrivals
