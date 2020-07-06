@@ -40,11 +40,11 @@ relative_mortality_risk_of_migration = [5]
 
 carryover_proportion = [1]
 
-number_replicates = 1
+number_replicates = 5
 
 executable = "./xmigration"
 
-counter = 4
+counter = 1
 
 # should jobs run on the background
 # only do this if the number of jobs is smaller
