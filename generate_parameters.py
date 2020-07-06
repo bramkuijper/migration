@@ -2,9 +2,9 @@
 
 # generate all parameter combinations to run the migration simulation
 
-init_theta_a = [0.0005]  # Default is 0.0005
+init_theta_a = [0.0002]  # Default is 0.0005
 init_theta_b = [0]  # Default is 0
-init_phi_a = [0.0005]  # Default is 0.0005
+init_phi_a = [0.0002]  # Default is 0.0005
 init_phi_b = [0]  # Default is 0
 
 twinter = 3000
@@ -38,7 +38,7 @@ min_offspring_cost = [ 10 ]
 offspring_cost_magnifier = [ 1 ] # The relative difference in resource cost per offspring having migrated at the earliest opportunity versus the last
 relative_mortality_risk_of_migration = [5]
 
-carryover_proportion = [1]
+carryover_proportion = [0]
 
 number_replicates = 5
 

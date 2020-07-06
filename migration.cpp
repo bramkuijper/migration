@@ -32,13 +32,13 @@ uniform_real_distribution<> uniform(0.0,1.0);
 // function
 
 // number of individuals in population
-const int N = 1000;
+const int N = 500;
 
 // number of generations
-long int number_generations = 100000;
+long int number_generations = 5000;
 
 // sampling interval
-int skip = 500;
+int skip = 2;
 
 // initial values for phi (social dependency) and theta (resource dependency)
 // a is an intercept, b is a gradient
