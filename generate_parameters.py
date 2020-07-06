@@ -10,7 +10,7 @@ init_phi_b = [0]  # Default is 0
 twinter = 3000
 tspring = 7000
 
-pmort = [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5]  # Default is 0.05
+pmort = [0.025, 0.05, 0.075, 0.1, 0.125, 0.15, 0.175, 0.2, 0.225, 0.25]  # Default is 0.05
 pgood_init = 0.5 # Deleted 0.5 option on 27 November 2019
 t_good_ends = [ 100000 ]
 
@@ -38,7 +38,7 @@ min_offspring_cost = [ 10 ]
 offspring_cost_magnifier = [ 1 ] # The relative difference in resource cost per offspring having migrated at the earliest opportunity versus the last
 relative_mortality_risk_of_migration = [5]
 
-carryover_proportion = [1, 0]
+carryover_proportion = [1]
 
 number_replicates = 1
 
