@@ -1572,6 +1572,11 @@ int main(int argc, char **argv)
 		
 		clear_staging_pool();
 		
+		if (generation == 0)
+		{
+			write_spring_stats(DataFile, generation);
+		}
+		
 		if ((generation + 1) % skip == 0)
 		 {
 			 write_spring_stats(DataFile, generation);
@@ -1597,7 +1602,12 @@ int main(int argc, char **argv)
 		
 		if (summer_pop > 1)
 		{
-		summer_reproduction(DataFile);	
+			summer_reproduction(DataFile);	
+		}
+		
+		if (generation == 0)
+		{
+			write_summer_stats(DataFile);
 		}
 		
 		if ((generation + 1) % skip == 0)
@@ -1650,6 +1660,11 @@ int main(int argc, char **argv)
 		
 		autumn_nonmigrant_pop = summer_pop + staging_pop;
 	  
+		if (generation == 0)
+		{
+			write_autumn_stats(DataFile);
+		}
+		
 		if ((generation+1) % skip == 0)
 		{
 			write_autumn_stats(DataFile);
@@ -1677,6 +1692,11 @@ int main(int argc, char **argv)
 		spring_migrant_pop = 0;
 		autumn_nonmigrant_pop = 0;
 		autumn_migrant_pop = 0;
+		
+		if (generation == 0)
+		{
+			write_winter_stats(DataFile);
+		}
 		
 		if ((generation+1) % skip == 0)
         {
