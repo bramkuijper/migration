@@ -1595,7 +1595,10 @@ int main(int argc, char **argv)
 		ss_resources = 0.0;
 		rv = 0.0;
 		
-		summer_reproduction(DataFile);
+		if (summer_pop > 1)
+		{
+		summer_reproduction(DataFile);	
+		}
 		
 		if ((generation + 1) % skip == 0)
 		{
