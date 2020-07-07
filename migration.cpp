@@ -32,10 +32,10 @@ uniform_real_distribution<> uniform(0.0,1.0);
 // function
 
 // number of individuals in population
-const int N = 500;
+const int N = 2000;
 
 // number of generations
-long int number_generations = 5000;
+long int number_generations = 20000;
 
 // sampling interval
 int skip = 2;
