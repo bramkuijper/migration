@@ -10,7 +10,7 @@ init_phi_b = [0]  # Default is 0
 twinter = 3000
 tspring = 7000
 
-pmort = [0.025, 0.05, 0.075, 0.1, 0.125, 0.15, 0.175, 0.2, 0.225, 0.25]  # Default is 0.05
+pmort = [0.15]  # Default is 0.05
 pgood_init = 0.5 # Deleted 0.5 option on 27 November 2019
 t_good_ends = [ 100000 ]
 
@@ -29,8 +29,8 @@ sdmu_theta = 0.01
 sdmu_phi = sdmu_theta
     
 # migration cost parameters
-max_migration_cost = [20]  # Default is 20 
-min_migration_cost = 10
+max_migration_cost = 20  # Default is 20 
+min_migration_cost = [20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10]
 migration_cost_power = [2]
 
 # reproductive cost parameters
@@ -70,7 +70,7 @@ for rep_i in range(0, number_replicates):
                                         for resource_reproduction_threshold_i in resource_reproduction_threshold:
                                             for resource_starvation_threshold_i in resource_starvation_threshold:
                                                 for resource_max_i in resource_max:
-                                                    for max_migration_cost_i in max_migration_cost:
+                                                    for min_migration_cost_i in min_migration_cost:
                                                         for migration_cost_power_i in migration_cost_power:
                                                             for min_offspring_cost_i in min_offspring_cost:
                                                                 for offspring_cost_magnifier_i in offspring_cost_magnifier:
@@ -101,8 +101,8 @@ for rep_i in range(0, number_replicates):
                                                                                     + str(mu_phi) + " "
                                                                                     + str(sdmu_theta) + " "
                                                                                     + str(sdmu_theta) + " "
-                                                                                    + str(max_migration_cost_i) + " "
-                                                                                    + str(min_migration_cost) + " "
+                                                                                    + str(max_migration_cost) + " "
+                                                                                    + str(min_migration_cost_i) + " "
                                                                                     + str(migration_cost_power_i) + " "
                                                                                     + str(twinter) + " "
                                                                                     + str(tspring) + " " 
