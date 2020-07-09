@@ -38,7 +38,7 @@ min_offspring_cost = [ 10 ]
 offspring_cost_magnifier = [ 1 ] # The relative difference in resource cost per offspring having migrated at the earliest opportunity versus the last
 relative_mortality_risk_of_migration = [5]
 
-carryover_proportion = [0]
+carryover_proportion = [1]
 
 number_replicates = 5
 
