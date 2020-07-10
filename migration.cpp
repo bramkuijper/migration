@@ -23,6 +23,7 @@ using namespace std;
 
 // set random seed etc
 unsigned int seed = get_nanoseconds();
+//unsigned int seed = 1247178590;
 mt19937 rng_r{seed};
 uniform_real_distribution<> uniform(0.0,1.0);
 
@@ -35,10 +36,10 @@ uniform_real_distribution<> uniform(0.0,1.0);
 const int N = 2000;
 
 // number of generations
-long int number_generations = 50000;
+long int number_generations = 100000;
 
 // sampling interval
-int skip = 100;
+int skip = 200;
 
 // initial values for phi (social dependency) and theta (resource dependency)
 // a is an intercept, b is a gradient
@@ -232,7 +233,7 @@ void init_arguments(int argc, char **argv)
     sdmu_theta = atof(argv[15]);
     sdmu_phi = sdmu_theta;
     max_migration_cost = atof(argv[17]);
-	min_migration_cost = atof(argv[17])/2;
+	min_migration_cost = atof(argv[18]);
     migration_cost_power = atof(argv[19]);
 	twinter = atoi(argv[20]);
     tspring = atoi(argv[21]);
