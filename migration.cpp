@@ -23,7 +23,7 @@ using namespace std;
 
 // set random seed etc
 unsigned int seed = get_nanoseconds();
-//unsigned int seed = 1247178590;
+//unsigned int seed = 1374319874;
 mt19937 rng_r{seed};
 uniform_real_distribution<> uniform(0.0,1.0);
 
@@ -36,10 +36,10 @@ uniform_real_distribution<> uniform(0.0,1.0);
 const int N = 2000;
 
 // number of generations
-long int number_generations = 100000;
+long int number_generations = 50000;
 
 // sampling interval
-int skip = 200;
+int skip = 100;
 
 // initial values for phi (social dependency) and theta (resource dependency)
 // a is an intercept, b is a gradient
@@ -149,7 +149,6 @@ int n_spring_flocks = 0;  // recording the number of spring flocks (tspring - n(
 int n_autumn_flocks = 0;
 int summer_pop_old = 0;  // 06/02/20: So that I can track summer_pop old
 int Nvacancies = 0;
-int NFlock = 0;
 int Nsurplus = 0;
 int autumn_migrant_deaths = 0;
 int remainer_pop = 0;
@@ -989,7 +988,7 @@ void spring_dynamics(int t)
     // keep track of flock size of individuals who will disperse
     // at this timestep. This should be initialized at 0 at each
     // timestep t
-    NFlock = 0;
+    int NFlock = 0;
 
     double pdisperse = 0.0;
 
@@ -1331,7 +1330,7 @@ void postbreeding_dynamics(int t)
 	
 	}
 
-    assert(summer_pop<= N);
+    assert(summer_pop <= N);
     assert(summer_pop >= 0);
 
     double psignal = 0.0;
@@ -1362,6 +1361,7 @@ void postbreeding_dynamics(int t)
             assert(staging_pop >= 0);
 
             // delete this individual from the summer population
+			// and replace with the individual from the end of the summer_pop stack
             SummerPop[i] = SummerPop[summer_pop - 1];
 
             // decrement the number of individuals in the summer population
@@ -1382,7 +1382,7 @@ void postbreeding_dynamics(int t)
     // group size)
     int winter_pop_old = winter_pop;
 
-    NFlock = 0;
+    int NFlock = 0;
 
     double pdisperse = 0.0;
 	mean_latency = 0.0;
@@ -1391,7 +1391,7 @@ void postbreeding_dynamics(int t)
 
     int staging_pop_start = staging_pop;
 
-    // actual autumn dispersal
+    // actual autumn dispersal at time t
     for (int i = 0; i < staging_pop; ++i)
     {
         // later we will consider collective dispersal decisions
@@ -1417,6 +1417,7 @@ void postbreeding_dynamics(int t)
 			++winter_pop;
 
             // delete this individual from the staging population
+			// replace with the last individual in the staging_pop stack
             StagingPool[i] = StagingPool[staging_pop - 1];
 
             // decrement the number of individuals in the staging population
@@ -1434,6 +1435,7 @@ void postbreeding_dynamics(int t)
             
             assert(NFlock <= N);
         } // Ends: individual goes
+		
 		else 
 		{
 			StagingPool[i].latency += 1;  // Individual does not depart at time t
