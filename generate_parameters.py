@@ -10,7 +10,7 @@ init_phi_b = [0]  # Default is 0
 twinter = 3000
 tspring = 7000
 
-pmort = [0.15]  # Default is 0.05
+pmort = [0.1] #[0.025, 0.05, 0.075, 0.1, 0.125, 0.15, 0.175, 0.2, 0.225, 0.25]  # Default is 0.05
 pgood_init = 0.5 # Deleted 0.5 option on 27 November 2019
 t_good_ends = [ 100000 ]
 
@@ -25,7 +25,7 @@ resource_max = [100]
 # mutation rates
 mu_theta = 0.01
 mu_phi = 0.01
-sdmu_theta = 0.01
+sdmu_theta = 0.001
 sdmu_phi = sdmu_theta
     
 # migration cost parameters
@@ -40,7 +40,7 @@ relative_mortality_risk_of_migration = [5]
 
 carryover_proportion = [1]
 
-number_replicates = 5
+number_replicates = 3
 
 executable = "./xmigration"
 
