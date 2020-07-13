@@ -14,8 +14,8 @@ pmort = [0.1] #[0.025, 0.05, 0.075, 0.1, 0.125, 0.15, 0.175, 0.2, 0.225, 0.25]  
 pgood_init = 0.5 # Deleted 0.5 option on 27 November 2019
 t_good_ends = [ 100000 ]
 
-rgood = [ 0.015 ]  # Default 0.01
-rbad = [ 0.01 ]  # Default 0.005
+rgood = [ 0.012 ]  # Default 0.01
+rbad = [ 0.008 ]  # Default 0.005
 preparation_penalty = [0] # The reduction in resource acquisition, relative to the normal feeding phase.
 
 resource_reproduction_threshold = [40]
