@@ -39,7 +39,7 @@ const int N = 2000;
 long int number_generations = 50000;
 
 // sampling interval
-int skip = 100;
+int skip = 200;
 
 // initial values for phi (social dependency) and theta (resource dependency)
 // a is an intercept, b is a gradient
@@ -1266,9 +1266,11 @@ void summer_reproduction(ofstream &DataFile)
         // add random kid to population
         SummerPop[summer_pop++] = Kids[random_kid];
 
-        //  delete random kid as it has been sampled
+        //  delete randomly selected kid as it has been sampled
+		// and replace with kid from end of stack
         Kids[random_kid] = Kids[Kids.size() - 1];
-
+		
+		// delete the now-replicated record
         Kids.pop_back();
 
     }  // Ends recruitment of offspring (kids)
