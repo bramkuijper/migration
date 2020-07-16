@@ -18,14 +18,14 @@ rgood = [ 0.012 ]  # Default 0.01
 rbad = [ 0.006 ]  # Default 0.005
 preparation_penalty = [0] # The reduction in resource acquisition, relative to the normal feeding phase.
 
-resource_reproduction_threshold = [40]
+resource_reproduction_threshold = [30]
 resource_starvation_threshold = 0
 resource_max = [100]
 
 # mutation rates
 mu_theta = 0.01
 mu_phi = 0.01
-sdmu_theta = 0.001
+sdmu_theta = 0.0005
 sdmu_phi = sdmu_theta
     
 # migration cost parameters
@@ -34,7 +34,7 @@ min_migration_cost = [20, 18, 16, 14, 12, 10, 8, 6, 4]
 migration_cost_power = [2]
 
 # reproductive cost parameters
-min_offspring_cost = [ 10 ]
+min_offspring_cost = [ 5 ]
 offspring_cost_magnifier = [ 1 ] # The relative difference in resource cost per offspring having migrated at the earliest opportunity versus the last
 relative_mortality_risk_of_migration = [5]
 

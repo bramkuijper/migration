@@ -36,7 +36,7 @@ uniform_real_distribution<> uniform(0.0,1.0);
 const int N = 2000;
 
 // number of generations
-long int number_generations = 150000;
+long int number_generations = 100000;
 
 // sampling interval
 int skip = 200;
@@ -1247,8 +1247,9 @@ void summer_reproduction(ofstream &DataFile)
     Nvacancies = N - summer_pop;
 
     assert(Nvacancies >= 0);
+	assert(Nvacancies <= N);
 
-    int random_kid = 0;
+    int random_kid_id = 0;
 
     // recruit new individuals to the summer pool
     for (int i = 0; i < Nvacancies; ++i)
@@ -1261,14 +1262,15 @@ void summer_reproduction(ofstream &DataFile)
     
         uniform_int_distribution<> kids_sample(0, Kids.size() - 1);
     
-        random_kid = kids_sample(rng_r);
+        random_kid_id = kids_sample(rng_r);
 
         // add random kid to population
-        SummerPop[summer_pop++] = Kids[random_kid];
+        SummerPop[summer_pop] = Kids[random_kid_id];
+		++summer_pop;
 
         //  delete randomly selected kid as it has been sampled
 		// and replace with kid from end of stack
-        Kids[random_kid] = Kids[Kids.size() - 1];
+        Kids[random_kid_id] = Kids[Kids.size() - 1];
 		
 		// delete the now-replicated record
         Kids.pop_back();
@@ -1276,6 +1278,7 @@ void summer_reproduction(ofstream &DataFile)
     }  // Ends recruitment of offspring (kids)
 	
 	postbreeding_pop = summer_pop;
+	assert(summer_pop <= N);
 		
 } // ENDS SUMMER REPRODUCTION
 
