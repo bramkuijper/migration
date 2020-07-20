@@ -12,7 +12,7 @@ tspring = 5000
 
 pmort = [0.1] #[0.025, 0.05, 0.075, 0.1, 0.125, 0.15, 0.175, 0.2, 0.225, 0.25]  # Default is 0.05
 pgood_init = 0.5 # Deleted 0.5 option on 27 November 2019
-t_good_ends = [ 100000 ]
+t_good_ends = 100000
 
 rgood = [ 0.012 ]  # Default 0.01
 rbad = [ 0.006 ]  # Default 0.005
@@ -25,12 +25,12 @@ resource_max = [100]
 # mutation rates
 mu_theta = 0.01
 mu_phi = 0.01
-sdmu_theta = 0.0005
+sdmu_theta = [0.005, 0.001, 0.0005, 0.0001, 0.00005]
 sdmu_phi = sdmu_theta
     
 # migration cost parameters
 max_migration_cost = 20  # Default is 20 
-min_migration_cost = [20, 18, 16, 14, 12, 10, 8, 6, 4]
+min_migration_cost = [20] #[20, 18, 16, 14, 12, 10, 8, 6, 4]
 migration_cost_power = [2]
 
 # reproductive cost parameters
@@ -40,7 +40,7 @@ relative_mortality_risk_of_migration = [5]
 
 carryover_proportion = [1]
 
-number_replicates = 4
+number_replicates = 10
 
 executable = "./xmigration"
 
@@ -63,12 +63,12 @@ for rep_i in range(0, number_replicates):
             for init_theta_a_i in init_phi_a:
                 for init_theta_b_i in init_theta_b:
                     for pmort_i in pmort:
-                        for t_good_ends_i in t_good_ends:
-                            for rgood_i in rgood:
-                                for rbad_i in rbad:
-                                    for preparation_penalty_i in preparation_penalty:
-                                        for resource_reproduction_threshold_i in resource_reproduction_threshold:
-                                            for resource_max_i in resource_max:
+                        for rgood_i in rgood:
+                            for rbad_i in rbad:
+                                for preparation_penalty_i in preparation_penalty:
+                                    for resource_reproduction_threshold_i in resource_reproduction_threshold:
+                                        for resource_max_i in resource_max:
+                                            for sdmu_theta_i in sdmu_theta:
                                                 for min_migration_cost_i in min_migration_cost:
                                                     for migration_cost_power_i in migration_cost_power:
                                                         for min_offspring_cost_i in min_offspring_cost:
@@ -90,7 +90,7 @@ for rep_i in range(0, number_replicates):
                                                                                 + str(init_theta_b_i) + " "
                                                                                 + str(pmort_i) + " "
                                                                                 + str(pgood_init) + " "
-                                                                                + str(t_good_ends_i) + " "
+                                                                                + str(t_good_ends) + " "
                                                                                 + str(rgood_i) + " "
                                                                                 + str(rbad_i) + " "
                                                                                 + str(preparation_penalty_i) + " "
@@ -98,8 +98,8 @@ for rep_i in range(0, number_replicates):
                                                                                 + str(resource_starvation_threshold) + " "
                                                                                 + str(mu_theta) + " "
                                                                                 + str(mu_phi) + " "
-                                                                                + str(sdmu_theta) + " "
-                                                                                + str(sdmu_theta) + " "
+                                                                                + str(sdmu_theta_i) + " "
+                                                                                + str(sdmu_theta_i) + " "
                                                                                 + str(max_migration_cost) + " "
                                                                                 + str(min_migration_cost_i) + " "
                                                                                 + str(migration_cost_power_i) + " "
