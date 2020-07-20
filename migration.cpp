@@ -745,7 +745,7 @@ void init_population()
 
 double migration_cost(int NFlock)
 {
-	cost = min_migration_cost + (max_migration_cost - min_migration_cost) / pow(NFlock, migration_cost_power);
+	cost = min_migration_cost + ((max_migration_cost - min_migration_cost) / pow(NFlock, migration_cost_power));
 	// Flock size of 1 (i.e., travelling alone) yields the maximum cost
 	return(cost);
 }  // ENDS: migration cost function
@@ -1620,7 +1620,7 @@ int main(int argc, char **argv)
 		
 		if ((generation + 1) % skip == 0)
 		{
-		write_summer_stats(DataFile);
+			write_summer_stats(DataFile);
 		}
 		
 		// set autumn migration stats to 0 before postbreeding_dynamics starts
