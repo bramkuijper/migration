@@ -22,8 +22,8 @@
 using namespace std;
 
 // set random seed etc
-unsigned int seed = get_nanoseconds();
-//unsigned int seed = 1374319874;
+//unsigned int seed = get_nanoseconds();
+unsigned int seed =550476143; 
 mt19937 rng_r{seed};
 uniform_real_distribution<> uniform(0.0,1.0);
 
@@ -36,7 +36,7 @@ uniform_real_distribution<> uniform(0.0,1.0);
 const int N = 2000;
 
 // number of generations
-long int number_generations = 50000;
+long int number_generations = 3;
 
 // sampling interval
 int skip = 500;
@@ -1244,8 +1244,9 @@ void summer_reproduction(ofstream &DataFile)
 
     // number of dead individuals is the max population
     // minus the current individuals in the summer population
-    Nvacancies = N - summer_pop;
+    Nvacancies = N - summer_pop - winter_pop;
 
+    assert(staging_pop == 0);
     assert(Nvacancies >= 0);
 	assert(Nvacancies <= N);
 
@@ -1278,7 +1279,7 @@ void summer_reproduction(ofstream &DataFile)
     }  // Ends recruitment of offspring (kids)
 	
 	postbreeding_pop = summer_pop;
-	assert(summer_pop <= N);
+	assert(summer_pop + winter_pop <= N);
 		
 } // ENDS SUMMER REPRODUCTION
 
@@ -1287,7 +1288,6 @@ void summer_reproduction(ofstream &DataFile)
 // & fly back
 void postbreeding_dynamics(int t)
 {
-	
 	// determine probability of encountering a good resource:
     //  if the time is later than t_good_ends
     //  one can only encounter bad resources, hence p_good = 0
@@ -1312,7 +1312,7 @@ void postbreeding_dynamics(int t)
             SummerPop[i].resources += rbad;
         }
     
-	SummerPop[i].resources = min(SummerPop[i].resources, resource_max);
+        SummerPop[i].resources = min(SummerPop[i].resources, resource_max);
 	
     } // ok resource dynamic done
 
@@ -1335,7 +1335,7 @@ void postbreeding_dynamics(int t)
 	
 	}
 
-    assert(summer_pop <= N);
+    assert(summer_pop + winter_pop + staging_pop <= N);
     assert(summer_pop >= 0);
 
     double psignal = 0.0;
@@ -1362,9 +1362,6 @@ void postbreeding_dynamics(int t)
 			StagingPool[staging_pop].latency = 0.0;
             ++staging_pop; // increment the number of individuals in the staging pool
 
-            assert(staging_pop <= N);
-            assert(staging_pop >= 0);
-
             // delete this individual from the summer population
 			// and replace with the individual from the end of the summer_pop stack
             SummerPop[i] = SummerPop[summer_pop - 1];
@@ -1372,6 +1369,10 @@ void postbreeding_dynamics(int t)
             // decrement the number of individuals in the summer population
             --summer_pop;
             --i;
+         
+            // bounds checking   
+            assert(staging_pop + winter_pop + summer_pop <= N);
+            assert(staging_pop >= 0);
         }
 		else
 		{
@@ -1432,7 +1433,7 @@ void postbreeding_dynamics(int t)
 			// increment the number of individuals recorded as autumn migrants
 			++autumn_migrant_pop;
 			
-            assert(staging_pop <= N);
+            assert(staging_pop + summer_pop + winter_pop <= N);
             assert(staging_pop >= 0);
 
             // increase flock size
