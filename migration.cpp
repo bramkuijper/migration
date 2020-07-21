@@ -22,8 +22,8 @@
 using namespace std;
 
 // set random seed etc
-//unsigned int seed = get_nanoseconds();
-unsigned int seed =550476143; 
+unsigned int seed = get_nanoseconds();
+//unsigned int seed =550476143; 
 mt19937 rng_r{seed};
 uniform_real_distribution<> uniform(0.0,1.0);
 
@@ -36,7 +36,7 @@ uniform_real_distribution<> uniform(0.0,1.0);
 const int N = 2000;
 
 // number of generations
-long int number_generations = 3;
+long int number_generations = 50000;
 
 // sampling interval
 int skip = 500;

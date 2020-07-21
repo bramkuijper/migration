@@ -12,10 +12,10 @@ tspring = 5000
 
 pmort = [0.1] #[0.025, 0.05, 0.075, 0.1, 0.125, 0.15, 0.175, 0.2, 0.225, 0.25]  # Default is 0.05
 pgood_init = 0.5 # Deleted 0.5 option on 27 November 2019
-t_good_ends = 100000
+t_good_ends = 500000
 
-rgood = [ 0.012 ]  # Default 0.01
-rbad = [ 0.006 ]  # Default 0.005
+rgood = [ 0.0125 ]  # Default 0.01
+rbad = [ 0.0075 ]  # Default 0.005
 preparation_penalty = [0] # The reduction in resource acquisition, relative to the normal feeding phase.
 
 resource_reproduction_threshold = [30]
@@ -24,13 +24,13 @@ resource_max = [100]
 
 # mutation rates
 mu_theta = 0.01
-mu_phi = 0.01
+mu_phi = mu_theta
 sdmu_theta = [0.005, 0.001, 0.0005, 0.0001, 0.00005]
 sdmu_phi = sdmu_theta
     
 # migration cost parameters
 max_migration_cost = 20  # Default is 20 
-min_migration_cost = [20] #[20, 18, 16, 14, 12, 10, 8, 6, 4]
+min_migration_cost = [20] #[20] #[20, 18, 16, 14, 12, 10, 8, 6, 4]
 migration_cost_power = [2]
 
 # reproductive cost parameters
@@ -40,7 +40,7 @@ relative_mortality_risk_of_migration = [5]
 
 carryover_proportion = [1]
 
-number_replicates = 10
+number_replicates = 5
 
 executable = "./xmigration"
 
@@ -97,7 +97,7 @@ for rep_i in range(0, number_replicates):
                                                                                 + str(resource_reproduction_threshold_i) + " "
                                                                                 + str(resource_starvation_threshold) + " "
                                                                                 + str(mu_theta) + " "
-                                                                                + str(mu_phi) + " "
+                                                                                + str(mu_theta) + " "
                                                                                 + str(sdmu_theta_i) + " "
                                                                                 + str(sdmu_theta_i) + " "
                                                                                 + str(max_migration_cost) + " "
