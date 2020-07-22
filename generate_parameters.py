@@ -25,7 +25,7 @@ resource_max = [100]
 # mutation rates
 mu_theta = 0.01
 mu_phi = mu_theta
-sdmu_theta = 0.002
+sdmu_theta = [0.002]
 sdmu_phi = sdmu_theta
     
 # migration cost parameters
