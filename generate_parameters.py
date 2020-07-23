@@ -14,8 +14,8 @@ pmort = [0.1] #[0.025, 0.05, 0.075, 0.1, 0.125, 0.15, 0.175, 0.2, 0.225, 0.25]  
 pgood_init = 0.5 # Deleted 0.5 option on 27 November 2019
 t_good_ends = 500000
 
-rgood = [ 0.005, 0.01, 0.015, 0.02, 0.025, 0.03 ]  # Default 0.01
-rbad = [ 0.0075 ]  # Default 0.005
+rgood = [ 0.03, 0.04 ]
+rbad = [ 0.02 ]
 preparation_penalty = [0] # The reduction in resource acquisition, relative to the normal feeding phase.
 
 resource_reproduction_threshold = [30]
@@ -25,7 +25,7 @@ resource_max = [100]
 # mutation rates
 mu_theta = 0.01
 mu_phi = mu_theta
-sdmu_theta = 0.002
+sdmu_theta = [0.002]
 sdmu_phi = sdmu_theta
     
 # migration cost parameters
@@ -92,7 +92,7 @@ for rep_i in range(0, number_replicates):
                                                                                 + str(pgood_init) + " "
                                                                                 + str(t_good_ends) + " "
                                                                                 + str(rgood_i) + " "
-                                                                                + str(rgood_i) + " "
+                                                                                + str(rbad_i) + " "
                                                                                 + str(preparation_penalty_i) + " "
                                                                                 + str(resource_reproduction_threshold_i) + " "
                                                                                 + str(resource_starvation_threshold) + " "
