@@ -362,9 +362,10 @@ void write_data_headers(ofstream &DataFile)
 		<< "mean_autumn_cost;"
 		<< "var_autumn_cost;"
 	
-		// WINTER STATS (16):
+		// WINTER STATS (17):
 		<< "autumn_migrant_deaths;"	
-		<< "autumn_migrant_mortality_rate"	
+		<< "autumn_migrant_mortality_rate"
+		<< "total_autumn_mortality_rate"	
 		<< "remainer_pop;"
 		<< "winter_pop;"
 		<< "mean_resources_winter;"
@@ -459,6 +460,7 @@ void write_winter_stats(ofstream &DataFile)
     DataFile 
 		<< autumn_migrant_deaths << ";"
 		<< autumn_migrant_deaths / autumn_migrant_pop << ";"
+		<< (autumn_nonmigrant_pop + autumn_migrant_deaths) / (autumn_nonmigrant_pop + autumn_migrant_pop ) << ";"
 		<< remainer_pop << ";"
 		<< winter_pop << ";"
         << mean_resources << ";"
