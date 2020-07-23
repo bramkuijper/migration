@@ -7,8 +7,8 @@ init_theta_b = [0]  # Default is 0
 init_phi_a = [0.0005]  # Default is 0.0005
 init_phi_b = [0]  # Default is 0
 
-twinter = 5000
-tspring = 5000
+twinter = 0
+tspring = 10000
 
 pmort = [0.1] #[0.025, 0.05, 0.075, 0.1, 0.125, 0.15, 0.175, 0.2, 0.225, 0.25]  # Default is 0.05
 pgood_init = 0.5 # Deleted 0.5 option on 27 November 2019
@@ -30,7 +30,7 @@ sdmu_phi = sdmu_theta
     
 # migration cost parameters
 max_migration_cost = 20  # Default is 20 
-min_migration_cost = [20] #[20] #[20, 18, 16, 14, 12, 10, 8, 6, 4]
+min_migration_cost = [20] #[20, 18, 16, 14, 12, 10, 8, 6, 4]
 migration_cost_power = [2]
 
 # reproductive cost parameters
