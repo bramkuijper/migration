@@ -137,6 +137,8 @@ int winter_pop = 0;
 int spring_pop_start = 0;
 int spring_nonmigrant_pop = 0;
 int spring_migrant_pop = 0;
+int spring_migrant_deaths = 0;
+double spring_migrant_mortality_rate = 0.0;
 int summer_pop = 0;
 int autumn_pop_start = 0;
 int breeder_pop = 0;
@@ -151,6 +153,7 @@ int summer_pop_old = 0;  // 06/02/20: So that I can track summer_pop old
 int Nvacancies = 0;
 int Nsurplus = 0;
 int autumn_migrant_deaths = 0;
+double autumn_migrant_mortality_rate = 0.0;
 int remainer_pop = 0;
 
 double ss_spring_migrant_pop = 0.0;
@@ -328,7 +331,8 @@ void write_data_headers(ofstream &DataFile)
 		<< "mean_spring_cost;"
 		<< "var_spring_cost;"
 		
-		// SUMMER STATS (9):	
+		// SUMMER STATS (10):	
+		<< "spring_migrant_mortality_rate;"
 		<< "summer_pop;"
 	    << "breeder_pop;"
 		<< "nonreproductive_pop;"
@@ -358,8 +362,9 @@ void write_data_headers(ofstream &DataFile)
 		<< "mean_autumn_cost;"
 		<< "var_autumn_cost;"
 	
-		// WINTER STATS (15):
-		<< "autumn_migrant_deaths;"		
+		// WINTER STATS (16):
+		<< "autumn_migrant_deaths;"	
+		<< "autumn_migrant_mortality_rate"	
 		<< "remainer_pop;"
 		<< "winter_pop;"
 		<< "mean_resources_winter;"
@@ -453,6 +458,7 @@ void write_winter_stats(ofstream &DataFile)
     // write statistics to a file
     DataFile 
 		<< autumn_migrant_deaths << ";"
+		<< autumn_migrant_deaths / autumn_migrant_pop << ";"
 		<< remainer_pop << ";"
 		<< winter_pop << ";"
         << mean_resources << ";"
@@ -539,7 +545,8 @@ void write_summer_stats(ofstream &DataFile)
 	
     // write statistics to a file
     DataFile 
-        << (breeder_pop + nonreproductive_pop) << ";"
+        << spring_migrant_deaths / spring_migrant_pop << ";"		
+		<< (breeder_pop + nonreproductive_pop) << ";"
 	    << breeder_pop << ";"
 		<< nonreproductive_pop << ";"
         << offspring_pop << ";"
@@ -778,6 +785,8 @@ void spring_mortality()
             SummerPop[i] = SummerPop[summer_pop - 1];
             --summer_pop;
             --i;
+			
+			++spring_migrant_deaths;
         } // ends: death due to starvation
 		
 		// random mortality of migrants
@@ -786,6 +795,8 @@ void spring_mortality()
             SummerPop[i] = SummerPop[summer_pop - 1];
             --summer_pop;
             --i;
+			
+			++spring_migrant_deaths;
         }
 		
 		else
@@ -1501,7 +1512,6 @@ int main(int argc, char **argv)
 		var_spring_staging_size = 0.0;
 		ss_spring_flock_size = 0.0;
 		n_spring_flocks = 0;
-		spring_migrant_pop = 0;
 		ss_spring_staging_size = 0.0;
 		mean_spring_cost = 0.0;
 		ss_spring_cost = 0.0;
@@ -1641,6 +1651,7 @@ int main(int argc, char **argv)
 		ss_resources = 0.0;
 		rv = 0;
 		autumn_migrant_deaths = 0;
+		autumn_migrant_mortality_rate = 0.0;
 		
         autumn_pop_start = summer_pop;
 		
@@ -1689,19 +1700,6 @@ int main(int argc, char **argv)
 		
 		assert(winter_pop = remainer_pop + autumn_migrant_pop - autumn_migrant_deaths);
 		
-		// all individuals who remain at the summer grounds die
-        summer_pop = 0;
-        postbreeding_pop = 0;
-		staging_pop = 0;
-		breeder_pop = 0;
-		nonreproductive_pop = 0;
-		offspring_pop = 0;
-		summer_pop_old = 0;
-		spring_nonmigrant_pop = 0;
-		spring_migrant_pop = 0;
-		autumn_nonmigrant_pop = 0;
-		autumn_migrant_pop = 0;
-		
 		if (generation == 0)
 		{
 			write_winter_stats(DataFile);
@@ -1716,6 +1714,19 @@ int main(int argc, char **argv)
 	    { 
 	        exit(1);
 	    }
+		
+		// all individuals who remain at the summer grounds die
+        summer_pop = 0;
+        postbreeding_pop = 0;
+		staging_pop = 0;
+		breeder_pop = 0;
+		nonreproductive_pop = 0;
+		offspring_pop = 0;
+		summer_pop_old = 0;
+		spring_nonmigrant_pop = 0;
+		spring_migrant_pop = 0;
+		autumn_nonmigrant_pop = 0;
+		autumn_migrant_pop = 0;
 				
     } // ENDS: GENERATION
 }
