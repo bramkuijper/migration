@@ -137,6 +137,7 @@ int winter_pop = 0;
 int spring_pop_start = 0;
 int spring_nonmigrant_pop = 0;
 int spring_migrant_pop = 0;
+int spring_migrants_resource_cap = 0;
 int spring_migrant_deaths = 0;
 double spring_migrant_mortality_rate = 0.0;
 int summer_pop = 0;
@@ -147,6 +148,7 @@ int offspring_pop = 0;
 int postbreeding_pop = 0;
 int autumn_nonmigrant_pop = 0;
 int autumn_migrant_pop = 0;
+int autumn_migrants_resource_cap = 0;
 int n_spring_flocks = 0;  // recording the number of spring flocks (tspring - n(unusued departure intervals))
 int n_autumn_flocks = 0;
 int summer_pop_old = 0;  // 06/02/20: So that I can track summer_pop old
@@ -311,11 +313,12 @@ void write_data_headers(ofstream &DataFile)
 {
     DataFile << "generation;"
 				
-		// SPRING MIGRATION STATS (17):
+		// SPRING MIGRATION STATS (19):
 		<< "spring_pop;"
 		<< "mean_spring_staging_size;"
         << "var_spring_staging_size;"
         << "spring_migrant_pop;"
+		<< "spring_migrants_resource_cap;"
 		<< "spring_nonmigrant_pop;"
 		<< "mean_spring_signal_timing;"
 		<< "var_spring_signal_timing;"
@@ -343,10 +346,11 @@ void write_data_headers(ofstream &DataFile)
 		<< "var_fecundity_breederpop;"
 		<< "postbreeding_pop;"
 		
-		// AUTUMN MIGRATION STATS (17)
+		// AUTUMN MIGRATION STATS (18)
         << "mean_autumn_staging_size;"
         << "var_autumn_staging_size;"
         << "autumn_migrant_pop;"
+		<< "autumn_migrants_resource_cap;"
 		<< "autumn_nonmigrant_pop;"
 		<< "mean_autumn_signal_timing;"
 		<< "var_autumn_signal_timing;"
@@ -615,6 +619,7 @@ void write_spring_stats(ofstream &DataFile, int generation)
 		<< mean_spring_staging_size << ";" 
 		<< var_spring_staging_size << ";"
 		<< spring_migrant_pop << ";"
+		<< spring_migrants_resource_cap << ";"
 		<< spring_nonmigrant_pop << ";"
 		<< mean_signal_timing << ";"
 		<< (ss_signal_timing - mean_signal_timing * mean_signal_timing) << ";"
@@ -685,6 +690,7 @@ void write_autumn_stats(ofstream &DataFile)
         << mean_autumn_staging_size << ";"
 		<< var_autumn_staging_size << ";"			
         << autumn_migrant_pop << ";"
+		<< autumn_migrants_resource_cap << ";"
 		<< autumn_nonmigrant_pop << ";"
 		<< mean_signal_timing << ";"
 		<< (ss_signal_timing - mean_signal_timing * mean_signal_timing) << ";"
@@ -1027,6 +1033,11 @@ void spring_dynamics(int t)
             ++summer_pop;
             
             assert(summer_pop <= N);
+
+			if (StagingPool[i].resources == resource_max)
+			{
+				++spring_migrants_resource_cap;
+			}
 
 			rv = StagingPool[i].resources;
 			mean_resources += rv;
@@ -1429,6 +1440,11 @@ void postbreeding_dynamics(int t)
 			mean_resources += rv;
 			ss_resources += rv * rv;
 			
+			if (StagingPool[i].resources == resource_max)
+			{
+				++spring_migrants_resource_cap;
+			}
+			
 			WinterPop[winter_pop] = StagingPool[i];  // Individual moves from staging pool to first empty position in WinterPop
 			lat = WinterPop[winter_pop].latency;
 			mean_latency += lat;
@@ -1535,9 +1551,11 @@ int main(int argc, char **argv)
 		rbad = rbad_init;  
 
 		spring_nonmigrant_pop = 0;
+		spring_migrants_resource_cap = 0;
 		spring_migrant_pop = 0;
 		autumn_nonmigrant_pop = 0;
 		autumn_migrant_pop = 0;
+		autumn_migrants_resource_cap = 0;
 		
 		
 		// Allow populations to become established (individuals must acquire resources)
@@ -1727,6 +1745,8 @@ int main(int argc, char **argv)
 		summer_pop_old = 0;
 		spring_nonmigrant_pop = 0;
 		spring_migrant_pop = 0;
+		spring_migrants_resource_cap = 0;
+		autumn_migrants_resource_cap = 0;
 		autumn_nonmigrant_pop = 0;
 		autumn_migrant_pop = 0;
 				
