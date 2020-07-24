@@ -36,7 +36,7 @@ uniform_real_distribution<> uniform(0.0,1.0);
 const int N = 2000;
 
 // number of generations
-long int number_generations = 10;
+long int number_generations = 50000;
 
 // sampling interval
 int skip = 500;
