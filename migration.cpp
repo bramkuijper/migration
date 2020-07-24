@@ -36,7 +36,7 @@ uniform_real_distribution<> uniform(0.0,1.0);
 const int N = 2000;
 
 // number of generations
-long int number_generations = 50000;
+long int number_generations = 10;
 
 // sampling interval
 int skip = 500;
@@ -368,8 +368,8 @@ void write_data_headers(ofstream &DataFile)
 	
 		// WINTER STATS (17):
 		<< "autumn_migrant_deaths;"	
-		<< "autumn_migrant_mortality_rate"
-		<< "total_autumn_mortality_rate"	
+		<< "autumn_migrant_mortality_rate;"
+		<< "total_autumn_mortality_rate;"	
 		<< "remainer_pop;"
 		<< "winter_pop;"
 		<< "mean_resources_winter;"
