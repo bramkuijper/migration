@@ -139,7 +139,6 @@ int spring_nonmigrant_pop = 0;
 int spring_migrant_pop = 0;
 int spring_migrants_resource_cap = 0;
 int spring_migrant_deaths = 0;
-double spring_migrant_mortality_rate = 0.0;
 int summer_pop = 0;
 int autumn_pop_start = 0;
 int breeder_pop = 0;
@@ -551,7 +550,7 @@ void write_summer_stats(ofstream &DataFile)
 	
     // write statistics to a file
     DataFile 
-        << spring_migrant_deaths / spring_migrant_pop << ";"		
+        << (spring_migrant_deaths / spring_migrant_pop) << ";"		
 		<< (breeder_pop + nonreproductive_pop) << ";"
 	    << breeder_pop << ";"
 		<< nonreproductive_pop << ";"
@@ -1557,6 +1556,7 @@ int main(int argc, char **argv)
 		spring_nonmigrant_pop = 0;
 		spring_migrants_resource_cap = 0;
 		spring_migrant_pop = 0;
+		spring_migrant_deaths = 0;
 		autumn_nonmigrant_pop = 0;
 		autumn_migrant_pop = 0;
 		autumn_migrants_resource_cap = 0;
