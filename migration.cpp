@@ -39,7 +39,7 @@ const int N = 2000;
 long int number_generations = 50000;
 
 // sampling interval
-int skip = 500;
+int skip = 100;
 
 // initial values for phi (social dependency) and theta (resource dependency)
 // a is an intercept, b is a gradient
