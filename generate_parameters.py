@@ -20,13 +20,13 @@ preparation_penalty = [0] # The reduction in resource acquisition, relative to t
 
 resource_reproduction_threshold = [30]
 resource_starvation_threshold = 0
-resource_max = [75]
+resource_max = [60]
 
 # mutation rates
 mu_theta = 0.01
 mu_phi = mu_theta
-sdmu_theta = [0.002]
-sdmu_phi = sdmu_theta
+sdmu_theta = 0.002
+sdmu_phi = 0.002
     
 # migration cost parameters
 max_migration_cost = 20  # Default is 20 
@@ -68,46 +68,45 @@ for rep_i in range(0, number_replicates):
                                 for preparation_penalty_i in preparation_penalty:
                                     for resource_reproduction_threshold_i in resource_reproduction_threshold:
                                         for resource_max_i in resource_max:
-                                            for sdmu_theta_i in sdmu_theta:
-                                                for min_migration_cost_i in min_migration_cost:
-                                                    for migration_cost_power_i in migration_cost_power:
-                                                        for min_offspring_cost_i in min_offspring_cost:
-                                                            for offspring_cost_magnifier_i in offspring_cost_magnifier:
-                                                                for carryover_proportion_i in carryover_proportion:
-                                                                    for relative_mortality_risk_of_migration_i in relative_mortality_risk_of_migration:
+                                            for min_migration_cost_i in min_migration_cost:
+                                                for migration_cost_power_i in migration_cost_power:
+                                                    for min_offspring_cost_i in min_offspring_cost:
+                                                        for offspring_cost_magnifier_i in offspring_cost_magnifier:
+                                                            for carryover_proportion_i in carryover_proportion:
+                                                                for relative_mortality_risk_of_migration_i in relative_mortality_risk_of_migration:
 
-                                                                        # increment the counter for the number of 
-                                                                        # runs
-                                                                        counter += 1
+                                                                    # increment the counter for the number of 
+                                                                    # runs
+                                                                    counter += 1
 
-        #                                                                print("echo " + str(counter))
+    #                                                                print("echo " + str(counter))
 
 
-                                                                        print(executable + " " 
-                                                                                + str(init_phi_a_i) + " "
-                                                                                + str(init_phi_b_i) + " "
-                                                                                + str(init_theta_a_i) + " "
-                                                                                + str(init_theta_b_i) + " "
-                                                                                + str(pmort_i) + " "
-                                                                                + str(pgood_init) + " "
-                                                                                + str(t_good_ends) + " "
-                                                                                + str(rgood_i) + " "
-                                                                                + str(rbad_i) + " "
-                                                                                + str(preparation_penalty_i) + " "
-                                                                                + str(resource_reproduction_threshold_i) + " "
-                                                                                + str(resource_starvation_threshold) + " "
-                                                                                + str(mu_theta) + " "
-                                                                                + str(mu_theta) + " "
-                                                                                + str(sdmu_theta_i) + " "
-                                                                                + str(sdmu_theta_i) + " "
-                                                                                + str(max_migration_cost) + " "
-                                                                                + str(min_migration_cost_i) + " "
-                                                                                + str(migration_cost_power_i) + " "
-                                                                                + str(twinter) + " "
-                                                                                + str(tspring) + " " 
-                                                                                + str(resource_max_i) + " "
-                                                                                + str(min_offspring_cost_i) + " "
-                                                                                + str(offspring_cost_magnifier_i) + " "
-                                                                                + str(carryover_proportion_i) + " "
-                                                                                + str(relative_mortality_risk_of_migration_i) + " "
-                                                                                + backgroundstr)
+                                                                    print(executable + " " 
+                                                                            + str(init_phi_a_i) + " "
+                                                                            + str(init_phi_b_i) + " "
+                                                                            + str(init_theta_a_i) + " "
+                                                                            + str(init_theta_b_i) + " "
+                                                                            + str(pmort_i) + " "
+                                                                            + str(pgood_init) + " "
+                                                                            + str(t_good_ends) + " "
+                                                                            + str(rgood_i) + " "
+                                                                            + str(rbad_i) + " "
+                                                                            + str(preparation_penalty_i) + " "
+                                                                            + str(resource_reproduction_threshold_i) + " "
+                                                                            + str(resource_starvation_threshold) + " "
+                                                                            + str(mu_theta) + " "
+                                                                            + str(mu_theta) + " "
+                                                                            + str(sdmu_theta) + " "
+                                                                            + str(sdmu_phi) + " "
+                                                                            + str(max_migration_cost) + " "
+                                                                            + str(min_migration_cost_i) + " "
+                                                                            + str(migration_cost_power_i) + " "
+                                                                            + str(twinter) + " "
+                                                                            + str(tspring) + " " 
+                                                                            + str(resource_max_i) + " "
+                                                                            + str(min_offspring_cost_i) + " "
+                                                                            + str(offspring_cost_magnifier_i) + " "
+                                                                            + str(carryover_proportion_i) + " "
+                                                                            + str(relative_mortality_risk_of_migration_i) + " "
+                                                                            + backgroundstr)
