@@ -4,8 +4,8 @@
 
 init_theta_a = [0.0005]  # Default is 0.0005
 init_theta_b = [0]  # Default is 0
-init_phi_a = [0.0005]  # Default is 0.0005
-init_phi_b = [0]  # Default is 0
+init_phi_a = [0]  # Default is 0.0005
+init_phi_b = [1]  # Default is 0
 
 twinter = 0
 tspring = 10000
@@ -25,12 +25,12 @@ resource_max = [60]
 # mutation rates
 mu_theta = 0.01
 mu_phi = mu_theta
-sdmu_theta = 0.002
-sdmu_phi = 0.002
+sdmu_theta = 0.0002
+sdmu_phi = 0.5
     
 # migration cost parameters
 max_migration_cost = 20  # Default is 20 
-min_migration_cost = [20, 18, 16, 14, 12, 10, 8, 6, 4]
+min_migration_cost = [20, 16, 12, 8, 4]
 migration_cost_power = [2]
 
 # reproductive cost parameters
@@ -60,7 +60,7 @@ if background:
 for rep_i in range(0, number_replicates):
     for init_phi_a_i in init_phi_a:
         for init_phi_b_i in init_phi_b:
-            for init_theta_a_i in init_phi_a:
+            for init_theta_a_i in init_theta_a:
                 for init_theta_b_i in init_theta_b:
                     for pmort_i in pmort:
                         for rgood_i in rgood:
