@@ -36,7 +36,7 @@ uniform_real_distribution<> uniform(0.0,1.0);
 const int N = 2000;
 
 // number of generations
-long int number_generations = 120000;
+long int number_generations = 200000;
 
 // sampling interval
 int skip = 100;
@@ -234,7 +234,7 @@ void init_arguments(int argc, char **argv)
     mu_theta = atof(argv[13]);
     mu_phi = atof(argv[14]);
     sdmu_theta = atof(argv[15]);
-    sdmu_phi = sdmu_theta;
+    sdmu_phi = atof(argv[16]);
     max_migration_cost = atof(argv[17]);
 	min_migration_cost = atof(argv[18]);
     migration_cost_power = atof(argv[19]);
