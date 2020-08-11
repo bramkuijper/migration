@@ -2,8 +2,8 @@
 
 # generate all parameter combinations to run the migration simulation
 
-init_theta_a = [-120]  # Default is 0.0005
-init_theta_b = [2]  # Default is 0
+init_theta_a = [0.0005]  # Default is 0.0005
+init_theta_b = [0]  # Default is 0
 init_phi_a = [0]  # Default is 0.0005
 init_phi_b = [1]  # Default is 0
 
@@ -20,17 +20,17 @@ preparation_penalty = [0] # The reduction in resource acquisition, relative to t
 
 resource_reproduction_threshold = [30]
 resource_starvation_threshold = 0
-resource_max = [200]
+resource_max = [60]
 
 # mutation rates
-mu_theta = 1e-20
+mu_theta = 0.01
 mu_phi = 0.01
-sdmu_theta = 1e-20
+sdmu_theta = 0.0004
 sdmu_phi = [0.002] #[0.2, 0.1, 0.05, 0.02, 0.01, 0.005, 0.002]
     
 # migration cost parameters
 max_migration_cost = 20  # Default is 20 
-min_migration_cost = [10] #[20, 16, 12, 8, 4]
+min_migration_cost = [20, 16, 12, 8, 4]
 migration_cost_power = [2]
 
 # reproductive cost parameters
@@ -40,7 +40,7 @@ relative_mortality_risk_of_migration = [5]
 
 carryover_proportion = [0]
 
-number_replicates = 1
+number_replicates = 5
 
 executable = "./xmigration"
 
