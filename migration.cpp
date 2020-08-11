@@ -136,7 +136,7 @@ int staging_pop = 0;
 int winter_pop = 0;
 int spring_pop_start = 0;
 int spring_nonmigrant_pop = 0;
-int spring_migrant_pop = 0;
+double spring_migrant_pop = 0;
 int spring_migrants_resource_cap = 0;
 int spring_migrant_deaths = 0;
 int summer_pop = 0;
@@ -146,7 +146,7 @@ int nonreproductive_pop = 0;
 int offspring_pop = 0;
 int postbreeding_pop = 0;
 int autumn_nonmigrant_pop = 0;
-int autumn_migrant_pop = 0;
+double autumn_migrant_pop = 0;
 int autumn_migrants_resource_cap = 0;
 int n_spring_flocks = 0;  // recording the number of spring flocks (tspring - n(unusued departure intervals))
 int n_autumn_flocks = 0;
@@ -463,7 +463,7 @@ void write_winter_stats(ofstream &DataFile)
     DataFile 
 		<< autumn_migrant_deaths << ";"
 		<< (autumn_migrant_deaths / autumn_migrant_pop) << ";"
-		<< (autumn_nonmigrant_pop + autumn_migrant_deaths) << ";" // (autumn_nonmigrant_pop + autumn_migrant_pop ) << ";"
+		<< (autumn_nonmigrant_pop + autumn_migrant_deaths) / (autumn_nonmigrant_pop + autumn_migrant_pop ) << ";"
 		<< remainer_pop << ";"
 		<< winter_pop << ";"
         << mean_resources << ";"
