@@ -33,13 +33,13 @@ uniform_real_distribution<> uniform(0.0,1.0);
 // function
 
 // number of individuals in population
-const int N = 2000;
+const int N = 400;
 
 // number of generations
-long int number_generations = 200000;
+long int number_generations = 250;
 
 // sampling interval
-int skip = 100;
+int skip = 5;
 
 // initial values for phi (social dependency) and theta (resource dependency)
 // a is an intercept, b is a gradient
@@ -390,10 +390,10 @@ void write_data_headers(ofstream &DataFile)
 // write data for winter population (post mortality)
 void write_winter_stats(ofstream &DataFile)
 {
-    double mean_theta_a[2] = { 0.0, 0.0 };
-    double ss_theta_a[2] = { 0.0, 0.0 };
-    double mean_theta_b[2] = { 0.0, 0.0 };
-    double ss_theta_b[2] = { 0.0, 0.0 };
+    double mean_theta_a = 0.0;
+    double ss_theta_a = 0.0;
+    double mean_theta_b = 0.0;
+    double ss_theta_b = 0.0;
 
     double mean_phi_a[2] = { 0.0, 0.0 };
     double ss_phi_a[2] = { 0.0, 0.0 };
@@ -416,12 +416,12 @@ void write_winter_stats(ofstream &DataFile)
 		// by a single gene (diploid) exhibiting incomplete dominance
 		// (hence *0.5)
 		val = 0.5 * (WinterPop[i].theta_a[0] + WinterPop[i].theta_a[1]);
-        mean_theta_a[0] += val;
-        ss_theta_a[0] += val * val;
+        mean_theta_a += val;
+        ss_theta_a += val * val;
 
         val = 0.5 * (WinterPop[i].theta_b[0] + WinterPop[i].theta_b[1]);
-        mean_theta_b[0] += val;
-        ss_theta_b[0] += val * val;
+        mean_theta_b += val;
+        ss_theta_b += val * val;
         
         val = 0.5 * (WinterPop[i].phi_a[0] + WinterPop[i].phi_a[1]);
         mean_phi_a[0] += val;
@@ -444,15 +444,15 @@ void write_winter_stats(ofstream &DataFile)
     if (winter_pop > 0)
     {
         // calculate means and variances of the winter population
-        mean_theta_a[0] /=  winter_pop;
-        mean_theta_b[0] /=  winter_pop;
+        mean_theta_a /=  winter_pop;
+        mean_theta_b /=  winter_pop;
         mean_phi_a[0] /=  winter_pop;
         mean_phi_b[0] /=  winter_pop;
         mean_resources /=  winter_pop;
 		mean_age /= winter_pop;
          
-        ss_theta_a[0] /= winter_pop; 
-        ss_theta_b[0] /= winter_pop; 
+        ss_theta_a /= winter_pop; 
+        ss_theta_b /= winter_pop; 
         ss_phi_a[0] /= winter_pop; 
         ss_phi_b[0] /= winter_pop;
         ss_resources /= winter_pop; 
@@ -462,16 +462,16 @@ void write_winter_stats(ofstream &DataFile)
     // write statistics to a file
     DataFile 
 		<< autumn_migrant_deaths << ";"
-		<< autumn_migrant_deaths / autumn_migrant_pop << ";"
-		<< (autumn_nonmigrant_pop + autumn_migrant_deaths) / (autumn_nonmigrant_pop + autumn_migrant_pop ) << ";"
+		<< (autumn_migrant_deaths / autumn_migrant_pop) << ";"
+		<< (autumn_nonmigrant_pop + autumn_migrant_deaths) << ";" // (autumn_nonmigrant_pop + autumn_migrant_pop ) << ";"
 		<< remainer_pop << ";"
 		<< winter_pop << ";"
         << mean_resources << ";"
         << (ss_resources - mean_resources * mean_resources) << ";"
-        << mean_theta_a[0] << ";"
-        << (ss_theta_a[0] - mean_theta_a[0] * mean_theta_a[0]) << ";"
-        << mean_theta_b[0] << ";"
-        << (ss_theta_b[0] - mean_theta_b[0] * mean_theta_b[0]) << ";"
+        << mean_theta_a << ";"
+        << (ss_theta_a - mean_theta_a * mean_theta_a) << ";"
+        << mean_theta_b << ";"
+        << (ss_theta_b - mean_theta_b * mean_theta_b) << ";"
         << mean_phi_a[0] << ";"
         << (ss_phi_a[0] - mean_phi_a[0] * mean_phi_a[0]) << ";"
         << mean_phi_b[0] << ";"
@@ -966,7 +966,7 @@ void spring_dynamics(int t)
         // resulting in signaling a willingness to disperse
         // => go to the staging level
         psignal = 0.5 * (WinterPop[i].theta_a[0] + WinterPop[i].theta_a[1])
-            + 0.5 * (WinterPop[i].theta_b[0] + WinterPop[i].theta_b[1]) * WinterPop[i].resources / resource_max;
+            + 0.5 * (WinterPop[i].theta_b[0] + WinterPop[i].theta_b[1]) * WinterPop[i].resources; // resource_max;
 
         // bound the probability
         psignal = clamp(psignal, 0, 1);
@@ -1126,32 +1126,32 @@ void create_offspring(
     // each parental allele has probability 0.5 to make it into offspring
     offspring.theta_a[0] = mutation(mother.theta_a[allele_sample(rng_r)], mu_theta, sdmu_theta);
     //offspring.theta_a[0] = clamp(offspring.theta_a[0], 0.0, 1.0);
-	offspring.theta_a[0] = min(offspring.theta_a[0], 1.0);
 
     offspring.theta_a[1] = mutation(father.theta_a[allele_sample(rng_r)], mu_theta, sdmu_theta);
     //offspring.theta_a[1] = clamp(offspring.theta_a[1], 0.0, 1.0);
-	offspring.theta_a[1] = min(offspring.theta_a[1], 1.0);
 
     offspring.theta_b[0] = mutation(mother.theta_b[allele_sample(rng_r)], mu_theta, sdmu_theta);
-    offspring.theta_b[0] = clamp(offspring.theta_b[0], 0.0, 1.0);
+    //offspring.theta_b[0] = clamp(offspring.theta_b[0], 0.0, 1.0);
+	offspring.theta_b[0] = max(offspring.theta_b[0], 0.0);  // slope must be positive
 
     offspring.theta_b[1] = mutation(father.theta_b[allele_sample(rng_r)], mu_theta, sdmu_theta);
-    offspring.theta_b[1] = clamp(offspring.theta_b[1], 0.0, 1.0);
+    //offspring.theta_b[1] = clamp(offspring.theta_b[1], 0.0, 1.0);
+	offspring.theta_a[1] = max(offspring.theta_b[1], 0.0);  // slope must be positive
 	
     // inherit phi loci
     offspring.phi_a[0] = mutation(mother.phi_a[allele_sample(rng_r)], mu_phi, sdmu_phi);
     //offspring.phi_a[0] = clamp(offspring.phi_a[0], 0.0, 1.0);
-	offspring.phi_a[0] = min(offspring.phi_a[0], 1.0);
 
     offspring.phi_a[1] = mutation(father.phi_a[allele_sample(rng_r)], mu_phi, sdmu_phi);
 	//offspring.phi_a[1] = clamp(offspring.phi_a[1], 0.0, 1.0);
-	offspring.phi_a[1] = min(offspring.phi_a[1], 1.0);
     
     offspring.phi_b[0] = mutation(mother.phi_b[allele_sample(rng_r)], mu_phi, sdmu_phi);
-    offspring.phi_b[0] = clamp(offspring.phi_b[0], 0.0, 1.0);
+    //offspring.phi_b[0] = clamp(offspring.phi_b[0], 0.0, 1.0);
+	offspring.phi_b[0] = max(offspring.phi_b[0], 0.0);  // slope must be positive
 
     offspring.phi_b[1] = mutation(father.phi_b[allele_sample(rng_r)], mu_phi, sdmu_phi);
-    offspring.phi_b[1] = clamp(offspring.phi_b[1], 0.0, 1.0);
+    //offspring.phi_b[1] = clamp(offspring.phi_b[1], 0.0, 1.0);
+	offspring.phi_b[1] = max(offspring.phi_b[1], 0.0);  // slope must be positive
 
 }  // ENDS OFFSPRING PRODUCTION
 
@@ -1376,7 +1376,7 @@ void postbreeding_dynamics(int t)
         // resulting in signaling a willingness to disperse
         // => go to the staging level
         psignal = 0.5 * (SummerPop[i].theta_a[0] + SummerPop[i].theta_a[1])
-            + 0.5 * (SummerPop[i].theta_b[0] + SummerPop[i].theta_b[1]) * SummerPop[i].resources / resource_max;
+            + 0.5 * (SummerPop[i].theta_b[0] + SummerPop[i].theta_b[1]) * SummerPop[i].resources; // resource_max;
 
         // bound the probability
         psignal = clamp(psignal, 0.0, 1.0);
