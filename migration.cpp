@@ -395,10 +395,10 @@ void write_winter_stats(ofstream &DataFile)
     double mean_theta_b = 0.0;
     double ss_theta_b = 0.0;
 
-    double mean_phi_a[2] = { 0.0, 0.0 };
-    double ss_phi_a[2] = { 0.0, 0.0 };
-    double mean_phi_b[2] = { 0.0, 0.0 };
-    double ss_phi_b[2] = { 0.0, 0.0 };
+    double mean_phi_a = 0.0;
+    double ss_phi_a = 0.0;
+    double mean_phi_b = 0.0;
+    double ss_phi_b = 0.0;
 
     double mean_resources = 0.0;
     double ss_resources = 0.0;
@@ -424,12 +424,12 @@ void write_winter_stats(ofstream &DataFile)
         ss_theta_b += val * val;
         
         val = 0.5 * (WinterPop[i].phi_a[0] + WinterPop[i].phi_a[1]);
-        mean_phi_a[0] += val;
-        ss_phi_a[0] += val * val;
+        mean_phi_a += val;
+        ss_phi_a += val * val;
 
         val = 0.5 * (WinterPop[i].phi_b[0] + WinterPop[i].phi_b[1]);
-        mean_phi_b[0] += val;
-        ss_phi_b[0] += val * val;
+        mean_phi_b += val;
+        ss_phi_b += val * val;
         
         val = WinterPop[i].resources;  // the resource level of individual i  // 18 Feb 2020: I've changed this from StagingPool[i].resources
         mean_resources += val;
@@ -446,15 +446,15 @@ void write_winter_stats(ofstream &DataFile)
         // calculate means and variances of the winter population
         mean_theta_a /=  winter_pop;
         mean_theta_b /=  winter_pop;
-        mean_phi_a[0] /=  winter_pop;
-        mean_phi_b[0] /=  winter_pop;
+        mean_phi_a /=  winter_pop;
+        mean_phi_b /=  winter_pop;
         mean_resources /=  winter_pop;
 		mean_age /= winter_pop;
          
         ss_theta_a /= winter_pop; 
         ss_theta_b /= winter_pop; 
-        ss_phi_a[0] /= winter_pop; 
-        ss_phi_b[0] /= winter_pop;
+        ss_phi_a /= winter_pop; 
+        ss_phi_b /= winter_pop;
         ss_resources /= winter_pop; 
 		ss_age /= winter_pop;
     }
@@ -472,10 +472,10 @@ void write_winter_stats(ofstream &DataFile)
         << (ss_theta_a - mean_theta_a * mean_theta_a) << ";"
         << mean_theta_b << ";"
         << (ss_theta_b - mean_theta_b * mean_theta_b) << ";"
-        << mean_phi_a[0] << ";"
-        << (ss_phi_a[0] - mean_phi_a[0] * mean_phi_a[0]) << ";"
-        << mean_phi_b[0] << ";"
-        << (ss_phi_b[0] - mean_phi_b[0] * mean_phi_b[0]) << ";"
+        << mean_phi_a << ";"
+        << (ss_phi_a - mean_phi_a * mean_phi_a) << ";"
+        << mean_phi_b << ";"
+        << (ss_phi_b - mean_phi_b * mean_phi_b) << ";"
 		<< mean_age << ";"
 		<< (ss_age - mean_age * mean_age) << ";"
 		<< endl;
@@ -485,17 +485,7 @@ void write_winter_stats(ofstream &DataFile)
 void write_summer_stats(ofstream &DataFile)
 {
     double val;
-	
-	double mean_theta_a[2] = { 0.0, 0.0 };
-    double ss_theta_a[2] = { 0.0, 0.0 };
-    double mean_theta_b[2] = { 0.0, 0.0 };
-    double ss_theta_b[2] = { 0.0, 0.0 };
-
-    double mean_phi_a[2] = { 0.0, 0.0 };
-    double ss_phi_a[2] = { 0.0, 0.0 };
-    double mean_phi_b[2] = { 0.0, 0.0 };
-    double ss_phi_b[2] = { 0.0, 0.0 };
-	
+		
 	double mean_summer_cost = 0.0;
 	double ss_summer_cost = 0.0;
 	
@@ -504,22 +494,6 @@ void write_summer_stats(ofstream &DataFile)
 		
     for (int i = 0; i < (breeder_pop + nonreproductive_pop); ++i)  // for each individual in the summer population:
     {
-		val = 0.5 * (SummerPop[i].theta_a[0] + SummerPop[i].theta_a[1]);
-        mean_theta_a[1] += val;
-        ss_theta_a[1] += val * val;
-
-        val = 0.5 * (SummerPop[i].theta_b[0] + SummerPop[i].theta_b[1]);
-        mean_theta_b[1] += val;
-        ss_theta_b[1] += val * val;
-        
-        val = 0.5 * (SummerPop[i].phi_a[0] + SummerPop[i].phi_a[1]);
-        mean_phi_a[1] += val;
-        ss_phi_a[1] += val * val;
-
-        val = 0.5 * (SummerPop[i].phi_b[0] + SummerPop[i].phi_b[1]);
-        mean_phi_b[1] += val;
-        ss_phi_b[1] += val * val;
-		
 		val = SummerPop[i].cost;
 		mean_summer_cost += val;
 		ss_summer_cost += val * val;
@@ -527,23 +501,13 @@ void write_summer_stats(ofstream &DataFile)
 		val = SummerPop[i].fecundity;
 		mean_fecundity += val;
 		ss_fecundity += val * val;
-
 	}
 
     if (summer_pop > 0)
     {
         // calculate means and variances of the summer population
-        mean_theta_a[1] /= (breeder_pop + nonreproductive_pop);
-        mean_theta_b[1] /= (breeder_pop + nonreproductive_pop);
-        mean_phi_a[1] /= (breeder_pop + nonreproductive_pop);
-        mean_phi_b[1] /= (breeder_pop + nonreproductive_pop);
         mean_summer_cost /= breeder_pop;
 		mean_fecundity /= breeder_pop;
-        
-        ss_theta_a[1] /= (breeder_pop + nonreproductive_pop); 
-        ss_theta_b[1] /= (breeder_pop + nonreproductive_pop); 
-        ss_phi_a[1] /= (breeder_pop + nonreproductive_pop); 
-        ss_phi_b[1] /= (breeder_pop + nonreproductive_pop);
         ss_summer_cost /= breeder_pop;
 		ss_fecundity /= breeder_pop;
     }
@@ -1125,18 +1089,14 @@ void create_offspring(
 
     // each parental allele has probability 0.5 to make it into offspring
     offspring.theta_a[0] = mutation(mother.theta_a[allele_sample(rng_r)], mu_theta, sdmu_theta);
-    //offspring.theta_a[0] = clamp(offspring.theta_a[0], 0.0, 1.0);
 
     offspring.theta_a[1] = mutation(father.theta_a[allele_sample(rng_r)], mu_theta, sdmu_theta);
-    //offspring.theta_a[1] = clamp(offspring.theta_a[1], 0.0, 1.0);
 
     offspring.theta_b[0] = mutation(mother.theta_b[allele_sample(rng_r)], mu_theta, sdmu_theta);
-    //offspring.theta_b[0] = clamp(offspring.theta_b[0], 0.0, 1.0);
 	offspring.theta_b[0] = max(offspring.theta_b[0], 0.0);  // slope must be positive
 
     offspring.theta_b[1] = mutation(father.theta_b[allele_sample(rng_r)], mu_theta, sdmu_theta);
-    //offspring.theta_b[1] = clamp(offspring.theta_b[1], 0.0, 1.0);
-	offspring.theta_a[1] = max(offspring.theta_b[1], 0.0);  // slope must be positive
+	offspring.theta_b[1] = max(offspring.theta_b[1], 0.0);  // slope must be positive
 	
     // inherit phi loci
     offspring.phi_a[0] = mutation(mother.phi_a[allele_sample(rng_r)], mu_phi, sdmu_phi);
@@ -1687,12 +1647,6 @@ int main(int argc, char **argv)
         }
 
 		autumn_migrant_pop = mean_autumn_flock_size;
-		
-		//mean_signal_timing /= autumn_migrant_pop;
-		//var_signal_timing = (ss_signal_timing / autumn_migrant_pop) - (autumn_migrant_pop * autumn_migrant_pop);
-		
-		//mean_latency /= autumn_migrant_pop;  // Denominator is the migrant population size
-		//var_latency = (ss_latency / autumn_migrant_pop) - (autumn_migrant_pop * autumn_migrant_pop);
 		
         // now take averages over all timesteps that individuals did (can) join groups
         mean_autumn_flock_size = n_autumn_flocks > 0 ?  mean_autumn_flock_size / n_autumn_flocks : 0;
