@@ -30,7 +30,7 @@ sdmu_phi = [0.01]
     
 # migration cost parameters
 max_migration_cost = 20  # Default is 20 
-min_migration_cost = [20, 16, 12, 8, 4]
+min_migration_cost = [10]
 migration_cost_power = [2]
 
 # reproductive cost parameters
@@ -38,7 +38,7 @@ min_offspring_cost = [ 5 ]
 offspring_cost_magnifier = [ 1 ] # The relative difference in resource cost per offspring having migrated at the earliest opportunity versus the last
 relative_mortality_risk_of_migration = [5]
 
-carryover_proportion = [0]
+carryover_proportion = [1, 0.5, 0]
 
 number_replicates = 5
 
