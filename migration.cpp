@@ -33,13 +33,13 @@ uniform_real_distribution<> uniform(0.0,1.0);
 // function
 
 // number of individuals in population
-const int N = 2000;
+const int N = 300;
 
 // number of generations
-long int number_generations = 20000;
+long int number_generations = 250;
 
 // sampling interval
-int skip = 50;
+int skip = 5;
 
 // initial values for phi (social dependency) and theta (resource dependency)
 // a is an intercept, b is a gradient
@@ -1100,17 +1100,13 @@ void create_offspring(
 	
     // inherit phi loci
     offspring.phi_a[0] = mutation(mother.phi_a[allele_sample(rng_r)], mu_phi, sdmu_phi);
-    //offspring.phi_a[0] = clamp(offspring.phi_a[0], 0.0, 1.0);
 
     offspring.phi_a[1] = mutation(father.phi_a[allele_sample(rng_r)], mu_phi, sdmu_phi);
-	//offspring.phi_a[1] = clamp(offspring.phi_a[1], 0.0, 1.0);
     
     offspring.phi_b[0] = mutation(mother.phi_b[allele_sample(rng_r)], mu_phi, sdmu_phi);
-    //offspring.phi_b[0] = clamp(offspring.phi_b[0], 0.0, 1.0);
 	offspring.phi_b[0] = max(offspring.phi_b[0], 0.0);  // slope must be positive
 
     offspring.phi_b[1] = mutation(father.phi_b[allele_sample(rng_r)], mu_phi, sdmu_phi);
-    //offspring.phi_b[1] = clamp(offspring.phi_b[1], 0.0, 1.0);
 	offspring.phi_b[1] = max(offspring.phi_b[1], 0.0);  // slope must be positive
 
 }  // ENDS OFFSPRING PRODUCTION

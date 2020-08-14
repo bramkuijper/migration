@@ -26,7 +26,7 @@ resource_max = [60]
 mu_theta = 0.01
 mu_phi = 0.01
 sdmu_theta = 0.0004
-sdmu_phi = [0.002] #[0.2, 0.1, 0.05, 0.02, 0.01, 0.005, 0.002]
+sdmu_phi = [0.01]
     
 # migration cost parameters
 max_migration_cost = 20  # Default is 20 
