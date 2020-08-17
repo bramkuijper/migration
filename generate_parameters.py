@@ -16,7 +16,7 @@ t_good_ends = 500000
 
 rgood = [ 0.04 ]
 rbad = [ 0.02 ]
-preparation_penalty = [0] # The reduction in resource acquisition, relative to the normal feeding phase.
+preparation_penalty = [0.5] # The reduction in resource acquisition, relative to the normal feeding phase.
 
 resource_reproduction_threshold = [30]
 resource_starvation_threshold = 0
@@ -25,12 +25,12 @@ resource_max = [60]
 # mutation rates
 mu_theta = 0.01
 mu_phi = 0.01
-sdmu_theta = 0.0004
+sdmu_theta = 0.0005
 sdmu_phi = [0.01]
     
 # migration cost parameters
 max_migration_cost = 20  # Default is 20 
-min_migration_cost = [10]
+min_migration_cost = [20, 18, 16, 14, 12, 10]
 migration_cost_power = [2]
 
 # reproductive cost parameters
@@ -38,9 +38,9 @@ min_offspring_cost = [ 5 ]
 offspring_cost_magnifier = [ 1 ] # The relative difference in resource cost per offspring having migrated at the earliest opportunity versus the last
 relative_mortality_risk_of_migration = [5]
 
-carryover_proportion = [1, 0.5, 0]
+carryover_proportion = [0]
 
-number_replicates = 5
+number_replicates = 8
 
 executable = "./xmigration"
 
