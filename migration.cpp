@@ -36,7 +36,8 @@ uniform_real_distribution<> uniform(0.0,1.0);
 const int N = 2000;
 
 // number of generations
-long int number_generations = 200000;
+//long int number_generations = 200000;
+long int number_generations = 10;
 
 // sampling interval
 int skip = ceil(number_generations / 500);
@@ -305,6 +306,81 @@ void write_parameters(ofstream &DataFile)  // at top of outputted file
 			<< "relative_mortality_risk_of_migration;" << relative_mortality_risk_of_migration << endl
             << "seed;" << seed << endl
 			<< endl;
+}
+
+// write the distributin of all individuals
+// ofstream &DataFile: the distribution file to write it to
+// int const generation: the particular generation in which the function is called
+// int const factor: a particular number allowing you to distinguish
+// between different writes of the distribution within the same generation
+void write_dist(ofstream &DataFile, 
+        int const generation,
+        int const factor)
+{
+    DataFile << generation << ";"
+        << factor << ";";
+
+    for (int winter_idx = 0; winter_idx < winter_pop; ++winter_idx)
+    {
+        DataFile << "winter;"
+            << WinterPop[winter_idx].resources << ";"
+            << WinterPop[winter_idx].theta_a[0] << ";"
+            << WinterPop[winter_idx].theta_a[1] << ";"
+            << WinterPop[winter_idx].theta_b[0] << ";"
+            << WinterPop[winter_idx].theta_b[1] << ";"
+            << WinterPop[winter_idx].phi_a[0] << ";"
+            << WinterPop[winter_idx].phi_a[1] << ";"
+            << WinterPop[winter_idx].phi_b[0] << ";"
+            << WinterPop[winter_idx].phi_b[1] << ";"
+            << WinterPop[winter_idx].latency << ";"
+            << WinterPop[winter_idx].timing << ";"
+            << WinterPop[winter_idx].cost << ";"
+            << WinterPop[winter_idx].signal_timing << ";"
+            << WinterPop[winter_idx].age << ";"
+            << WinterPop[winter_idx].fecundity << ";" << std::endl;
+    } 
+
+    for (int summer_idx = 0; summer_idx < summer_pop; ++summer_idx)
+    {
+        DataFile << "summer;"
+            << SummerPop[summer_idx].resources << ";"
+            << SummerPop[summer_idx].theta_a[0] << ";"
+            << SummerPop[summer_idx].theta_a[1] << ";"
+            << SummerPop[summer_idx].theta_b[0] << ";"
+            << SummerPop[summer_idx].theta_b[1] << ";"
+            << SummerPop[summer_idx].phi_a[0] << ";"
+            << SummerPop[summer_idx].phi_a[1] << ";"
+            << SummerPop[summer_idx].phi_b[0] << ";"
+            << SummerPop[summer_idx].phi_b[1] << ";"
+            << SummerPop[summer_idx].latency << ";"
+            << SummerPop[summer_idx].timing << ";"
+            << SummerPop[summer_idx].cost << ";"
+            << SummerPop[summer_idx].signal_timing << ";"
+            << SummerPop[summer_idx].age << ";"
+            << SummerPop[summer_idx].fecundity << ";" << std::endl;
+    }
+} // end write_dist()
+
+void write_dist_data_headers(ofstream &DataFile)
+{
+    DataFile << "generation;"
+        << "factor;" // allows you to distinguish between multiple calls of write_dist()
+        << "poptype;"
+        << "resources;"
+        << "theta_a1;"
+        << "theta_a2;"
+        << "theta_b1;"
+        << "theta_b2;"
+        << "phi_a1;"
+        << "phi_a2;"
+        << "phi_b1;"
+        << "phi_b2;"
+        << "latency;"
+        << "timing;"
+        << "cost;"
+        << "signal_timing;"
+        << "age;"
+        << "fecundity;" << std::endl;
 }
 
 // list of the data headers 
@@ -1473,11 +1549,18 @@ int main(int argc, char **argv)
     create_filename(filename);
     ofstream DataFile(filename.c_str());  // output file 
 
+    // setting up filename for distribution file
+    string dist_filename{filename + "_dist"};
+    ofstream DistFile(dist_filename.c_str());
+
     init_arguments(argc, argv);
 
     write_parameters(DataFile);
 	
 	write_data_headers(DataFile);
+
+    // write the data headers for the distribution file
+    write_dist_data_headers(DistFile);
 
     init_population();
 
@@ -1556,7 +1639,11 @@ int main(int argc, char **argv)
 		for (int t = 0; t < tspring; ++t)
         {
             spring_dynamics(t);
-			
+
+//            if (generation == number_generations - 1 && t >= tspring - 1)
+//            {
+//                write_dist(DistFile, generation, tspring);
+//            }
         }
 				
 		spring_migrant_pop = mean_spring_flock_size;
@@ -1705,4 +1792,7 @@ int main(int argc, char **argv)
 		autumn_migrant_pop = 0;
 				
     } // ENDS: GENERATION
+
+
+
 }
