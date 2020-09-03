@@ -40,7 +40,8 @@ const int N = 2000;
 long int number_generations = 10;
 
 // sampling interval
-int skip = ceil(number_generations / 500);
+//int skip = ceil(number_generations / 500);
+int skip = 5;
 
 // initial values for phi (social dependency) and theta (resource dependency)
 // a is an intercept, b is a gradient
@@ -1639,11 +1640,11 @@ int main(int argc, char **argv)
 		for (int t = 0; t < tspring; ++t)
         {
             spring_dynamics(t);
-
-//            if (generation == number_generations - 1 && t >= tspring - 1)
-//            {
-//                write_dist(DistFile, generation, tspring);
-//            }
+			
+			if (generation == number_generations - 1 && t >= tspring - 1)
+				{
+					write_dist(DistFile, generation, tspring);
+				}
         }
 				
 		spring_migrant_pop = mean_spring_flock_size;
@@ -1792,7 +1793,4 @@ int main(int argc, char **argv)
 		autumn_migrant_pop = 0;
 				
     } // ENDS: GENERATION
-
-
-
 }
