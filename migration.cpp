@@ -317,13 +317,15 @@ void write_parameters(ofstream &DataFile)  // at top of outputted file
 void write_dist(ofstream &DataFile, 
         int const generation,
         int const factor)
+
 {
-    DataFile << generation << ";"
-        << factor << ";";
+//    DataFile << generation << ";"
+ //       << factor << ";";
 
     for (int winter_idx = 0; winter_idx < winter_pop; ++winter_idx)
     {
-        DataFile << "winter;"
+        DataFile << generation << ";"
+			<< "winter;"
             << WinterPop[winter_idx].resources << ";"
             << WinterPop[winter_idx].theta_a[0] << ";"
             << WinterPop[winter_idx].theta_a[1] << ";"
@@ -343,7 +345,8 @@ void write_dist(ofstream &DataFile,
 
     for (int summer_idx = 0; summer_idx < summer_pop; ++summer_idx)
     {
-        DataFile << "summer;"
+        DataFile << generation << ";"
+			<< "summer;"
             << SummerPop[summer_idx].resources << ";"
             << SummerPop[summer_idx].theta_a[0] << ";"
             << SummerPop[summer_idx].theta_a[1] << ";"
@@ -365,8 +368,8 @@ void write_dist(ofstream &DataFile,
 void write_dist_data_headers(ofstream &DataFile)
 {
     DataFile << "generation;"
-        << "factor;" // allows you to distinguish between multiple calls of write_dist()
-        << "poptype;"
+//        << "factor;" // allows you to distinguish between multiple calls of write_dist()
+        << "season;"
         << "resources;"
         << "theta_a1;"
         << "theta_a2;"
