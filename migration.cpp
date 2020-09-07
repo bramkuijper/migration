@@ -327,14 +327,10 @@ void write_dist(ofstream &DataFile,
         DataFile << generation << ";"
 			<< "winter;"
             << WinterPop[winter_idx].resources << ";"
-            << WinterPop[winter_idx].theta_a[0] << ";"
-            << WinterPop[winter_idx].theta_a[1] << ";"
-            << WinterPop[winter_idx].theta_b[0] << ";"
-            << WinterPop[winter_idx].theta_b[1] << ";"
-            << WinterPop[winter_idx].phi_a[0] << ";"
-            << WinterPop[winter_idx].phi_a[1] << ";"
-            << WinterPop[winter_idx].phi_b[0] << ";"
-            << WinterPop[winter_idx].phi_b[1] << ";"
+            << WinterPop[winter_idx].theta_a[0]*0.5 + WinterPop[winter_idx].theta_a[1]*0.5 << ";"
+            << WinterPop[winter_idx].theta_b[0]*0.5 + WinterPop[winter_idx].theta_b[1]*0.5 << ";"
+            << WinterPop[winter_idx].phi_a[0]*0.5 + WinterPop[winter_idx].phi_a[1]*0.5 << ";"
+            << WinterPop[winter_idx].phi_b[0]*0.5 + WinterPop[winter_idx].phi_b[1]*0.5 << ";"
             << WinterPop[winter_idx].latency << ";"
             << WinterPop[winter_idx].timing << ";"
             << WinterPop[winter_idx].cost << ";"
@@ -343,27 +339,28 @@ void write_dist(ofstream &DataFile,
             << WinterPop[winter_idx].fecundity << ";" << std::endl;
     } 
 
-    for (int summer_idx = 0; summer_idx < summer_pop; ++summer_idx)
-    {
-        DataFile << generation << ";"
-			<< "summer;"
-            << SummerPop[summer_idx].resources << ";"
-            << SummerPop[summer_idx].theta_a[0] << ";"
-            << SummerPop[summer_idx].theta_a[1] << ";"
-            << SummerPop[summer_idx].theta_b[0] << ";"
-            << SummerPop[summer_idx].theta_b[1] << ";"
-            << SummerPop[summer_idx].phi_a[0] << ";"
-            << SummerPop[summer_idx].phi_a[1] << ";"
-            << SummerPop[summer_idx].phi_b[0] << ";"
-            << SummerPop[summer_idx].phi_b[1] << ";"
-            << SummerPop[summer_idx].latency << ";"
-            << SummerPop[summer_idx].timing << ";"
-            << SummerPop[summer_idx].cost << ";"
-            << SummerPop[summer_idx].signal_timing << ";"
-            << SummerPop[summer_idx].age << ";"
-            << SummerPop[summer_idx].fecundity << ";" << std::endl;
-    }
-} // end write_dist()
+//	07/09/20: Don't need summer for now
+//    for (int summer_idx = 0; summer_idx < summer_pop; ++summer_idx)
+//    {
+//        DataFile << generation << ";"
+//			<< "summer;"
+//          << SummerPop[summer_idx].resources << ";"
+//            << SummerPop[summer_idx].theta_a[0] << ";"
+//            << SummerPop[summer_idx].theta_a[1] << ";"
+//            << SummerPop[summer_idx].theta_b[0] << ";"
+//            << SummerPop[summer_idx].theta_b[1] << ";"
+//            << SummerPop[summer_idx].phi_a[0] << ";"
+//            << SummerPop[summer_idx].phi_a[1] << ";"
+//            << SummerPop[summer_idx].phi_b[0] << ";"
+//            << SummerPop[summer_idx].phi_b[1] << ";"
+//            << SummerPop[summer_idx].latency << ";"
+//            << SummerPop[summer_idx].timing << ";"
+//            << SummerPop[summer_idx].cost << ";"
+//            << SummerPop[summer_idx].signal_timing << ";"
+//            << SummerPop[summer_idx].age << ";"
+//            << SummerPop[summer_idx].fecundity << ";" << std::endl;
+//    }
+} // ENDS: write_dist()
 
 void write_dist_data_headers(ofstream &DataFile)
 {
