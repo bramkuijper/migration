@@ -197,6 +197,9 @@ struct Individual
 	// phenology of signalling
 	int signal_timing;
 	
+	// resource value when signalling begins
+	int signal_resources;
+	
 	// individual age (start out at 1 as they are reproductively mature)
 	int age;
 	
@@ -322,66 +325,57 @@ void write_dist(ofstream &DataFile,
 //    DataFile << generation << ";"
  //       << factor << ";";
 
-    for (int winter_idx = 0; winter_idx < winter_pop; ++winter_idx)
-    {
-        DataFile << generation << ";"
-			<< "winter;"
-            << WinterPop[winter_idx].resources << ";"
-            << WinterPop[winter_idx].theta_a[0]*0.5 + WinterPop[winter_idx].theta_a[1]*0.5 << ";"
-            << WinterPop[winter_idx].theta_b[0]*0.5 + WinterPop[winter_idx].theta_b[1]*0.5 << ";"
-            << WinterPop[winter_idx].phi_a[0]*0.5 + WinterPop[winter_idx].phi_a[1]*0.5 << ";"
-            << WinterPop[winter_idx].phi_b[0]*0.5 + WinterPop[winter_idx].phi_b[1]*0.5 << ";"
-            << WinterPop[winter_idx].latency << ";"
-            << WinterPop[winter_idx].timing << ";"
-            << WinterPop[winter_idx].cost << ";"
-            << WinterPop[winter_idx].signal_timing << ";"
-            << WinterPop[winter_idx].age << ";"
-            << WinterPop[winter_idx].fecundity << ";" << std::endl;
-    } 
-
-//	07/09/20: Don't need summer for now
-//    for (int summer_idx = 0; summer_idx < summer_pop; ++summer_idx)
+//    for (int winter_idx = 0; winter_idx < winter_pop; ++winter_idx)
 //    {
 //        DataFile << generation << ";"
-//			<< "summer;"
-//          << SummerPop[summer_idx].resources << ";"
-//            << SummerPop[summer_idx].theta_a[0] << ";"
-//            << SummerPop[summer_idx].theta_a[1] << ";"
-//            << SummerPop[summer_idx].theta_b[0] << ";"
-//            << SummerPop[summer_idx].theta_b[1] << ";"
-//            << SummerPop[summer_idx].phi_a[0] << ";"
-//            << SummerPop[summer_idx].phi_a[1] << ";"
-//            << SummerPop[summer_idx].phi_b[0] << ";"
-//            << SummerPop[summer_idx].phi_b[1] << ";"
-//            << SummerPop[summer_idx].latency << ";"
-//            << SummerPop[summer_idx].timing << ";"
-//            << SummerPop[summer_idx].cost << ";"
-//            << SummerPop[summer_idx].signal_timing << ";"
-//            << SummerPop[summer_idx].age << ";"
-//            << SummerPop[summer_idx].fecundity << ";" << std::endl;
-//    }
-} // ENDS: write_dist()
+//			<< "winter;"
+//            << WinterPop[winter_idx].resources << ";"
+//            << WinterPop[winter_idx].theta_a[0]*0.5 + WinterPop[winter_idx].theta_a[1]*0.5 << ";"
+//            << WinterPop[winter_idx].theta_b[0]*0.5 + WinterPop[winter_idx].theta_b[1]*0.5 << ";"
+//            << WinterPop[winter_idx].phi_a[0]*0.5 + WinterPop[winter_idx].phi_a[1]*0.5 << ";"
+//            << WinterPop[winter_idx].phi_b[0]*0.5 + WinterPop[winter_idx].phi_b[1]*0.5 << ";"
+//            << WinterPop[winter_idx].latency << ";"
+//            << WinterPop[winter_idx].timing << ";"
+//            << WinterPop[winter_idx].cost << ";"
+//            << WinterPop[winter_idx].signal_timing << ";"
+//            << WinterPop[winter_idx].age << ";"
+//            << WinterPop[winter_idx].fecundity << ";" << std::endl;
+//	    } 
+	
+    for (int summer_idx = 0; summer_idx < summer_pop; ++summer_idx)
+    {
+        DataFile << generation << ";"
+			<< "summer;"
+			<< SummerPop[summer_idx].signal_timing << ";"
+			<< SummerPop[summer_idx].signal_resources << ";"
+            << SummerPop[summer_idx].timing << ";"
+            << SummerPop[summer_idx].latency << ";"
+           	<< SummerPop[summer_idx].cost << ";"
+			<< SummerPop[summer_idx].resources << ";"  // At arrival
+	        << SummerPop[summer_idx].theta_a[0]*0.5 + SummerPop[summer_idx].theta_a[1]*0.5 << ";"
+	        << SummerPop[summer_idx].theta_b[0]*0.5 + SummerPop[summer_idx].theta_b[1]*0.5 << ";"
+	        << SummerPop[summer_idx].phi_a[0]*0.5 + SummerPop[summer_idx].phi_a[1]*0.5 << ";"
+	        << SummerPop[summer_idx].phi_b[0]*0.5 + SummerPop[summer_idx].phi_b[1]*0.5 << ";"
+            << SummerPop[summer_idx].age << ";" << std::endl;
+	    }
+} // ENDS: ()
 
 void write_dist_data_headers(ofstream &DataFile)
 {
     DataFile << "generation;"
-//        << "factor;" // allows you to distinguish between multiple calls of write_dist()
+//        << "factor;" // allows you to distinguish between multiple calls of ()
         << "season;"
-        << "resources;"
-        << "theta_a1;"
-        << "theta_a2;"
-        << "theta_b1;"
-        << "theta_b2;"
-        << "phi_a1;"
-        << "phi_a2;"
-        << "phi_b1;"
-        << "phi_b2;"
-        << "latency;"
-        << "timing;"
-        << "cost;"
-        << "signal_timing;"
-        << "age;"
-        << "fecundity;" << std::endl;
+		<< "signal_timing;"	
+		<< "signal_resources;"
+		<< "departure_timing;"
+		<< "latency;"	
+		<< "cost;"
+		<< "arrival_resources;"
+        << "theta_a;"
+        << "theta_b;"
+        << "phi_a;"
+        << "phi_b;"
+        << "age;" << std::endl;
 }
 
 // list of the data headers 
@@ -759,6 +753,8 @@ void init_population()
     {
         WinterPop[i].resources = 0.0;  // at start of simulation, initial resource level for all individuals is 0
 		
+		WinterPop[i].signal_resources = 0.0;
+		
 		// set individual latency to 0
 		WinterPop[i].latency = 0;
 		
@@ -851,7 +847,6 @@ void spring_mortality()
 		{
 			SummerPop[i].timing = 1;  // individual survives: timing is reset to 1 for autumn migration
 			SummerPop[i].signal_timing = 1;  // signal phenology is also reset to 1 for autumn
-			SummerPop[i].age += 1;
 		}
     }
 }
@@ -886,6 +881,7 @@ void autumn_mortality()
 			{
 				WinterPop[i].timing = 1;  // individual survives: timing is reset to 1, ready for spring phenology monitoring
 				WinterPop[i].signal_timing = 1;
+				WinterPop[i].age += 1;  // individuals become a year older during winter, so that first-year spring migrants are scored as one year-olds rather than 0 year-olds
 			} 
 	
 	// NON-MIGRANTS MORTALITY WAS DEALT WITH IN SPRING_MORTALITY()
@@ -1018,6 +1014,7 @@ void spring_dynamics(int t)
             // add individual to the staging pool
             StagingPool[staging_pop] = WinterPop[i];
 			StagingPool[staging_pop].latency = 0;
+			StagingPool[staging_pop].signal_resources = StagingPool[staging_pop].resources;
             ++staging_pop; // increment the number of individuals in the staging pool
 
             assert(staging_pop <= N);
@@ -1156,6 +1153,7 @@ void create_offspring(
     bernoulli_distribution allele_sample(0.5);
 
     offspring.resources = 0.0;
+	offspring.signal_resources = 0.0;
 	offspring.latency = 0;
 	offspring.timing = 1;
 	offspring.signal_timing = 1;
@@ -1420,6 +1418,7 @@ void postbreeding_dynamics(int t)
             // add individual to the staging pool
             StagingPool[staging_pop] = SummerPop[i];
 			StagingPool[staging_pop].latency = 0.0;
+			StagingPool[staging_pop].signal_resources = StagingPool[staging_pop].resources;
             ++staging_pop; // increment the number of individuals in the staging pool
 
             // delete this individual from the summer population
