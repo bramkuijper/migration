@@ -200,7 +200,6 @@ struct Individual
 	// resource value when signalling begins
 	double signal_resources;
 	
-	// proportion of population that is signalling when individual departs
 	double signalling_proportion;
 	
 	// individual age (start out at 1 as they are reproductively mature)
@@ -787,7 +786,7 @@ void init_population()
 		
 		WinterPop[i].cost = 0.0; 
 		
-		WinterPop[i].fecundity = 0.0; 
+		WinterPop[i].fecundity = 0; 
 		
     }
 
@@ -1073,8 +1072,9 @@ void spring_dynamics(int t)
         // yes individual goes
         if (uniform(rng_r) < pdisperse)
         {
-            SummerPop[summer_pop] = StagingPool[i]; // Individual transfers to SummerPop
-            ++summer_pop;
+			SummerPop[summer_pop] = StagingPool[i]; // Individual transfers to SummerPop
+			SummerPop[summer_pop].signalling_proportion = (double) staging_pop_start / winter_pop;
+			++summer_pop;
             
             assert(summer_pop <= N);
 
@@ -1086,9 +1086,6 @@ void spring_dynamics(int t)
 			rv = StagingPool[i].resources;
 			mean_resources += rv;
 			ss_resources += rv * rv;
-			
-			// record the proportion of the population that was signalling at the point of departure
-			SummerPop[summer_pop].signalling_proportion = staging_pop_start / (staging_pop_start + winter_pop);
 			
             // delete this individual from the staging population
             StagingPool[i] = StagingPool[staging_pop - 1];
@@ -1488,19 +1485,16 @@ void postbreeding_dynamics(int t)
 			
 			if (StagingPool[i].resources == resource_max)
 			{
-				++spring_migrants_resource_cap;
+				++autumn_migrants_resource_cap;
 			}
 			
 			WinterPop[winter_pop] = StagingPool[i];  // Individual moves from staging pool to first empty position in WinterPop
+			WinterPop[winter_pop].signalling_proportion = staging_pop_start / (staging_pop_start + summer_pop);  // record the proportion of the population that was signalling at the point of departure
 			lat = WinterPop[winter_pop].latency;
 			mean_latency += lat;
 			ss_latency += (lat * lat);			
 			++winter_pop;
 			
-			// record the proportion of the population that was signalling at the point of departure
-			WinterPop[winter_pop].signalling_proportion = staging_pop_start / (staging_pop_start + summer_pop);
-			
-
             // delete this individual from the staging population
 			// replace with the last individual in the staging_pop stack
             StagingPool[i] = StagingPool[staging_pop - 1];
