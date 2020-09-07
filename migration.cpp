@@ -36,12 +36,12 @@ uniform_real_distribution<> uniform(0.0,1.0);
 const int N = 2000;
 
 // number of generations
-//long int number_generations = 200000;
-long int number_generations = 10;
+long int number_generations = 200000;
+//long int number_generations = 10;
 
 // sampling interval
-//int skip = ceil(number_generations / 500);
-int skip = 5;
+int skip = ceil(number_generations / 500);
+//int skip = 5;
 
 // initial values for phi (social dependency) and theta (resource dependency)
 // a is an intercept, b is a gradient
