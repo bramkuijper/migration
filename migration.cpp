@@ -200,6 +200,9 @@ struct Individual
 	// resource value when signalling begins
 	int signal_resources;
 	
+	// proportion of population that is signalling when individual departs
+	int signalling_proportion;
+	
 	// individual age (start out at 1 as they are reproductively mature)
 	int age;
 	
@@ -349,6 +352,7 @@ void write_dist(ofstream &DataFile,
 			<< SummerPop[summer_idx].signal_timing << ";"
 			<< SummerPop[summer_idx].signal_resources << ";"
             << SummerPop[summer_idx].timing << ";"
+			<< SummerPop[summer_idx].signalling_proportion << ";"
             << SummerPop[summer_idx].latency << ";"
            	<< SummerPop[summer_idx].cost << ";"
 			<< SummerPop[summer_idx].resources << ";"  // At arrival
@@ -368,6 +372,7 @@ void write_dist_data_headers(ofstream &DataFile)
 		<< "signal_timing;"	
 		<< "signal_resources;"
 		<< "departure_timing;"
+		<< "signalling_proportion"
 		<< "latency;"	
 		<< "cost;"
 		<< "arrival_resources;"
@@ -1080,6 +1085,9 @@ void spring_dynamics(int t)
 			mean_resources += rv;
 			ss_resources += rv * rv;
 			
+			// record the proportion of the population that was signalling at the point of departure
+			SummerPop[summer_pop].signalling_proportion = staging_pop_start / (staging_pop_start + winter_pop);
+			
             // delete this individual from the staging population
             StagingPool[i] = StagingPool[staging_pop - 1];
 
@@ -1159,6 +1167,7 @@ void create_offspring(
 	offspring.signal_timing = 1;
 	offspring.age = 0;
 	offspring.fecundity = 0;
+	offspring.signalling_proportion = 0.0;
 
     // inherit theta loci
 
@@ -1485,6 +1494,10 @@ void postbreeding_dynamics(int t)
 			mean_latency += lat;
 			ss_latency += (lat * lat);			
 			++winter_pop;
+			
+			// record the proportion of the population that was signalling at the point of departure
+			WinterPop[winter_pop].signalling_proportion = staging_pop_start / (staging_pop_start + summer_pop);
+			
 
             // delete this individual from the staging population
 			// replace with the last individual in the staging_pop stack
