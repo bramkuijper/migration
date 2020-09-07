@@ -198,10 +198,10 @@ struct Individual
 	int signal_timing;
 	
 	// resource value when signalling begins
-	int signal_resources;
+	double signal_resources;
 	
 	// proportion of population that is signalling when individual departs
-	int signalling_proportion;
+	double signalling_proportion;
 	
 	// individual age (start out at 1 as they are reproductively mature)
 	int age;
@@ -372,7 +372,7 @@ void write_dist_data_headers(ofstream &DataFile)
 		<< "signal_timing;"	
 		<< "signal_resources;"
 		<< "departure_timing;"
-		<< "signalling_proportion"
+		<< "signalling_proportion;"
 		<< "latency;"	
 		<< "cost;"
 		<< "arrival_resources;"
@@ -768,6 +768,8 @@ void init_population()
 		
 		// set individual timing value to 1 (Departure on the first day will give a timing value of 1)
 		WinterPop[i].timing = 1;
+		
+		WinterPop[i].signalling_proportion = 0.0;
 		
         for (int j = 0; j < 2; ++j)
         {
