@@ -147,6 +147,8 @@ def analyze_file(filename):
     # prepare the data to be printed
     data = ""
 
+    header_line = None
+
     if init:
 
         # do error checking in terms of the csv values
@@ -174,10 +176,14 @@ def analyze_file(filename):
 
     data_line = ";".join(parameters.values()) + ";" + data +  filename
 
+    print(header_line)
     print(data_line)
 
     # count number of occurrences of semicolon for error checking
     num_semicol_data = len(re.findall(";",data_line))
+
+    print(num_semicol_data)
+    print(num_semicol_header)
 
     assert(num_semicol_header == num_semicol_data)
 
@@ -192,5 +198,6 @@ if len(sys.argv) > 2:
 for root, dir, files in os.walk(sys.argv[1]):
 
     for file in files:
+        print(file)
         if re.search("(sim|iter).*\d$",file) is not None:
             analyze_file(os.path.join(root, file))
