@@ -1055,12 +1055,12 @@ void spring_dynamics(int t)
         // within the staging pool
         
 		// LINEAR MODEL		
-		pdisperse = 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1])
-       /    + 0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) * (double) staging_pop_start / (staging_pop_start + winter_pop);  // TODO Does the '(double)' need to be here?
+		//pdisperse = 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1])
+        //   + 0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) * (double) staging_pop_start / (staging_pop_start + winter_pop);  // TODO Does the '(double)' need to be here?
 
 		// SIGMOIDAL MODEL
-		pdisperse = pow(1 + exp(-0.5 * (WinterPop[i].phi_b[0] + WinterPop[i].phi_b[1]) 
-			* (((double) staging_pop_start / (staging_pop_start + winter_pop)) - 0.5 * (WinterPop[i].phi_a[0] + WinterPop[i].phi_a[1]))), -1);
+		pdisperse = pow(1 + exp(-0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) 
+			* (((double) staging_pop_start / (staging_pop_start + winter_pop)) - 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1]))), -1);
 
         // bound the probability (not really necessary)
         pdisperse = clamp(psignal, 0, 1);
@@ -1410,10 +1410,13 @@ void postbreeding_dynamics(int t)
         // reaction norm dependent on resources
         // resulting in signaling a willingness to disperse
         // => go to the staging level
-        psignal = 0.5 * (SummerPop[i].theta_a[0] + SummerPop[i].theta_a[1])
-            + 0.5 * (SummerPop[i].theta_b[0] + SummerPop[i].theta_b[1]) * SummerPop[i].resources; // resource_max;
+        //psignal = 0.5 * (SummerPop[i].theta_a[0] + SummerPop[i].theta_a[1])
+        //    + 0.5 * (SummerPop[i].theta_b[0] + SummerPop[i].theta_b[1]) * SummerPop[i].resources; // resource_max;
 
-        // bound the probability
+		psignal = pow(1 + exp(-0.5 * (SummerPop[i].theta_b[0] + SummerPop[i].theta_b[1]) 
+			* (SummerPop[i].resources - 0.5 * (SummerPop[i].theta_a[0] + SummerPop[i].theta_a[1]))), -1);
+		
+		// bound the probability
         psignal = clamp(psignal, 0.0, 1.0);
 
         // does individual want to signal to others to be ready for departure?
@@ -1467,11 +1470,16 @@ void postbreeding_dynamics(int t)
         // for now, individuals leave dependent on the current amount of individuals
         // within the staging pool
 
-        pdisperse = 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1])
-            + 0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) * (double) staging_pop_start / (staging_pop_start + summer_pop);
-		pdisperse = clamp(pdisperse, 0, 1);
+        //pdisperse = 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1])
+        //    + 0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) * (double) staging_pop_start / (staging_pop_start + summer_pop);
 
-        // yes individual goes
+		// SIGMOIDAL MODEL
+		pdisperse = pow(1 + exp(-0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) 
+			* (((double) staging_pop_start / (staging_pop_start + summer_pop)) - 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1]))), -1);
+		
+		pdisperse = clamp(pdisperse, 0, 1);
+		
+		// yes individual goes
         if (uniform(rng_r) < pdisperse)
         {
 			
