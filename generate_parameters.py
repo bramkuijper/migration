@@ -2,17 +2,17 @@
 
 # generate all parameter combinations to run the migration simulation
 
-init_theta_a = [60] #[0.0005]  # Default is 0.0005
-init_theta_b = [1] #[0]  # Default is 0
-init_phi_a = [0.25] #[0]  # Default is 0.0005
-init_phi_b = [1] #[1]  # Default is 0
+init_theta_a = [60]  # Default is 0.0005
+init_theta_b = [1]  # Default is 0
+init_phi_a = [0.25]  # Default is 0.0005
+init_phi_b = [1]  # Default is 0
 
 twinter = 0
 tspring = 10000
 
-pmort = [0.1] #[0.025, 0.05, 0.075, 0.1, 0.125, 0.15, 0.175, 0.2, 0.225, 0.25]  # Default is 0.05
+pmort = [0.1]
 pgood_init = 0.5 # Deleted 0.5 option on 27 November 2019
-t_good_ends = 500000
+t_good_ends = 5000000
 
 rgood = [ 0.04 ]
 rbad = [ 0.02 ]
