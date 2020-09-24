@@ -1636,6 +1636,12 @@ int main(int argc, char **argv)
 	        exit(1);
 	    }
 		
+		// Winter foraging (migration is not an option)
+		for (int t = 0; t < twinter; ++t)
+		{
+			winter_dynamics(t);
+		}
+		
 		// time during spring during which individuals can migrate (or carry on foraging)
 		mean_resources = 0.0;
 		ss_resources = 0.0;
