@@ -324,25 +324,6 @@ void write_dist(ofstream &DataFile,
         int const factor)
 
 {
-//    DataFile << generation << ";"
- //       << factor << ";";
-
-//    for (int winter_idx = 0; winter_idx < winter_pop; ++winter_idx)
-//    {
-//        DataFile << generation << ";"
-//			<< "winter;"
-//            << WinterPop[winter_idx].resources << ";"
-//            << WinterPop[winter_idx].theta_a[0]*0.5 + WinterPop[winter_idx].theta_a[1]*0.5 << ";"
-//            << WinterPop[winter_idx].theta_b[0]*0.5 + WinterPop[winter_idx].theta_b[1]*0.5 << ";"
-//            << WinterPop[winter_idx].phi_a[0]*0.5 + WinterPop[winter_idx].phi_a[1]*0.5 << ";"
-//            << WinterPop[winter_idx].phi_b[0]*0.5 + WinterPop[winter_idx].phi_b[1]*0.5 << ";"
-//            << WinterPop[winter_idx].latency << ";"
-//            << WinterPop[winter_idx].timing << ";"
-//            << WinterPop[winter_idx].cost << ";"
-//            << WinterPop[winter_idx].signal_timing << ";"
-//            << WinterPop[winter_idx].age << ";"
-//            << WinterPop[winter_idx].fecundity << ";" << std::endl;
-//	    } 
 	
     for (int summer_idx = 0; summer_idx < summer_pop; ++summer_idx)
     {
@@ -1008,8 +989,15 @@ void spring_dynamics(int t)
 		// reaction norm dependent on resources
         // resulting in signaling a willingness to disperse
         // => go to the staging level
-        psignal = 0.5 * (WinterPop[i].theta_a[0] + WinterPop[i].theta_a[1])
-            + 0.5 * (WinterPop[i].theta_b[0] + WinterPop[i].theta_b[1]) * WinterPop[i].resources; // resource_max;
+		
+		// 	LINEAR MODEL
+        // psignal = 0.5 * (WinterPop[i].theta_a[0] + WinterPop[i].theta_a[1]) 
+		// + 0.5 * (WinterPop[i].theta_b[0] + WinterPop[i].theta_b[1]) * WinterPop[i].resources; // resource_max;
+		
+		// SIGMOIDAL MODEL
+		// of the form psignal = (1 + e^-theta_b.(resources - theta_a))^-1
+		psignal = pow(1 + exp(-0.5 * (WinterPop[i].theta_b[0] + WinterPop[i].theta_b[1]) 
+			* (WinterPop[i].resources - 0.5 * (WinterPop[i].theta_a[0] + WinterPop[i].theta_a[1]))), -1);
 
         // bound the probability
         psignal = clamp(psignal, 0, 1);
@@ -1065,9 +1053,17 @@ void spring_dynamics(int t)
 		// later we will consider collective dispersal decisions
         // for now, individuals leave dependent on the current amount of individuals
         // within the staging pool
-        pdisperse = 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1])
-            + 0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) * (double) staging_pop_start / (staging_pop_start + winter_pop);  // TODO Does the '(double)' need to be here?
-		pdisperse = clamp(pdisperse, 0, 1);
+        
+		// LINEAR MODEL		
+		pdisperse = 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1])
+       /    + 0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) * (double) staging_pop_start / (staging_pop_start + winter_pop);  // TODO Does the '(double)' need to be here?
+
+		// SIGMOIDAL MODEL
+		pdisperse = pow(1 + exp(-0.5 * (WinterPop[i].phi_b[0] + WinterPop[i].phi_b[1]) 
+			* (((double) staging_pop_start / (staging_pop_start + winter_pop)) - 0.5 * (WinterPop[i].phi_a[0] + WinterPop[i].phi_a[1]))), -1);
+
+        // bound the probability (not really necessary)
+        pdisperse = clamp(psignal, 0, 1);
 
         // yes individual goes
         if (uniform(rng_r) < pdisperse)
@@ -1143,7 +1139,7 @@ double mutation(double val, double mu, double sdmu)
 {
     if (uniform(rng_r) < mu)
     {
-        normal_distribution<> allelic_dist(0,sdmu);
+        normal_distribution<> allelic_dist(0,sdmu*val);
         val += allelic_dist(rng_r);
     }
 
