@@ -1061,9 +1061,9 @@ void spring_dynamics(int t)
 		// SIGMOIDAL MODEL
 		pdisperse = pow(1 + exp(-0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) 
 			* (((double) staging_pop_start / (staging_pop_start + winter_pop)) - 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1]))), -1);
-
-        // bound the probability (not really necessary)
-        pdisperse = clamp(psignal, 0, 1);
+		
+		// bound the probability (not really necessary)
+        pdisperse = clamp(pdisperse, 0, 1);
 
         // yes individual goes
         if (uniform(rng_r) < pdisperse)
