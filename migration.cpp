@@ -1172,10 +1172,8 @@ void create_offspring(
     offspring.theta_a[1] = mutation(father.theta_a[allele_sample(rng_r)], mu_theta, sdmu_theta);
 
     offspring.theta_b[0] = mutation(mother.theta_b[allele_sample(rng_r)], mu_theta, sdmu_theta);
-	offspring.theta_b[0] = max(offspring.theta_b[0], 0.0);  // slope must be positive
 
     offspring.theta_b[1] = mutation(father.theta_b[allele_sample(rng_r)], mu_theta, sdmu_theta);
-	offspring.theta_b[1] = max(offspring.theta_b[1], 0.0);  // slope must be positive
 	
     // inherit phi loci
     offspring.phi_a[0] = mutation(mother.phi_a[allele_sample(rng_r)], mu_phi, sdmu_phi);
@@ -1183,10 +1181,8 @@ void create_offspring(
     offspring.phi_a[1] = mutation(father.phi_a[allele_sample(rng_r)], mu_phi, sdmu_phi);
     
     offspring.phi_b[0] = mutation(mother.phi_b[allele_sample(rng_r)], mu_phi, sdmu_phi);
-	offspring.phi_b[0] = max(offspring.phi_b[0], 0.0);  // slope must be positive
 
     offspring.phi_b[1] = mutation(father.phi_b[allele_sample(rng_r)], mu_phi, sdmu_phi);
-	offspring.phi_b[1] = max(offspring.phi_b[1], 0.0);  // slope must be positive
 
 }  // ENDS OFFSPRING PRODUCTION
 
