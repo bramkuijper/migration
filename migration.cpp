@@ -1069,7 +1069,7 @@ void spring_dynamics(int t)
         if (uniform(rng_r) < pdisperse)
         {
 			SummerPop[summer_pop] = StagingPool[i]; // Individual transfers to SummerPop
-			SummerPop[summer_pop].signalling_proportion = (double) staging_pop_start / winter_pop;
+			SummerPop[summer_pop].signalling_proportion = (double) staging_pop_start / (staging_pop_start + winter_pop);
 			++summer_pop;
             
             assert(summer_pop <= N);
