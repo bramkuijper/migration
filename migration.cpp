@@ -788,8 +788,12 @@ void init_population()
 
 double migration_cost(int NFlock)
 {
-	cost = min_migration_cost + ((max_migration_cost - min_migration_cost) / pow(NFlock, migration_cost_power));
+	//cost = min_migration_cost + ((max_migration_cost - min_migration_cost) / pow(NFlock, migration_cost_power));
 	// Flock size of 1 (i.e., travelling alone) yields the maximum cost
+	
+	// 17 Nov 2020: Revising the cost function to allow it to take an accelerating / decelarating function
+	cost = min_migration_cost + ((max_migration_cost - min_migration_cost) * pow(1 - (NFlock-1)/(capacity-1), exp(migration_cost_power)));
+	
 	return(cost);
 }  // ENDS: migration cost function
 
