@@ -44,6 +44,7 @@ const int N = 1500;
 long int number_generations = 10;
 int skip = 5;
 
+
 // initial values for phi (social dependency) and theta (resource dependency)
 // a is an intercept, b is a gradient
 double init_theta_a = 0.0; 
@@ -792,8 +793,13 @@ double migration_cost(int NFlock)
 	// Flock size of 1 (i.e., travelling alone) yields the maximum cost
 	
 	// 17 Nov 2020: Revising the cost function to allow it to take an accelerating / decelarating function
-	cost = min_migration_cost + ((max_migration_cost - min_migration_cost) * pow(1 - (NFlock-1)/(capacity-1), exp(migration_cost_power)));
-	
+	if (NFlock <= capacity)
+	{
+		cost = min_migration_cost + ((max_migration_cost - min_migration_cost) * pow(1 - (NFlock-1)/(capacity-1), exp(migration_cost_power)));
+	}
+	else{
+		cost = min_migration_cost;
+	}
 	return(cost);
 }  // ENDS: migration cost function
 
