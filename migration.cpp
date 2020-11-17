@@ -36,12 +36,13 @@ uniform_real_distribution<> uniform(0.0,1.0);
 const int N = 1500;
 
 // number of generations
-long int number_generations = 1000000;
-//long int number_generations = 10;
+//long int number_generations = 1000000;
 
 // sampling interval
-int skip = ceil(number_generations / 500);
-//int skip = 5;
+//int skip = ceil(number_generations / 500);
+
+long int number_generations = 10;
+int skip = 5;
 
 // initial values for phi (social dependency) and theta (resource dependency)
 // a is an intercept, b is a gradient
@@ -83,6 +84,7 @@ double sdmu_phi = 0.0;
 double migration_cost_power = 0.0;
 double max_migration_cost = 0.0;
 double min_migration_cost = 0.0;
+int capacity = 0.0;  // group size at which minimum migration cost is reached
 double cost = 0.0;
 
 // reproductive cost function
@@ -252,6 +254,7 @@ void init_arguments(int argc, char **argv)
 	offspring_cost_magnifier = atof(argv[24]);
 	carryover_proportion = atof(argv[25]);
 	relative_mortality_risk_of_migration = atof(argv[26]);
+	capacity = atoi(argv[27]);
 		
     // some bounds checking on parameters
     // probability of encountering a good environment
@@ -276,6 +279,7 @@ void init_arguments(int argc, char **argv)
 	assert(resource_max > 0);
 	
 	assert(max_migration_cost >= min_migration_cost);
+	assert(capacity <= N);
 
 }
 
@@ -307,6 +311,7 @@ void write_parameters(ofstream &DataFile)  // at top of outputted file
             << "migration_cost_power;" << migration_cost_power << endl
             << "max_migration_cost;" << max_migration_cost << endl
 			<< "min_migration_cost;" << min_migration_cost << endl
+			<< "capacity;" << capacity << endl
 			<< "offspring_cost_magnifier;" << offspring_cost_magnifier << endl
 			<< "carryover_proportion;" << carryover_proportion << endl
 			<< "relative_mortality_risk_of_migration;" << relative_mortality_risk_of_migration << endl
