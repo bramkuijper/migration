@@ -33,16 +33,15 @@ uniform_real_distribution<> uniform(0.0,1.0);
 // function
 
 // number of individuals in population
-const int N = 1500;
+const int N = 100;  // DEAFULT: 2000
 
 // number of generations
-long int number_generations = 1000000;
+long int number_generations = 100;  // DEFAULT: 100000
 
 // sampling interval
-int skip = ceil(number_generations / 500);
+//int skip = ceil(number_generations / 500);  // DEFAULT: 500
 
-//long int number_generations = 10;
-//int skip = 5;
+int skip = 5;
 
 
 // initial values for phi (social dependency) and theta (resource dependency)
@@ -124,6 +123,9 @@ double ss_departure_timing = 0.0;
 double mean_signal_timing = 0.0;
 double var_signal_timing = 0.0;
 double ss_signal_timing = 0.0;
+double mean_signal_resources = 0.0;
+double var_signal_resources = 0.0;
+double ss_signal_resources = 0.0;
 double mean_age = 0.0;
 double var_age = 0.0;
 double ss_age = 0.0;
@@ -374,13 +376,15 @@ void write_data_headers(ofstream &DataFile)
 {
     DataFile << "generation;"
 				
-		// SPRING MIGRATION STATS (19):
+		// SPRING MIGRATION STATS (n = 21):
 		<< "spring_pop;"
 		<< "mean_spring_staging_size;"
         << "var_spring_staging_size;"
         << "spring_migrant_pop;"
 		<< "spring_migrants_resource_cap;"
 		<< "spring_nonmigrant_pop;"
+		<< "mean_spring_signal_resources;"
+		<< "var_spring_signal_resources;"
 		<< "mean_spring_signal_timing;"
 		<< "var_spring_signal_timing;"
 		<< "mean_spring_latency;"
@@ -407,12 +411,14 @@ void write_data_headers(ofstream &DataFile)
 		<< "var_fecundity_breederpop;"
 		<< "postbreeding_pop;"
 		
-		// AUTUMN MIGRATION STATS (18)
+		// AUTUMN MIGRATION STATS (20)
         << "mean_autumn_staging_size;"
         << "var_autumn_staging_size;"
         << "autumn_migrant_pop;"
 		<< "autumn_migrants_resource_cap;"
 		<< "autumn_nonmigrant_pop;"
+		<< "mean_autumn_signal_resources;"
+		<< "var_autumn_signal_resources;"
 		<< "mean_autumn_signal_timing;"
 		<< "var_autumn_signal_timing;"
 		<< "mean_autumn_latency;"
@@ -599,9 +605,12 @@ void write_spring_stats(ofstream &DataFile, int generation)
 	ss_signal_timing = 0.0;
 	mean_spring_cost = 0.0;
 	ss_spring_cost = 0.0;
+	mean_signal_resources = 0.0;
+	ss_signal_resources = 0.0;
 	int lat;
 	int ticktock;
 	int calendar;
+	int fatness;
 	double spring_cost;
    	
     for (int i = 0; i < summer_pop; ++i)  // for each individual in the population of migrants:
@@ -617,6 +626,10 @@ void write_spring_stats(ofstream &DataFile, int generation)
 		calendar = SummerPop[i].signal_timing;
 		mean_signal_timing += calendar;
 		ss_signal_timing += calendar * calendar;
+		
+		fatness = SummerPop[i].signal_resources;
+		mean_signal_resources += fatness;
+		ss_signal_resources += fatness * fatness;
 		
 		spring_cost = SummerPop[i].cost;
 		mean_spring_cost += spring_cost;
@@ -635,6 +648,8 @@ void write_spring_stats(ofstream &DataFile, int generation)
 		ss_spring_cost /= summer_pop;
 		mean_resources /= summer_pop;
 		ss_resources /= summer_pop;
+		mean_signal_resources /= summer_pop;
+		ss_signal_resources /= summer_pop;
     }
 
     // write statistics to a file
@@ -646,6 +661,8 @@ void write_spring_stats(ofstream &DataFile, int generation)
 		<< spring_migrant_pop << ";"
 		<< spring_migrants_resource_cap << ";"
 		<< spring_nonmigrant_pop << ";"
+		<< mean_signal_resources << ";"
+		<< (ss_signal_resources - mean_signal_resources * mean_signal_resources) << ";"
 		<< mean_signal_timing << ";"
 		<< (ss_signal_timing - mean_signal_timing * mean_signal_timing) << ";"
 		<< mean_latency << ";"
@@ -672,9 +689,12 @@ void write_autumn_stats(ofstream &DataFile)
 	ss_signal_timing = 0.0;
 	mean_autumn_cost = 0.0;
 	ss_autumn_cost = 0.0;
+	mean_signal_resources = 0.0;
+	ss_signal_resources = 0.0;
 	int lat;
 	int ticktock;
 	int calendar;
+	int fatness;
 	double autumn_cost;
 	
 	for (int i = remainer_pop; i < winter_pop; ++i)	
@@ -691,6 +711,10 @@ void write_autumn_stats(ofstream &DataFile)
 		mean_signal_timing += calendar;
 		ss_signal_timing += calendar * calendar;
 		
+		fatness = WinterPop[i].signal_resources;
+		mean_signal_resources += fatness;
+		ss_signal_resources += fatness * fatness;
+		
 		autumn_cost = WinterPop[i].cost;
 		mean_autumn_cost += autumn_cost;
 		ss_autumn_cost += autumn_cost * autumn_cost;
@@ -706,6 +730,8 @@ void write_autumn_stats(ofstream &DataFile)
 		ss_resources /= autumn_migrant_pop;
 		mean_signal_timing /= autumn_migrant_pop;
 		ss_signal_timing /= autumn_migrant_pop;
+		mean_signal_resources /= autumn_migrant_pop;
+		ss_signal_resources /= autumn_migrant_pop;
 		mean_autumn_cost /= autumn_migrant_pop;
 		ss_autumn_cost /= autumn_migrant_pop;
     }
@@ -717,6 +743,8 @@ void write_autumn_stats(ofstream &DataFile)
         << autumn_migrant_pop << ";"
 		<< autumn_migrants_resource_cap << ";"
 		<< autumn_nonmigrant_pop << ";"
+		<< mean_signal_resources << ";"
+		<< (ss_signal_resources - mean_signal_resources * mean_signal_resources) << ";"
 		<< mean_signal_timing << ";"
 		<< (ss_signal_timing - mean_signal_timing * mean_signal_timing) << ";"
 		<< mean_latency << ";"
@@ -1599,6 +1627,9 @@ int main(int argc, char **argv)
 		ss_spring_staging_size = 0.0;
 		mean_spring_cost = 0.0;
 		ss_spring_cost = 0.0;
+		mean_signal_resources = 0.0;
+		var_signal_resources = 0.0;
+		ss_signal_resources = 0.0;
 		mean_cost = 0.0;
 		ss_cost = 0.0;
 		staging_pop = 0;
@@ -1742,6 +1773,8 @@ int main(int argc, char **argv)
 		autumn_nonmigrant_pop = 0.0;
 		ss_autumn_migrant_pop = 0.0;
 		ss_autumn_staging_size = 0.0;
+		mean_autumn_cost = 0.0;
+		ss_autumn_cost = 0.0;
 		mean_autumn_cost = 0.0;
 		ss_autumn_cost = 0.0;
 		mean_resources = 0.0;
