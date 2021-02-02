@@ -30,8 +30,8 @@ sdmu_phi = [0.05]
     
 # migration cost parameters
 max_migration_cost = 20  # Default is 20 
-min_migration_cost = [10]
-migration_cost_power = [3, 2, 1, 0, -1, -2, -3]
+min_migration_cost = [20, 18, 16, 14, 12, 10, 8, 6, 4, 2]
+migration_cost_power = [2] #[3, 2, 1, 0, -1, -2, -3]
 capacity = 8
 
 # reproductive cost parameters
