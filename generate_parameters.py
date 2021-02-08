@@ -89,7 +89,7 @@ for rep_i in range(0, number_replicates):
                                                                                 + str(init_phi_b_i) + " "
                                                                                 + str(init_theta_a_i) + " "
                                                                                 + str(init_theta_b_i) + " "
-                                                                                + str(pmort_i) + " "
+                                                                                + str(pmort_i) + " " # 5
                                                                                 + str(pgood_init) + " "
                                                                                 + str(t_good_ends) + " "
                                                                                 + str(rgood_i) + " "
@@ -99,17 +99,17 @@ for rep_i in range(0, number_replicates):
                                                                                 + str(resource_starvation_threshold) + " "
                                                                                 + str(mu_theta) + " "
                                                                                 + str(mu_phi) + " "
-                                                                                + str(sdmu_theta) + " "
+                                                                                + str(sdmu_theta) + " "  # 15
                                                                                 + str(sdmu_phi_i) + " "
                                                                                 + str(max_migration_cost) + " "
                                                                                 + str(min_migration_cost_i) + " "
                                                                                 + str(migration_cost_power_i) + " "
-                                                                                + str(twinter) + " "
+                                                                                + str(twinter) + " "  # 20
                                                                                 + str(tspring) + " " 
                                                                                 + str(resource_max_i) + " "
                                                                                 + str(min_offspring_cost_i) + " "
                                                                                 + str(offspring_cost_magnifier_i) + " "
-                                                                                + str(carryover_proportion_i) + " "
+                                                                                + str(carryover_proportion_i) + " " 
                                                                                 + str(relative_mortality_risk_of_migration_i) + " "
-                                                                                + str(capacity) + " "
+                                                                                + str(capacity) + " " # 27
                                                                                 + backgroundstr)
