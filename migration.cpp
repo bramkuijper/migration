@@ -384,32 +384,31 @@ void write_dist_data_headers(ofstream &DataFile)
 // list of the data headers 
 void write_data_headers(ofstream &DataFile)
 {
-    DataFile << "generation;"
-				
-		// SPRING MIGRATION STATS (n = 23):
-		<< "spring_pop;"
-		<< "mean_spring_staging_size;"
-        << "var_spring_staging_size;"
-        << "spring_migrant_pop;"
-		<< "spring_migrants_resource_cap;"
-		<< "spring_nonmigrant_pop;"
-		<< "mean_spring_signal_resources;"
-		<< "var_spring_signal_resources;"
-		<< "mean_spring_signal_timing;"
-		<< "var_spring_signal_timing;"
+    // SPRING MIGRATION STATS (n = 24):
+	DataFile << "generation;"  // 1		
+		<< "spring_pop;"  // 2
+		<< "mean_spring_staging_size;"  // 3
+        << "var_spring_staging_size;"  // 4
+        << "spring_migrant_pop;"  // 5
+		<< "spring_migrants_resource_cap;"  // 6
+		<< "spring_nonmigrant_pop;"  // 7
+		<< "mean_spring_signal_resources;"  // 8
+		<< "var_spring_signal_resources;"  // 9
+		<< "mean_spring_signal_timing;"  // 10
+		<< "var_spring_signal_timing;"  // 11
 		<< "mean_spring_latency;"
-		<< "var_spring_latency;"
+		<< "var_spring_latency;"  // 13
 		<< "mean_spring_departure_timing;"
-		<< "var_spring_departure_timing;"
-		<< "mean_spring_departure_resources;"
-		<< "var_spring_departure_resources;"
+		<< "var_spring_departure_timing;"  // 15
+		<< "mean_spring_departure_resources;"  // 16
+		<< "var_spring_departure_resources;"  // 17
         << "n_spring_flocks;"
         << "population_mean_spring_flock_size;"
-        << "population_var_spring_flock_size;"
-	    << "individual_mean_spring_flock_size;"
-	    << "individual_var_spring_flock_size;"
-		<< "mean_spring_cost;"
-		<< "var_spring_cost;"
+        << "population_var_spring_flock_size;"  // 20
+	    << "individual_mean_spring_flock_size;"  //21
+	    << "individual_var_spring_flock_size;"  // 22
+		<< "mean_spring_cost;"  // 23
+		<< "var_spring_cost;"  // 24
 		
 		// SUMMER STATS (10):	
 		<< "spring_migrant_mortality_rate;"
@@ -678,30 +677,30 @@ void write_spring_stats(ofstream &DataFile, int generation)
 
     // write statistics to a file
     DataFile
-        << generation << ";"
+        << generation << ";"  // 1
 		<< spring_pop_start << ";"
-		<< mean_spring_staging_size << ";" 
+		<< mean_spring_staging_size << ";"  // 3
 		<< var_spring_staging_size << ";"
-		<< spring_migrant_pop << ";"
+		<< spring_migrant_pop << ";"  // 5
 		<< spring_migrants_resource_cap << ";"
-		<< spring_nonmigrant_pop << ";"
+		<< spring_nonmigrant_pop << ";"  // 7
 		<< mean_signal_resources << ";"
-		<< (ss_signal_resources - mean_signal_resources * mean_signal_resources) << ";"
+		<< (ss_signal_resources - mean_signal_resources * mean_signal_resources) << ";"  // 9
 		<< mean_signal_timing << ";"
-		<< (ss_signal_timing - mean_signal_timing * mean_signal_timing) << ";"
+		<< (ss_signal_timing - mean_signal_timing * mean_signal_timing) << ";"  // 11
 		<< mean_latency << ";"
-		<< (ss_latency - mean_latency * mean_latency) << ";"
+		<< (ss_latency - mean_latency * mean_latency) << ";"  // 13
 		<< mean_departure_timing << ";"
-		<< (ss_departure_timing - mean_departure_timing * mean_departure_timing) << ";"
+		<< (ss_departure_timing - mean_departure_timing * mean_departure_timing) << ";"  // 15
 		<< mean_resources << ";"
-		<< (ss_resources - mean_resources * mean_resources) << ";"
+		<< (ss_resources - mean_resources * mean_resources) << ";"  // 17
 		<< n_spring_flocks << ";"
-		<< population_mean_spring_flock_size << ";" 
+		<< population_mean_spring_flock_size << ";"  // 19
 		<< population_var_spring_flock_size << ";"
-		<< individual_mean_spring_flock_size << ";" 
+		<< individual_mean_spring_flock_size << ";"  // 21
 		<< (individual_ss_spring_flock_size - individual_mean_spring_flock_size * individual_mean_spring_flock_size) << ";"	
-		<< mean_spring_cost << ";"
-		<< (ss_spring_cost - mean_spring_cost * mean_spring_cost) << ";";
+		<< mean_spring_cost << ";"  // 23
+		<< (ss_spring_cost - mean_spring_cost * mean_spring_cost) << ";";  // 24
 
 }  // ENDS: write data for spring migrants
 
@@ -765,6 +764,8 @@ void write_autumn_stats(ofstream &DataFile)
 		ss_signal_timing /= autumn_migrant_pop;
 		mean_signal_resources /= autumn_migrant_pop;
 		ss_signal_resources /= autumn_migrant_pop;
+		individual_mean_autumn_flock_size /= summer_pop;
+		individual_ss_autumn_flock_size /= summer_pop;
 		mean_autumn_cost /= autumn_migrant_pop;
 		ss_autumn_cost /= autumn_migrant_pop;
     }
