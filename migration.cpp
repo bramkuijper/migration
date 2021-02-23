@@ -1424,11 +1424,11 @@ void postbreeding_dynamics(int t)
         // continue to forage at the staging site
         if (uniform(rng_r) < pgood) // good resource chosen
         {
-            StagingPool[i].resources += rgood;
+            StagingPool[i].resources += rgood * preparation_penalty;
         }
         else
         {
-            StagingPool[i].resources += rbad;
+            StagingPool[i].resources += rbad * preparation_penalty;
         }
     
 	StagingPool[i].resources = min(StagingPool[i].resources, resource_max);
