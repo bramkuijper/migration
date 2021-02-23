@@ -33,10 +33,10 @@ uniform_real_distribution<> uniform(0.0,1.0);
 // function
 
 // number of individuals in population
-const int N = 2000;  // DEAFULT: 2000
+const int N = 100;  // DEAFULT: 2000
 
 // number of generations
-long int number_generations = 1000000;  // DEFAULT: 1000000
+long int number_generations = 5000;  // DEFAULT: 1000000
 
 // sampling interval
 int skip = ceil(number_generations / 500);
@@ -699,7 +699,7 @@ void write_spring_stats(ofstream &DataFile, int generation)
 		<< population_mean_spring_flock_size << ";" 
 		<< population_var_spring_flock_size << ";"
 		<< individual_mean_spring_flock_size << ";" 
-		<< individual_var_spring_flock_size << ";"	
+		<< (individual_ss_spring_flock_size - individual_mean_spring_flock_size * individual_mean_spring_flock_size) << ";"	
 		<< mean_spring_cost << ";"
 		<< (ss_spring_cost - mean_spring_cost * mean_spring_cost) << ";";
 
@@ -789,6 +789,8 @@ void write_autumn_stats(ofstream &DataFile)
 		<< n_autumn_flocks << ";"
 		<< population_mean_autumn_flock_size << ";" 
 		<< population_var_autumn_flock_size << ";"
+		<< individual_mean_autumn_flock_size << ";" 
+		<< individual_var_autumn_flock_size << ";"
 		<< mean_autumn_cost << ";"
 		<< (ss_autumn_cost - mean_autumn_cost * mean_autumn_cost) << ";";
 // ENDS: write data both for autumn migrants
