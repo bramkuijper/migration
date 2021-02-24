@@ -83,7 +83,7 @@ double sdmu_phi = 0.0;
 double migration_cost_power = 0.0;
 double max_migration_cost = 0.0;
 double min_migration_cost = 0.0;
-int capacity = 0.0;  // group size at which minimum migration cost is reached
+double capacity = 0.0;  // group size at which minimum migration cost is reached. Made this a double rather than an integer so as to avoid problems with division in the migration cost function.
 double cost = 0.0;
 
 // reproductive cost function
@@ -265,7 +265,7 @@ void init_arguments(int argc, char **argv)
 	offspring_cost_magnifier = atof(argv[24]);
 	carryover_proportion = atof(argv[25]);
 	relative_mortality_risk_of_migration = atof(argv[26]);
-	capacity = atoi(argv[27]);
+	capacity = atof(argv[27]);
 		
     // some bounds checking on parameters
     // probability of encountering a good environment
@@ -866,7 +866,7 @@ double migration_cost(int NFlock)
 	}
 	else{
 		//cost = min_migration_cost + (capacity - NFlock)*pow(capacity, -1);	
-		cost = min_migration_cost + ((max_migration_cost - min_migration_cost) * pow(1 - ((NFlock-1)*pow(capacity-1, -1)), exp(migration_cost_power)));
+		cost = min_migration_cost + ((max_migration_cost - min_migration_cost) * pow(1 - ((NFlock-1) / (capacity-1)), exp(migration_cost_power)));
 	}
 	return(cost);
 }  // ENDS: migration cost function
