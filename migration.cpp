@@ -33,14 +33,14 @@ uniform_real_distribution<> uniform(0.0,1.0);
 // function
 
 // number of individuals in population
-const int N = 100;  // DEAFULT: 2000
+const int N = 200;  // DEAFULT: 2000
 
 // number of generations
-long int number_generations = 5000;  // DEFAULT: 1000000
+long int number_generations = 100;  // DEFAULT: 1000000
 
 // sampling interval
-int skip = ceil(number_generations / 500);
-//int skip = 5;
+//int skip = ceil(number_generations / 500);
+int skip = 5;
 
 
 // initial values for phi (social dependency) and theta (resource dependency)
@@ -201,7 +201,7 @@ struct Individual
 	// individual departure timing
 	int timing;
 	
-	// size of flock individual joined
+	// size of flock individual was in
 	int flock_size;
 	
 	// resource cost of migration for individual
@@ -416,7 +416,7 @@ void write_data_headers(ofstream &DataFile)
 	    << "breeder_pop;"
 		<< "nonreproductive_pop;"
         << "offspring_pop;"
-		<< "mean_reproductive_cost_breederpop;"
+		<< "mean_reproductive_cost_breederpop;"  // 6
 		<< "var_reproductive_cost_breederpop;"
 		<< "mean_fecundity_breederpop;"
 		<< "var_fecundity_breederpop;"
@@ -609,6 +609,7 @@ void write_summer_stats(ofstream &DataFile)
 
 }  // ENDS: write summer stats
 
+
 void write_spring_stats(ofstream &DataFile, int generation)
 {
 	mean_latency = 0.0;
@@ -764,8 +765,8 @@ void write_autumn_stats(ofstream &DataFile)
 		ss_signal_timing /= autumn_migrant_pop;
 		mean_signal_resources /= autumn_migrant_pop;
 		ss_signal_resources /= autumn_migrant_pop;
-		individual_mean_autumn_flock_size /= summer_pop;
-		individual_ss_autumn_flock_size /= summer_pop;
+		individual_mean_autumn_flock_size /= autumn_migrant_pop;
+		individual_ss_autumn_flock_size /= autumn_migrant_pop;
 		mean_autumn_cost /= autumn_migrant_pop;
 		ss_autumn_cost /= autumn_migrant_pop;
     }
@@ -791,7 +792,7 @@ void write_autumn_stats(ofstream &DataFile)
 		<< population_mean_autumn_flock_size << ";" 
 		<< population_var_autumn_flock_size << ";"
 		<< individual_mean_autumn_flock_size << ";" 
-		<< individual_var_autumn_flock_size << ";"
+		<< (individual_ss_autumn_flock_size - individual_mean_autumn_flock_size * individual_mean_autumn_flock_size) << ";"
 		<< mean_autumn_cost << ";"
 		<< (ss_autumn_cost - mean_autumn_cost * mean_autumn_cost) << ";";
 // ENDS: write data both for autumn migrants
@@ -859,12 +860,13 @@ double migration_cost(int NFlock)
 	// Flock size of 1 (i.e., travelling alone) yields the maximum cost
 	
 	// 17 Nov 2020: Revising the cost function to allow it to take an accelerating / decelarating function
-	if (NFlock <= capacity)
+	if (NFlock >= capacity)
 	{
-		cost = min_migration_cost + ((max_migration_cost - min_migration_cost) * pow(1 - (NFlock-1)/(capacity-1), exp(migration_cost_power)));
+		cost = min_migration_cost;
 	}
 	else{
-		cost = min_migration_cost;
+		//cost = min_migration_cost + (capacity - NFlock)*pow(capacity, -1);	
+		cost = min_migration_cost + ((max_migration_cost - min_migration_cost) * pow(1 - ((NFlock-1)*pow(capacity-1, -1)), exp(migration_cost_power)));
 	}
 	return(cost);
 }  // ENDS: migration cost function
@@ -1205,11 +1207,11 @@ void spring_dynamics(int t)
 		
     {		
 		// Resource cost of migration to the individual
+		SummerPop[i].flock_size = NFlock;
 		SummerPop[i].cost = migration_cost(NFlock);
 		SummerPop[i].resources -= migration_cost(NFlock);
 		SummerPop[i].resources = min(SummerPop[i].resources, resource_max);
 		SummerPop[i].fecundity = 0;
-		SummerPop[i].flock_size = NFlock;
 		
     } // ENDS: updating resources of migrants
 
@@ -1621,7 +1623,7 @@ void postbreeding_dynamics(int t)
     {	
         // resources are reduced due to migration,
 		WinterPop[i].cost = migration_cost(NFlock);
-		WinterPop[i].resources = WinterPop[i].resources - migration_cost(NFlock);
+		WinterPop[i].resources -= migration_cost(NFlock);
 		WinterPop[i].resources = min(WinterPop[i].resources, resource_max);  // Individual resource values cannot exceed resource max
 		WinterPop[i].resources *= carryover_proportion;
 		WinterPop[i].flock_size = NFlock;
