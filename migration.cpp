@@ -266,7 +266,7 @@ void init_arguments(int argc, char **argv)
 	offspring_cost_magnifier = atof(argv[24]);
 	carryover_proportion = atof(argv[25]);
 	relative_mortality_risk_of_migration = atof(argv[26]);
-	capacity = atof(argv[27]);
+	capacity = atof(argv[27 ]);
 		
     // some bounds checking on parameters
     // probability of encountering a good environment
@@ -352,7 +352,8 @@ void write_dist(ofstream &DataFile,
 	        << SummerPop[summer_idx].theta_b[0]*0.5 + SummerPop[summer_idx].theta_b[1]*0.5 << ";"
 	        << SummerPop[summer_idx].phi_a[0]*0.5 + SummerPop[summer_idx].phi_a[1]*0.5 << ";"
 	        << SummerPop[summer_idx].phi_b[0]*0.5 + SummerPop[summer_idx].phi_b[1]*0.5 << ";"
-            << SummerPop[summer_idx].age << ";" << std::endl;
+            << SummerPop[summer_idx].age << ";"
+			<< SummerPop[summer_idx].patch_quality << ";" << std::endl;
 	    }
 } // ENDS: ()
 
@@ -373,7 +374,8 @@ void write_dist_data_headers(ofstream &DataFile)
         << "theta_b;"
         << "phi_a;"
         << "phi_b;"
-        << "age;" << std::endl;
+        << "age;"
+		<< "patch_quality;" << std::endl;
 }
 
 // list of the data headers 

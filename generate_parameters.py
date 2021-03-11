@@ -13,7 +13,7 @@ tspring = 10000  # twinter in manuscript
 pmort = [0.1]
 pgood = 0.5
 t_good_ends = 100000000
-patch_consistency_factor = [0.5, 1, 1.5, 2]  # Varies from 0 (switching patch type EVERY timestep, so uniformity in resource value) and upwards. Above 3 (equating to a switch probability of 0.001) the distribution of resource values starts to become bimodal.
+patch_consistency_factor = [0.5, 1, 1.5, 2, 2.5, 3]  # Varies from 0 (switching patch type EVERY timestep, so uniformity in resource value) and upwards. Above 3 (equating to a switch probability of 0.001) the distribution of resource values starts to become bimodal.
 
 rgood = [ 0.04 ]
 rbad = [ 0.02 ]
@@ -31,7 +31,7 @@ sdmu_phi = [0.05]
     
 # migration cost parameters
 max_migration_cost = 20  # Default is 20 
-min_migration_cost = [20, 18, 16, 14, 12, 10, 8, 6, 4, 2]
+min_migration_cost = [10] # [20, 18, 16, 14, 12, 10, 8, 6, 4, 2]
 migration_cost_power = [2] #[3, 2, 1, 0, -1, -2, -3]
 capacity = 8
 
