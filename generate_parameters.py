@@ -12,7 +12,6 @@ tspring = 10000  # twinter in manuscript
 
 pmort = [0.1]
 pgood = 0.5
-t_good_ends = 100000000
 patch_consistency_factor = [0.5, 1, 1.5, 2, 2.5, 3]  # Varies from 0 (switching patch type EVERY timestep, so uniformity in resource value) and upwards. Above 3 (equating to a switch probability of 0.001) the distribution of resource values starts to become bimodal.
 
 rgood = [ 0.04 ]
