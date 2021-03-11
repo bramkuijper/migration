@@ -92,8 +92,8 @@ for rep_i in range(0, number_replicates):
                                                                                     + str(init_theta_a_i) + " "
                                                                                     + str(init_theta_b_i) + " "
                                                                                     + str(pmort_i) + " " #5
-                                                                                    + str(pgood_init) + " "
-                                                                                    + str(ptch_consistency_factor_i) + " "
+                                                                                    + str(pgood) + " "
+                                                                                    + str(patch_consistency_factor_i) + " "
                                                                                     + str(rgood_i) + " "
                                                                                     + str(rbad_i) + " "  #9
                                                                                     + str(preparation_penalty_i) + " "  #10
