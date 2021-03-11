@@ -58,7 +58,7 @@ double relative_mortality_risk_of_migration = 0.0;
 double pgood_init = 0.0;
 
 // 
-double pswitch = 0.0;
+double patch_consistency_factor = 0.0;
 
 // the time point at which 
 // the probability of encountering a good environment becomes 0
@@ -250,7 +250,7 @@ void init_arguments(int argc, char **argv)
     init_theta_b = atof(argv[4]);  // Slope of the reaction norm for resource-dependent entry to staging pool
     pmort = atof(argv[5]);
     pgood_init = atof(argv[6]);
-	pswitch = atof(argv[7]);
+	patch_consistency_factor = atof(argv[7]);
     t_good_ends = atoi(argv[8]);
     rgood_init = atof(argv[9]);
     rbad_init = atof(argv[10]);
@@ -1016,7 +1016,7 @@ void winter_dynamics(int t)
 		}
 		
 		// possible change of foraging success in next timestep:	
-		if (uniform(rng_r) < pswitch)
+		if (uniform(rng_r) < 1/pow(10, patch_consistency_factor))
         {
             WinterPop[i].patch_quality = 1 - WinterPop[i].patch_quality;  // switch of patch quality (good to poor; poor to good)
         }
@@ -1048,13 +1048,19 @@ void spring_dynamics(int t)
     // and who have yet to decide to go to the staging site
     for (int i = 0; i < winter_pop; ++i)
     {		
-		if (uniform(rng_r) < pgood) // good resource chosen
+		if (WinterPop[i].patch_quality == 1)
+		{
+			WinterPop[i].resources += rgood;
+		}
+		else
+		{
+			WinterPop[i].resources += rbad;
+		}
+		
+		// possible change of foraging success in next timestep:	
+		if (uniform(rng_r) < 1/pow(10, patch_consistency_factor))
         {
-            WinterPop[i].resources += rgood;
-        }
-        else
-        {
-            WinterPop[i].resources += rbad;
+            WinterPop[i].patch_quality = 1 - WinterPop[i].patch_quality;  // switch of patch quality (good to poor; poor to good)
         }
 		
 	WinterPop[i].resources = min(WinterPop[i].resources, resource_max);
@@ -1068,13 +1074,19 @@ void spring_dynamics(int t)
     { 
         // indivuals who are already at the staging site
         // continue to forage at the staging site
-        if (uniform(rng_r) < pgood) // good resource chosen
+		if (StagingPool[i].patch_quality == 1)
+		{
+			StagingPool[i].resources += rgood * preparation_penalty;
+		}
+		else
+		{
+			StagingPool[i].resources += rbad * preparation_penalty;
+		}
+		
+		// possible change of foraging success in next timestep:	
+		if (uniform(rng_r) < 1/pow(10, patch_consistency_factor))
         {
-            StagingPool[i].resources += rgood * preparation_penalty;
-        }
-        else
-        {
-            StagingPool[i].resources += rbad * preparation_penalty;
+            StagingPool[i].patch_quality = 1 - StagingPool[i].patch_quality;  // switch of patch quality (good to poor; poor to good)
         }
 	
 	StagingPool[i].resources = min(StagingPool[i].resources, resource_max);	
@@ -1095,10 +1107,6 @@ void spring_dynamics(int t)
 		// reaction norm dependent on resources
         // resulting in signaling a willingness to disperse
         // => go to the staging level
-		
-		// 	LINEAR MODEL
-        // psignal = 0.5 * (WinterPop[i].theta_a[0] + WinterPop[i].theta_a[1]) 
-		// + 0.5 * (WinterPop[i].theta_b[0] + WinterPop[i].theta_b[1]) * WinterPop[i].resources; // resource_max;
 		
 		// SIGMOIDAL MODEL
 		// of the form psignal = (1 + e^-theta_b.(resources - theta_a))^-1
@@ -1160,10 +1168,6 @@ void spring_dynamics(int t)
         // for now, individuals leave dependent on the current amount of individuals
         // within the staging pool
         
-		// LINEAR MODEL		
-		//pdisperse = 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1])
-        //   + 0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) * (double) staging_pop_start / (staging_pop_start + winter_pop);  // TODO Does the '(double)' need to be here?
-
 		// SIGMOIDAL MODEL
 		pdisperse = pow(1 + exp(-0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) 
 			* (((double) staging_pop_start / (staging_pop_start + winter_pop)) - 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1]))), -1);
@@ -1291,7 +1295,7 @@ void create_offspring(
     offspring.phi_b[0] = mutation(mother.phi_b[allele_sample(rng_r)], mu_phi, sdmu_phi);
 
     offspring.phi_b[1] = mutation(father.phi_b[allele_sample(rng_r)], mu_phi, sdmu_phi);
-
+	
 }  // ENDS OFFSPRING PRODUCTION
 
 
@@ -1446,6 +1450,31 @@ void summer_reproduction(ofstream &DataFile)
 	
 	postbreeding_pop = summer_pop;
 	assert(summer_pop + winter_pop <= N);
+	
+	// Randomly assign all individuals an initial habitat quality for postbreeding feeding
+	
+	// determine probability of encountering a good resource:
+    //  if the time is later than t_good_ends
+    //  one can only encounter bad resources, hence p_good = 0
+    double pgood = t < t_good_ends ? pgood_init : 0;
+
+    // set lower boundary to the probability
+    if (pgood <= 0)
+    {
+        pgood = 0;
+    }
+	
+	for (int i = 0; i < summer_pop; ++i)
+	    {			
+			if (uniform(rng_r) < pgood)
+			{
+				SummerPop[i].patch_quality = 1;  // Will secure high quality foraging
+			}
+			else
+			{
+				SummerPop[i].patch_quality = 0;  // Will access low quality foraging
+			}
+	}
 		
 } // ENDS SUMMER REPRODUCTION
 
@@ -1469,16 +1498,22 @@ void postbreeding_dynamics(int t)
     // and who have yet to decide to go to the staging site
     for (int i = 0; i < summer_pop; ++i)
     {
-		if (uniform(rng_r) < pgood) // good resource chosen
+		if (SummerPop[i].patch_quality == 1)
+		{
+			SummerPop[i].resources += rgood;
+		}
+		else
+		{
+			SummerPop[i].resources += rbad;
+		}
+		
+		// possible change of foraging success in next timestep:	
+		if (uniform(rng_r) < 1/pow(10, patch_consistency_factor))
         {
-            SummerPop[i].resources += rgood;
+            SummerPop[i].patch_quality = 1 - SummerPop[i].patch_quality;  // switch of patch quality (good to poor; poor to good)
         }
-        else
-        {
-            SummerPop[i].resources += rbad;
-        }
-    
-        SummerPop[i].resources = min(SummerPop[i].resources, resource_max);
+		
+		SummerPop[i].resources = min(SummerPop[i].resources, resource_max);
 	
     } // ok resource dynamic done
 
@@ -1488,13 +1523,19 @@ void postbreeding_dynamics(int t)
     { 
         // indivuals who are already at the staging site
         // continue to forage at the staging site
-        if (uniform(rng_r) < pgood) // good resource chosen
+		if (StagingPool[i].patch_quality == 1)
+		{
+			StagingPool[i].resources += rgood * preparation_penalty;
+		}
+		else
+		{
+			StagingPool[i].resources += rbad * preparation_penalty;
+		}
+		
+		// possible change of foraging success in next timestep:	
+		if (uniform(rng_r) < 1/pow(10, patch_consistency_factor))
         {
-            StagingPool[i].resources += rgood * preparation_penalty;
-        }
-        else
-        {
-            StagingPool[i].resources += rbad * preparation_penalty;
+            StagingPool[i].patch_quality = 1 - StagingPool[i].patch_quality;  // switch of patch quality (good to poor; poor to good)
         }
     
 	StagingPool[i].resources = min(StagingPool[i].resources, resource_max);
