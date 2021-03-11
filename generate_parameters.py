@@ -11,9 +11,9 @@ twinter = 0
 tspring = 10000  # twinter in manuscript
 
 pmort = [0.1]
-pgood_init = 0.5 # Deleted 0.5 option on 27 November 2019
+pgood = 0.5
 t_good_ends = 100000000
-switch_rate_factor = [0.5, 1, 1.5, 2]  # Varies from 0 (switching patch type EVERY timestep, so uniformity in resource value) and upwards. Above 3 (equating to a switch probability of 0.001) the distribution of resource values starts to become bimodal.
+patch_consistency_factor = [0.5, 1, 1.5, 2]  # Varies from 0 (switching patch type EVERY timestep, so uniformity in resource value) and upwards. Above 3 (equating to a switch probability of 0.001) the distribution of resource values starts to become bimodal.
 
 rgood = [ 0.04 ]
 rbad = [ 0.02 ]
@@ -65,7 +65,7 @@ for rep_i in range(0, number_replicates):
             for init_theta_a_i in init_theta_a:
                 for init_theta_b_i in init_theta_b:
                     for pmort_i in pmort:
-                        for pswitch_i in pswitch:
+                        for patch_consistency_factor_i in patch_consistency_factor:
                             for rgood_i in rgood:
                                 for rbad_i in rbad:
                                     for preparation_penalty_i in preparation_penalty:
@@ -93,26 +93,25 @@ for rep_i in range(0, number_replicates):
                                                                                     + str(init_theta_b_i) + " "
                                                                                     + str(pmort_i) + " " #5
                                                                                     + str(pgood_init) + " "
-                                                                                    + str(pswitch_i) + " "
-                                                                                    + str(t_good_ends) + " "
+                                                                                    + str(ptch_consistency_factor_i) + " "
                                                                                     + str(rgood_i) + " "
-                                                                                    + str(rbad_i) + " "  #10
-                                                                                    + str(preparation_penalty_i) + " "
+                                                                                    + str(rbad_i) + " "  #9
+                                                                                    + str(preparation_penalty_i) + " "  #10
                                                                                     + str(resource_reproduction_threshold_i) + " "
                                                                                     + str(resource_starvation_threshold) + " "
                                                                                     + str(mu_theta) + " "
-                                                                                    + str(mu_phi) + " "  #15
-                                                                                    + str(sdmu_theta) + " "  #16
-                                                                                    + str(sdmu_phi_i) + " "
+                                                                                    + str(mu_phi) + " "  #14
+                                                                                    + str(sdmu_theta) + " "  #15
+                                                                                    + str(sdmu_phi_i) + " "  #16
                                                                                     + str(max_migration_cost) + " "
                                                                                     + str(min_migration_cost_i) + " "
-                                                                                    + str(migration_cost_power_i) + " "  #20
-                                                                                    + str(twinter) + " "  #21
+                                                                                    + str(migration_cost_power_i) + " "  #19
+                                                                                    + str(twinter) + " "  #20
                                                                                     + str(tspring) + " " 
                                                                                     + str(resource_max_i) + " "
                                                                                     + str(min_offspring_cost_i) + " "
-                                                                                    + str(offspring_cost_magnifier_i) + " "  #25
-                                                                                    + str(carryover_proportion_i) + " " 
+                                                                                    + str(offspring_cost_magnifier_i) + " "  #24
+                                                                                    + str(carryover_proportion_i) + " "  #25
                                                                                     + str(relative_mortality_risk_of_migration_i) + " "
-                                                                                    + str(capacity) + " " #28
+                                                                                    + str(capacity) + " " #27
                                                                                     + backgroundstr)

@@ -55,14 +55,10 @@ double pmort = 0.0;
 double relative_mortality_risk_of_migration = 0.0;
 
 // initial probability per season to encounter a good resource patch
-double pgood_init = 0.0;
+double pgood = 0.0;
 
 // 
 double patch_consistency_factor = 0.0;
-
-// the time point at which 
-// the probability of encountering a good environment becomes 0
-int t_good_ends = 0.0;
 
 // how much resource individuals obtain on a good vs bad patch
 double rgood_init = 0.0;
@@ -249,44 +245,38 @@ void init_arguments(int argc, char **argv)
     init_theta_a = atof(argv[3]);  // // Elevation of the reaction norm for resource-dependent entry to staging pool
     init_theta_b = atof(argv[4]);  // Slope of the reaction norm for resource-dependent entry to staging pool
     pmort = atof(argv[5]);
-    pgood_init = atof(argv[6]);
+    pgood = atof(argv[6]);
 	patch_consistency_factor = atof(argv[7]);
-    t_good_ends = atoi(argv[8]);
-    rgood_init = atof(argv[9]);
-    rbad_init = atof(argv[10]);
-	preparation_penalty = atof(argv[11]);
-    resource_reproduction_threshold = atof(argv[12]);
-    resource_starvation_threshold = atof(argv[13]);
-    mu_theta = atof(argv[14]);
-    mu_phi = atof(argv[15]);
-    sdmu_theta = atof(argv[16]);
-    sdmu_phi = atof(argv[17]);
-    max_migration_cost = atof(argv[18]);
-	min_migration_cost = atof(argv[19]);
-    migration_cost_power = atof(argv[20]);
-	twinter = atoi(argv[21]);
-    tspring = atoi(argv[22]);
-	resource_max = atof(argv[23]);
-	min_offspring_cost = atof(argv[24]);
-	offspring_cost_magnifier = atof(argv[25]);
-	carryover_proportion = atof(argv[26]);
-	relative_mortality_risk_of_migration = atof(argv[27]);
-	capacity = atof(argv[28]);
+    rgood_init = atof(argv[8]);
+    rbad_init = atof(argv[9]);
+	preparation_penalty = atof(argv[10]);
+    resource_reproduction_threshold = atof(argv[11]);
+    resource_starvation_threshold = atof(argv[12]);
+    mu_theta = atof(argv[13]);
+    mu_phi = atof(argv[14]);
+    sdmu_theta = atof(argv[15]);
+    sdmu_phi = atof(argv[16]);
+    max_migration_cost = atof(argv[17]);
+	min_migration_cost = atof(argv[18]);
+    migration_cost_power = atof(argv[19]);
+	twinter = atoi(argv[20]);
+    tspring = atoi(argv[21]);
+	resource_max = atof(argv[22]);
+	min_offspring_cost = atof(argv[23]);
+	offspring_cost_magnifier = atof(argv[24]);
+	carryover_proportion = atof(argv[25]);
+	relative_mortality_risk_of_migration = atof(argv[26]);
+	capacity = atof(argv[27]);
 		
     // some bounds checking on parameters
     // probability of encountering a good environment
     // initially should be 0 <= pgood <= 1
-    assert(pgood_init >= 0.0);
-    assert(pgood_init <= 1.0);
+    assert(pgood >= 0.0);
+    assert(pgood <= 1.0);
     
     //max number of days per season > 0
     assert(tspring > 0);
 	assert(twinter >= 0);
-
-    // probability that encountering good resource should be
-    // set to 0 after t_good_ends timesteps
-    assert(t_good_ends >= 0);
-    // assert(t_good_ends <= tspring);
 
     // resource increments
     assert(rgood_init > 0);
@@ -309,8 +299,7 @@ void write_parameters(ofstream &DataFile)  // at top of outputted file
             << "init_phi_a;" << init_phi_a << endl
             << "init_phi_b;" << init_phi_b << endl
             << "pmort;" << pmort << endl
-            << "pgood_init;" << pgood_init << endl
-            << "t_good_ends;" << t_good_ends << endl
+            << "pgood;" << pgood << endl
             << "rgood_init;" << rgood_init << endl
             << "rbad_init;" << rbad_init << endl
 			<< "preparation_penalty;" << preparation_penalty << endl
@@ -848,7 +837,7 @@ void init_population()
 		
 		WinterPop[i].fecundity = 0; 
 		
-		if (uniform(rng_r) < pgood_init)
+		if (uniform(rng_r) < pgood)
 		{
 			WinterPop[i].patch_quality = 1;  // Will secure high quality foraging
 		}
@@ -1039,12 +1028,7 @@ void spring_dynamics(int t)
     // individuals can continue to accumulate resources
     // individuals make dispersal decisions
 	
-	// determine probability of encountering a good resource:
-    //  if the time is later than t_good_ends
-    //  one can only encounter bad resources, hence p_good = 0
-    double pgood = t < t_good_ends ? pgood_init : 0;
-   
-    // foraging of individuals who are just at the wintering site
+	// foraging of individuals who are just at the wintering site
     // and who have yet to decide to go to the staging site
     for (int i = 0; i < winter_pop; ++i)
     {		
@@ -1453,17 +1437,7 @@ void summer_reproduction(ofstream &DataFile)
 	
 	// Randomly assign all individuals an initial habitat quality for postbreeding feeding
 	
-	// determine probability of encountering a good resource:
-    //  if the time is later than t_good_ends
-    //  one can only encounter bad resources, hence p_good = 0
-    double pgood = t < t_good_ends ? pgood_init : 0;
-
-    // set lower boundary to the probability
-    if (pgood <= 0)
-    {
-        pgood = 0;
-    }
-	
+   // set lower boundary to the probability	
 	for (int i = 0; i < summer_pop; ++i)
 	    {			
 			if (uniform(rng_r) < pgood)
@@ -1483,17 +1457,6 @@ void summer_reproduction(ofstream &DataFile)
 // & fly back
 void postbreeding_dynamics(int t)
 {
-	// determine probability of encountering a good resource:
-    //  if the time is later than t_good_ends
-    //  one can only encounter bad resources, hence p_good = 0
-    double pgood = t < t_good_ends ? pgood_init : 0;
-
-    // set lower boundary to the probability
-    if (pgood <= 0)
-    {
-        pgood = 0;
-    }
-
     // foraging of individuals who are just at the breeding site
     // and who have yet to decide to go to the staging site
     for (int i = 0; i < summer_pop; ++i)
