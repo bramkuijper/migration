@@ -33,14 +33,14 @@ uniform_real_distribution<> uniform(0.0,1.0);
 // function
 
 // number of individuals in population
-const int N = 1500;  // DEAFULT: 2000
+const int N = 200;  // DEAFULT: 2000
 
 // number of generations
-long int number_generations = 1000000;  // DEFAULT: 1000000
+long int number_generations = 500;  // DEFAULT: 1000000
 
 // sampling interval
-int skip = ceil(number_generations / 500);
-//int skip = 5;
+//int skip = ceil(number_generations / 500);
+int skip = 5;
 
 
 // initial values for phi (social dependency) and theta (resource dependency)
@@ -302,6 +302,7 @@ void write_parameters(ofstream &DataFile)  // at top of outputted file
             << "pgood;" << pgood << endl
             << "rgood_init;" << rgood_init << endl
             << "rbad_init;" << rbad_init << endl
+			<< "patch_consistency_factor;" << patch_consistency_factor << endl
 			<< "preparation_penalty;" << preparation_penalty << endl
             << "resource_max;"  << resource_max << endl
             << "resource_reproduction_threshold;" << resource_reproduction_threshold << endl
@@ -325,7 +326,7 @@ void write_parameters(ofstream &DataFile)  // at top of outputted file
 			<< endl;
 }
 
-// write the distributin of all individuals
+// write the distribution of all individuals
 // ofstream &DataFile: the distribution file to write it to
 // int const generation: the particular generation in which the function is called
 // int const factor: a particular number allowing you to distinguish
