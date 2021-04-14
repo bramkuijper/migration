@@ -16,7 +16,7 @@ patch_consistency_factor = [0.30103] # [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 
 
 rgood = [ 0.04 ]
 rbad = [ 0.02 ]
-preparation_penalty = [1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1, 0] # The reduction in resource acquisition, relative to the normal feeding phase. Default is 0.5
+preparation_penalty = [0.5] # [1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1, 0] # The reduction in resource acquisition, relative to the normal feeding phase. Default is 0.5
 
 resource_reproduction_threshold = [30]
 resource_starvation_threshold = 0
@@ -32,8 +32,7 @@ sdmu_phi = [0.05]
 max_migration_cost = 20  # Default is 20 
 min_migration_cost = [10] # [20, 18, 16, 14, 12, 10, 8, 6, 4, 2]
 migration_cost_power = [1] #[3, 2, 1, 0, -1, -2, -3]
-capacity = [8]
-
+capacity = [1, 4, 6, 8, 10, 12, 14, 16, 18, 20]
 # reproductive cost parameters
 min_offspring_cost = [ 5 ]
 offspring_cost_magnifier = [ 1 ] # The relative difference in resource cost per offspring having migrated at the earliest opportunity versus the last
@@ -41,7 +40,7 @@ relative_mortality_risk_of_migration = [5]
 
 carryover_proportion = [0]
 
-number_replicates = 5
+number_replicates = 8
 
 executable = "./xmigration"
 
