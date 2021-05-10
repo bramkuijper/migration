@@ -32,7 +32,7 @@ sdmu_phi = [0.05]
 max_migration_cost = 20  # Default is 20 
 min_migration_cost = [10] # [20, 18, 16, 14, 12, 10, 8, 6, 4, 2]
 migration_cost_power = [1] #[3, 2, 1, 0, -1, -2, -3]
-capacity = [1, 4, 6, 8, 10, 12, 14, 16, 18, 20]
+capacity = [8] # [2, 4, 6, 8, 10, 12, 14, 16, 18, 20]
 # reproductive cost parameters
 min_offspring_cost = [ 5 ]
 offspring_cost_magnifier = [ 1 ] # The relative difference in resource cost per offspring having migrated at the earliest opportunity versus the last
@@ -40,7 +40,9 @@ relative_mortality_risk_of_migration = [5]
 
 carryover_proportion = [0]
 
-number_replicates = 8
+costs_sourcefile = "~/Documents/Research/PENRYN/Modelling migration/hpcbatch_24_02_2021_131605/sim_migration_24_2_2021_131805_1286542699_dist"  # If none, enter "none"
+
+number_replicates = 1
 
 executable = "./xmigration"
 
@@ -113,4 +115,5 @@ for rep_i in range(0, number_replicates):
                                                                                         + str(carryover_proportion_i) + " "  #25
                                                                                         + str(relative_mortality_risk_of_migration_i) + " "
                                                                                         + str(capacity_i) + " " #27
+                                                                                        + str(costs_sourcefile) + " "
                                                                                         + backgroundstr)

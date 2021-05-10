@@ -864,19 +864,22 @@ void init_population()
 
 double migration_cost(int NFlock)
 {
-	//cost = min_migration_cost + ((max_migration_cost - min_migration_cost) / pow(NFlock, migration_cost_power));
-	// Flock size of 1 (i.e., travelling alone) yields the maximum cost
-	
-	// 17 Nov 2020: Revising the cost function to allow it to take an accelerating / decelarating function
-	if (NFlock >= capacity)
+	if (cost_sourcefile == "none")  // Check if this is a control simulation, in which the cost of migration is assigned to individuals based on a random draw from observed values in the final year of an experimental simulation
 	{
-		cost = min_migration_cost;
+		if (NFlock >= capacity)
+		{
+			cost = min_migration_cost;
+		}
+		else{	
+			cost = min_migration_cost + ((max_migration_cost - min_migration_cost) * pow(1 - ((NFlock-1) / (capacity-1)), exp(migration_cost_power)));
+		}
+		return(cost);
+	}	
+	else {
+		// Select an observed migration cost at random
+		auto random_integer = uni(rng)
+		cost = ;
 	}
-	else{
-		//cost = min_migration_cost + (capacity - NFlock)*pow(capacity, -1);	
-		cost = min_migration_cost + ((max_migration_cost - min_migration_cost) * pow(1 - ((NFlock-1) / (capacity-1)), exp(migration_cost_power)));
-	}
-	return(cost);
 }  // ENDS: migration cost function
 
 void spring_mortality()
