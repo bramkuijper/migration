@@ -33,14 +33,14 @@ uniform_real_distribution<> uniform(0.0,1.0);
 // function
 
 // number of individuals in population
-const int N = 2000;  // DEAFULT: 2000
+const int N = 200;  // DEAFULT: 2000
 
 // number of generations
-long int number_generations = 1000000;  // DEFAULT: 1000000
+long int number_generations = 100;  // DEFAULT: 1000000
 
 // sampling interval
-int skip = ceil(number_generations / 500);
-//int skip = 5;
+//int skip = ceil(number_generations / 500);
+int skip = 10;
 
 
 // initial values for phi (social dependency) and theta (resource dependency)
@@ -864,22 +864,15 @@ void init_population()
 
 double migration_cost(int NFlock)
 {
-	if (cost_sourcefile == "none")  // Check if this is a control simulation, in which the cost of migration is assigned to individuals based on a random draw from observed values in the final year of an experimental simulation
+
+	if (NFlock >= capacity)
 	{
-		if (NFlock >= capacity)
-		{
-			cost = min_migration_cost;
-		}
-		else{	
-			cost = min_migration_cost + ((max_migration_cost - min_migration_cost) * pow(1 - ((NFlock-1) / (capacity-1)), exp(migration_cost_power)));
-		}
-		return(cost);
-	}	
-	else {
-		// Select an observed migration cost at random
-		auto random_integer = uni(rng)
-		cost = ;
+		cost = min_migration_cost;
 	}
+	else{	
+		cost = min_migration_cost + ((max_migration_cost - min_migration_cost) * pow(1 - ((NFlock-1) / (capacity-1)), exp(migration_cost_power)));
+	}
+	return(cost);
 }  // ENDS: migration cost function
 
 void spring_mortality()
