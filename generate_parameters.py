@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import datetime
 
 # generate all parameter combinations to run the migration simulation
 
@@ -40,7 +41,8 @@ relative_mortality_risk_of_migration = [5]
 
 carryover_proportion = [0]
 
-costs_sourcefile = "~/Documents/Research/PENRYN/Modelling migration/hpcbatch_24_02_2021_131605/sim_migration_24_2_2021_131805_1286542699_dist"  # If none, enter "none"
+#costs_sourcefile = "~/Documents/Research/PENRYN/Modelling migration/hpcbatch_24_02_2021_131605/sim_migration_24_2_2021_131805_1286542699_dist"  # If none, enter "none"
+costs_sourcefile = "sim_migration_10_9_2020_150907_1995502144_dist" 
 
 number_replicates = 1
 
@@ -58,6 +60,13 @@ backgroundstr = ""
 
 if background:
     backgroundstr = "&"
+
+
+date = datetime.datetime.now()
+base_name = "sim_migration_" +\
+        f"{date:%d}_{date:%m}_{date:%Y}_{date:%H}{date:%M}{date:%S}"
+
+
 
 for rep_i in range(0, number_replicates):
     for init_phi_a_i in init_phi_a:
@@ -80,9 +89,6 @@ for rep_i in range(0, number_replicates):
                                                                         for carryover_proportion_i in carryover_proportion:
                                                                             for relative_mortality_risk_of_migration_i in relative_mortality_risk_of_migration:
 
-                                                                                # increment the counter for the number of 
-                                                                                # runs
-                                                                                counter += 1
 
                 #                                                                print("echo " + str(counter))
 
@@ -115,5 +121,10 @@ for rep_i in range(0, number_replicates):
                                                                                         + str(carryover_proportion_i) + " "  #25
                                                                                         + str(relative_mortality_risk_of_migration_i) + " "
                                                                                         + str(capacity_i) + " " #27
-                                                                                        + str(costs_sourcefile) + " "
+                                                                                        + "'" + str(costs_sourcefile) + "' "
+                                                                                        + "'" + str(base_name) + "_" + str(counter) + "' "
                                                                                         + backgroundstr)
+
+                                                                                # increment the counter for the number of 
+                                                                                # runs
+                                                                                counter += 1

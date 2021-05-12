@@ -20,6 +20,7 @@ if (length(args) < 1)
 # without having it messed up by the subsequent parameter listing
 find_out_param_line <- function(filename) {
 
+    # read all the lines of the file
     f <- readLines(filename)
 
     # make a reverse sequence

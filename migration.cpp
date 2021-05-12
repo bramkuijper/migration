@@ -14,19 +14,13 @@
 #include <cmath>
 #include <random>
 
-// various functions, such as unique filename creation
-#include "auxiliary.h"
+// set up the random number generator 
+std::random_device rd;
+unsigned seed = rd();
+std::mt19937 rng_r(seed);
 
-
-// standard namespace
-using namespace std;
-
-// set random seed etc
-unsigned int seed = get_nanoseconds();
-//unsigned int seed =550476143; 
-mt19937 rng_r{seed};
-uniform_real_distribution<> uniform(0.0,1.0);
-
+// make a standard uniform distribution
+std::uniform_real_distribution<> uniform(0.0,1.0);
 
 // parameters & variables:
 // values of the most of these are overridden in the init_arguments()
@@ -39,8 +33,7 @@ const int N = 2000;  // DEAFULT: 2000
 long int number_generations = 1000000;  // DEFAULT: 1000000
 
 // sampling interval
-int skip = ceil(number_generations / 500);
-//int skip = 10;
+int skip = std::ceil(number_generations / 500);
 
 
 // initial values for phi (social dependency) and theta (resource dependency)
@@ -229,11 +222,92 @@ Individual WinterPop[N];
 Individual StagingPool[N];
 Individual SummerPop[N];
 
+// allocate vector to deal with the distribution of
+// migration costs
+std::vector<double> cost_distribution; 
+
+std::string filename_costs;
+std::string filename_output;
+
 // bounds value val between (min and max)
 double clamp(double const val, double const min, double const max) 
 {
     return(val > max ? max : val < min ? min : val);
 }
+
+// open a file and fill the cost array
+void initialize_cost_distribution(std::string file_name)
+{
+    std::ifstream cost_file(file_name);
+
+    if (!cost_file.is_open())
+    {
+        throw std::runtime_error("Cannot open file " + file_name);
+    }
+
+    // auxiliary variable to store a single line
+    std::string single_line;
+    std::string column;
+
+    // the separator we are using
+    char delim = ';';
+
+    int col_idx = 0;
+
+    // indicator whether we found our desired column
+    bool found_column = false;
+
+    // first read in header file
+    if (cost_file.good())
+    {
+        std::getline(cost_file, single_line);
+
+        // allocate some memory to go through the line
+        // and split it up by separator
+        std::stringstream ss_line(single_line);
+
+        // now split line into bits of string separated by separator
+        // each bit is a column name
+        while (std::getline(ss_line, column, delim))
+        {
+
+            if (column == "cost")
+            {
+                found_column = true;
+
+                break;
+            }
+            // count column name
+            ++col_idx;
+        } // end while()
+    } // end if (cost_file.good())
+
+    double csv_val;
+
+    if (found_column)
+    {
+        while (std::getline(cost_file, single_line))
+        {
+            int data_idx = 0;
+
+            std::stringstream ss_line(single_line);
+
+            // chop up each value and put it into a double
+            while (std::getline(ss_line, column, delim))
+            {
+//                std::cout << column << std::endl;
+
+                if (data_idx == col_idx)
+                {
+                    cost_distribution.push_back(std::stod(column));
+                    break;
+                }
+
+                ++data_idx;
+            }
+        } // end while getline 1
+    } // end if (found_column)
+} // end initialize_cost_distribution()
 
 
 // get parameters from the command line when 
@@ -266,8 +340,11 @@ void init_arguments(int argc, char **argv)
 	offspring_cost_magnifier = atof(argv[24]);
 	carryover_proportion = atof(argv[25]);
 	relative_mortality_risk_of_migration = atof(argv[26]);
-	capacity = atof(argv[27 ]);
-		
+	capacity = atof(argv[27]);
+
+    filename_costs = argv[28];
+    filename_output = argv[29];
+
     // some bounds checking on parameters
     // probability of encountering a good environment
     // initially should be 0 <= pgood <= 1
@@ -288,50 +365,52 @@ void init_arguments(int argc, char **argv)
 	assert(max_migration_cost >= min_migration_cost);
 	assert(capacity <= N);
 
-}
+    initialize_cost_distribution(filename_costs);
+} // end init_arguments
 
 // write down all parameters in the file
-void write_parameters(ofstream &DataFile)  // at top of outputted file
+void write_parameters(std::ofstream &DataFile)  // at top of outputted file
 {
     DataFile
-            << "init_theta_a;" << init_theta_a << endl
-            << "init_theta_b;" << init_theta_b << endl
-            << "init_phi_a;" << init_phi_a << endl
-            << "init_phi_b;" << init_phi_b << endl
-            << "pmort;" << pmort << endl
-            << "pgood;" << pgood << endl
-            << "rgood_init;" << rgood_init << endl
-            << "rbad_init;" << rbad_init << endl
-			<< "patch_consistency_factor;" << patch_consistency_factor << endl
-			<< "preparation_penalty;" << preparation_penalty << endl
-            << "resource_max;"  << resource_max << endl
-            << "resource_reproduction_threshold;" << resource_reproduction_threshold << endl
-            << "resource_starvation_threshold;" << resource_starvation_threshold << endl
-            << "mu_theta;" << mu_theta << endl
-            << "mu_phi;" << mu_phi << endl
-            << "sdmu_theta;" << sdmu_theta << endl
-            << "sdmu_phi;" << sdmu_phi << endl
-            << "tspring;" << tspring << endl
-			<< "twinter;" << twinter << endl
-            << "N;" << N << endl
-			<< "number_generations;" << number_generations << endl
-            << "migration_cost_power;" << migration_cost_power << endl
-            << "max_migration_cost;" << max_migration_cost << endl
-			<< "min_migration_cost;" << min_migration_cost << endl
-			<< "capacity;" << capacity << endl
-			<< "offspring_cost_magnifier;" << offspring_cost_magnifier << endl
-			<< "carryover_proportion;" << carryover_proportion << endl
-			<< "relative_mortality_risk_of_migration;" << relative_mortality_risk_of_migration << endl
-            << "seed;" << seed << endl
-			<< endl;
+            << "init_theta_a;" << init_theta_a << std::endl
+            << "init_theta_b;" << init_theta_b << std::endl
+            << "init_phi_a;" << init_phi_a << std::endl
+            << "init_phi_b;" << init_phi_b << std::endl
+            << "pmort;" << pmort << std::endl
+            << "pgood;" << pgood << std::endl
+            << "filename_costs;" << filename_costs << std::endl
+            << "rgood_init;" << rgood_init << std::endl
+            << "rbad_init;" << rbad_init << std::endl
+			<< "patch_consistency_factor;" << patch_consistency_factor << std::endl
+			<< "preparation_penalty;" << preparation_penalty << std::endl
+            << "resource_max;"  << resource_max << std::endl
+            << "resource_reproduction_threshold;" << resource_reproduction_threshold << std::endl
+            << "resource_starvation_threshold;" << resource_starvation_threshold << std::endl
+            << "mu_theta;" << mu_theta << std::endl
+            << "mu_phi;" << mu_phi << std::endl
+            << "sdmu_theta;" << sdmu_theta << std::endl
+            << "sdmu_phi;" << sdmu_phi << std::endl
+            << "tspring;" << tspring << std::endl
+			<< "twinter;" << twinter << std::endl
+            << "N;" << N << std::endl
+			<< "number_generations;" << number_generations << std::endl
+            << "migration_cost_power;" << migration_cost_power << std::endl
+            << "max_migration_cost;" << max_migration_cost << std::endl
+			<< "min_migration_cost;" << min_migration_cost << std::endl
+			<< "capacity;" << capacity << std::endl
+			<< "offspring_cost_magnifier;" << offspring_cost_magnifier << std::endl
+			<< "carryover_proportion;" << carryover_proportion << std::endl
+			<< "relative_mortality_risk_of_migration;" << relative_mortality_risk_of_migration << std::endl
+            << "seed;" << seed << std::endl
+			<< std::endl;
 }
 
 // write the distribution of all individuals
-// ofstream &DataFile: the distribution file to write it to
+// std::ofstream &DataFile: the distribution file to write it to
 // int const generation: the particular generation in which the function is called
 // int const factor: a particular number allowing you to distinguish
 // between different writes of the distribution within the same generation
-void write_dist(ofstream &DataFile, 
+void write_dist(std::ofstream &DataFile, 
         int const generation,
         int const factor)
 
@@ -356,9 +435,9 @@ void write_dist(ofstream &DataFile,
             << SummerPop[summer_idx].age << ";"
 			<< SummerPop[summer_idx].patch_quality << ";" << std::endl;
 	    }
-} // ENDS: ()
+} // end write_dist()
 
-void write_dist_data_headers(ofstream &DataFile)
+void write_dist_data_headers(std::ofstream &DataFile)
 {
     DataFile << "generation;"
 //        << "factor;" // allows you to distinguish between multiple calls of ()
@@ -377,10 +456,10 @@ void write_dist_data_headers(ofstream &DataFile)
         << "phi_b;"
         << "age;"
 		<< "patch_quality;" << std::endl;
-}
+} // end write_dist_data_headers
 
-// list of the data headers 
-void write_data_headers(ofstream &DataFile)
+// write data headers to file
+void write_data_headers(std::ofstream &DataFile)
 {
     // SPRING MIGRATION STATS (n = 24):
 	DataFile << "generation;"  // 1		
@@ -462,12 +541,12 @@ void write_data_headers(ofstream &DataFile)
 	    << "var_phi_b_winter;"
 		<< "mean_age;"
 		<< "var_age;"
-		<< endl;
-}
+		<< std::endl;
+} // end write_data_headers
 
 
 // write data for winter population (post mortality)
-void write_winter_stats(ofstream &DataFile)
+void write_winter_stats(std::ofstream &DataFile)
 {
     double mean_theta_a = 0.0;
     double ss_theta_a = 0.0;
@@ -557,11 +636,11 @@ void write_winter_stats(ofstream &DataFile)
         << (ss_phi_b - mean_phi_b * mean_phi_b) << ";"
 		<< mean_age << ";"
 		<< (ss_age - mean_age * mean_age) << ";"
-		<< endl;
+		<< std::endl;
 // ENDS: write data both for winter population and ends line entry in DataFile
-}
+} // write_winter_stats
 
-void write_summer_stats(ofstream &DataFile)
+void write_summer_stats(std::ofstream &DataFile)
 {
     double val;
 		
@@ -608,7 +687,7 @@ void write_summer_stats(ofstream &DataFile)
 }  // ENDS: write summer stats
 
 
-void write_spring_stats(ofstream &DataFile, int generation)
+void write_spring_stats(std::ofstream &DataFile, int generation)
 {
 	mean_latency = 0.0;
 	ss_latency = 0.0;
@@ -703,7 +782,7 @@ void write_spring_stats(ofstream &DataFile, int generation)
 
 }  // ENDS: write data for spring migrants
 
-void write_autumn_stats(ofstream &DataFile)
+void write_autumn_stats(std::ofstream &DataFile)
 {
 	mean_latency = 0.0;
 	ss_latency = 0.0;
@@ -795,7 +874,6 @@ void write_autumn_stats(ofstream &DataFile)
 		<< (ss_autumn_cost - mean_autumn_cost * mean_autumn_cost) << ";";
 // ENDS: write data both for autumn migrants
 }
-
 
 
 // initialize the population at the start of the simulation
@@ -1010,7 +1088,7 @@ void winter_dynamics(int t)
         }
         
 		
-	WinterPop[i].resources = min(WinterPop[i].resources, resource_max); // individuals can reach a (uniform) maximum resource value
+	WinterPop[i].resources = std::min(WinterPop[i].resources, resource_max); // individuals can reach a (uniform) maximum resource value
     
 	} // ok, resource dynamic done
 
@@ -1046,7 +1124,7 @@ void spring_dynamics(int t)
             WinterPop[i].patch_quality = 1 - WinterPop[i].patch_quality;  // switch of patch quality (good to poor; poor to good)
         }
 		
-	WinterPop[i].resources = min(WinterPop[i].resources, resource_max);
+	WinterPop[i].resources = std::min(WinterPop[i].resources, resource_max);
 		 
     } // ok, resource dynamic done
 
@@ -1072,7 +1150,7 @@ void spring_dynamics(int t)
             StagingPool[i].patch_quality = 1 - StagingPool[i].patch_quality;  // switch of patch quality (good to poor; poor to good)
         }
 	
-	StagingPool[i].resources = min(StagingPool[i].resources, resource_max);	
+	StagingPool[i].resources = std::min(StagingPool[i].resources, resource_max);	
 		
     } // ENDS staging site foraging loop
 
@@ -1220,7 +1298,7 @@ void spring_dynamics(int t)
 		SummerPop[i].flock_size = NFlock;
 		SummerPop[i].cost = migration_cost(NFlock);
 		SummerPop[i].resources -= migration_cost(NFlock);
-		SummerPop[i].resources = min(SummerPop[i].resources, resource_max);
+		SummerPop[i].resources = std::min(SummerPop[i].resources, resource_max);
 		SummerPop[i].fecundity = 0;
 		
     } // ENDS: updating resources of migrants
@@ -1233,7 +1311,7 @@ double mutation(double val, double mu, double sdmu)
 {
     if (uniform(rng_r) < mu)
     {
-        normal_distribution<> allelic_dist(0,sdmu*val);
+        std::normal_distribution<double> allelic_dist(0,sdmu*val);
         val += allelic_dist(rng_r);
     }
 
@@ -1247,7 +1325,7 @@ void create_offspring(
         ,Individual &father
         ,Individual &offspring)
 {
-    bernoulli_distribution allele_sample(0.5);
+    std::bernoulli_distribution allele_sample(0.5);
 
     offspring.resources = 0.0;
 	offspring.signal_resources = 0.0;
@@ -1285,7 +1363,7 @@ void create_offspring(
 
 // in summary, they reproduce dependent on 
 // resources and arrival time
-void summer_reproduction(ofstream &DataFile)
+void summer_reproduction(std::ofstream &DataFile)
 {
 	// the next three lines are now duplicated in the main text of the model at the bottom of the script, so I think this is redundant
 	mean_resources = 0.0;
@@ -1305,9 +1383,9 @@ void summer_reproduction(ofstream &DataFile)
     int father_id;
 
     // use a flexible array for the kids
-    vector<Individual> Kids;
+    std::vector<Individual> Kids;
 
-    uniform_int_distribution<> summer_sample(0, summer_pop - 1);
+    std::uniform_int_distribution<> summer_sample(0, summer_pop - 1);
 
     // Mating dynamic. Presumes that there are an even number of individuals so we  
     // just discard the last individual
@@ -1414,7 +1492,7 @@ void summer_reproduction(ofstream &DataFile)
             break;
         }
     
-        uniform_int_distribution<> kids_sample(0, Kids.size() - 1);
+        std::uniform_int_distribution<> kids_sample(0, Kids.size() - 1);
     
         random_kid_id = kids_sample(rng_r);
 
@@ -1475,7 +1553,7 @@ void postbreeding_dynamics(int t)
             SummerPop[i].patch_quality = 1 - SummerPop[i].patch_quality;  // switch of patch quality (good to poor; poor to good)
         }
 		
-		SummerPop[i].resources = min(SummerPop[i].resources, resource_max);
+		SummerPop[i].resources = std::min(SummerPop[i].resources, resource_max);
 	
     } // ok resource dynamic done
 
@@ -1500,7 +1578,7 @@ void postbreeding_dynamics(int t)
             StagingPool[i].patch_quality = 1 - StagingPool[i].patch_quality;  // switch of patch quality (good to poor; poor to good)
         }
     
-	StagingPool[i].resources = min(StagingPool[i].resources, resource_max);
+	StagingPool[i].resources = std::min(StagingPool[i].resources, resource_max);
 	
 	}
 
@@ -1650,7 +1728,7 @@ void postbreeding_dynamics(int t)
         // resources are reduced due to migration,
 		WinterPop[i].cost = migration_cost(NFlock);
 		WinterPop[i].resources -= migration_cost(NFlock);
-		WinterPop[i].resources = min(WinterPop[i].resources, resource_max);  // Individual resource values cannot exceed resource max
+		WinterPop[i].resources = std::min(WinterPop[i].resources, resource_max);  // Individual resource values cannot exceed resource max
 		WinterPop[i].resources *= carryover_proportion;
 		WinterPop[i].flock_size = NFlock;
 
@@ -1666,15 +1744,14 @@ void postbreeding_dynamics(int t)
 // accepting command line arguments
 int main(int argc, char **argv)
 {
-    string filename = "sim_migration";
-    create_filename(filename);
-    ofstream DataFile(filename.c_str());  // output file 
+    init_arguments(argc, argv);
+
+    std::ofstream DataFile(filename_output.c_str());  // output file 
 
     // setting up filename for distribution file
-    string dist_filename{filename + "_dist"};
-    ofstream DistFile(dist_filename.c_str());
+    std::string dist_filename{filename_output + "_dist"};
+    std::ofstream DistFile(dist_filename.c_str());
 
-    init_arguments(argc, argv);
 
     write_parameters(DataFile);
 	
