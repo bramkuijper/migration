@@ -1,7 +1,7 @@
 // Collective migration when resources vary
 // Bram Kuijper & Simon Evans
 // 2019
-//
+// ADDING THIS SO THAT IT COMMITS
 #define DEBUG
 
 #include <iostream>
