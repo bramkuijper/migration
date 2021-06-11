@@ -1,7 +1,7 @@
 // Collective migration when resources vary
 // Bram Kuijper & Simon Evans
 // 2019
-// ADDING THIS SO THAT IT COMMITS
+
 #define DEBUG
 
 #include <iostream>
@@ -27,13 +27,14 @@ std::uniform_real_distribution<> uniform(0.0,1.0);
 // function
 
 // number of individuals in population
-const int N = 2000;  // DEAFULT: 2000
+const int N = 1000;  // DEAFULT: 2000
 
 // number of generations
-long int number_generations = 1000000;  // DEFAULT: 1000000
+long int number_generations = 50;  // DEFAULT: 1000000
 
 // sampling interval
-int skip = std::ceil(number_generations / 500);
+//int skip = std::ceil(number_generations / 500);
+int skip = 10;  // BRAM: This has to be used when running short trial simulations. I've not figured out why the ceiling function won't ensure the minimum value for skip is 1 but for whatever reason it doesn't and you get 'Floating point exception 8' in response.
 
 
 // initial values for phi (social dependency) and theta (resource dependency)
@@ -282,7 +283,7 @@ void initialize_cost_distribution(std::string file_name)
         } // end while()
     } // end if (cost_file.good())
 
-    double csv_val;
+//	double csv_val;  Added by Bram but isn't in use (signed: SRE 10/06/21)
 
     if (found_column)
     {
@@ -364,8 +365,12 @@ void init_arguments(int argc, char **argv)
 	
 	assert(max_migration_cost >= min_migration_cost);
 	assert(capacity <= N);
-
-    initialize_cost_distribution(filename_costs);
+	
+	//if(filename_costs != 'none')
+	//{
+	//	initialize_cost_distribution(filename_costs);
+	//}
+  
 } // end init_arguments
 
 // write down all parameters in the file
@@ -1296,8 +1301,18 @@ void spring_dynamics(int t)
     {		
 		// Resource cost of migration to the individual
 		SummerPop[i].flock_size = NFlock;
-		SummerPop[i].cost = migration_cost(NFlock);
-		SummerPop[i].resources -= migration_cost(NFlock);
+		
+		if (filename_costs.length() == 0){
+			SummerPop[i].cost = migration_cost(NFlock);
+		}
+		
+		//else
+		//{
+		//	// setting up a sampling function to sample from the vector of observed costs
+		//	std::uniform_int_distribution<int> cost_sample(0, cost_distribution.size()-1);
+		//	SummerPop[i].cost = cost_sample(rng_r);
+		//}
+		SummerPop[i].resources -= SummerPop[i].cost;
 		SummerPop[i].resources = std::min(SummerPop[i].resources, resource_max);
 		SummerPop[i].fecundity = 0;
 		
