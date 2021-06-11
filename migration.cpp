@@ -27,7 +27,7 @@ std::uniform_real_distribution<> uniform(0.0,1.0);
 // function
 
 // number of individuals in population
-const int N = 1000;  // DEAFULT: 2000
+const int N = 500;  // DEAFULT: 2000
 
 // number of generations
 long int number_generations = 50;  // DEFAULT: 1000000
@@ -310,6 +310,8 @@ void initialize_cost_distribution(std::string file_name)
     } // end if (found_column)
 } // end initialize_cost_distribution()
 
+// setting up a sampling function to sample from cost_distribution
+std::uniform_int_distribution<int> cost_sample(0, cost_distribution.size()-1);
 
 // get parameters from the command line when 
 // running the executable file
@@ -1188,6 +1190,7 @@ void spring_dynamics(int t)
             // add individual to the staging pool
             StagingPool[staging_pop] = WinterPop[i];
 			StagingPool[staging_pop].latency = 0;
+			StagingPool[staging_pop].cost = 0.0;  // reset individual's migration cost to zero
 			StagingPool[staging_pop].signal_resources = StagingPool[staging_pop].resources;
             ++staging_pop; // increment the number of individuals in the staging pool
 
@@ -1306,12 +1309,13 @@ void spring_dynamics(int t)
 			SummerPop[i].cost = migration_cost(NFlock);
 		}
 		
-		//else
-		//{
+		else
+		{
+		//	SummerPop[i].cost = 25;
 		//	// setting up a sampling function to sample from the vector of observed costs
 		//	std::uniform_int_distribution<int> cost_sample(0, cost_distribution.size()-1);
-		//	SummerPop[i].cost = cost_sample(rng_r);
-		//}
+			SummerPop[i].cost = cost_sample(rng_r);
+		}
 		SummerPop[i].resources -= SummerPop[i].cost;
 		SummerPop[i].resources = std::min(SummerPop[i].resources, resource_max);
 		SummerPop[i].fecundity = 0;
@@ -1625,6 +1629,7 @@ void postbreeding_dynamics(int t)
             // add individual to the staging pool
             StagingPool[staging_pop] = SummerPop[i];
 			StagingPool[staging_pop].latency = 0.0;
+			StagingPool[staging_pop].cost = 0.0;  // reset individual's migration cost to zero
 			StagingPool[staging_pop].signal_resources = StagingPool[staging_pop].resources;
             ++staging_pop; // increment the number of individuals in the staging pool
 
