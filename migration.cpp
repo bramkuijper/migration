@@ -19,7 +19,7 @@ std::random_device rd;
 unsigned seed = rd();
 std::mt19937 rng_r(seed);
 
-// make a standard uniform distribution
+// make a standard distribution
 std::uniform_real_distribution<> uniform(0.0,1.0);
 
 // parameters & variables:
@@ -27,10 +27,10 @@ std::uniform_real_distribution<> uniform(0.0,1.0);
 // function
 
 // number of individuals in population
-const int N = 500;  // DEAFULT: 2000
+const int N = 200;  // DEAFULT: 2000
 
 // number of generations
-long int number_generations = 50;  // DEFAULT: 1000000
+long int number_generations = 40;  // DEFAULT: 1000000
 
 // sampling interval
 //int skip = std::ceil(number_generations / 500);
@@ -225,7 +225,7 @@ Individual SummerPop[N];
 
 // allocate vector to deal with the distribution of
 // migration costs
-std::vector<double> cost_distribution; 
+std::vector<int> flock_size_distribution; 
 
 std::string filename_costs;
 std::string filename_output;
@@ -237,7 +237,7 @@ double clamp(double const val, double const min, double const max)
 }
 
 // open a file and fill the cost array
-void initialize_cost_distribution(std::string file_name)
+void initialize_flock_size_distribution(std::string file_name)
 {
     std::ifstream cost_file(file_name);
 
@@ -272,7 +272,7 @@ void initialize_cost_distribution(std::string file_name)
         while (std::getline(ss_line, column, delim))
         {
 
-            if (column == "cost")
+            if (column == "flock_size")
             {
                 found_column = true;
 
@@ -300,7 +300,7 @@ void initialize_cost_distribution(std::string file_name)
 
                 if (data_idx == col_idx)
                 {
-                    cost_distribution.push_back(std::stod(column));
+                    flock_size_distribution.push_back(std::stod(column));
                     break;
                 }
 
@@ -308,10 +308,10 @@ void initialize_cost_distribution(std::string file_name)
             }
         } // end while getline 1
     } // end if (found_column)
-} // end initialize_cost_distribution()
+} // end initialize_flock_size_distribution()
 
-// setting up a sampling function to sample from cost_distribution
-std::uniform_int_distribution<int> cost_sample(0, cost_distribution.size()-1);
+// setting up a sampling function to sample from flock_size_distribution
+std::uniform_int_distribution<> flock_size_sample(0, flock_size_distribution.size()-1);
 
 // get parameters from the command line when 
 // running the executable file
@@ -368,11 +368,6 @@ void init_arguments(int argc, char **argv)
 	assert(max_migration_cost >= min_migration_cost);
 	assert(capacity <= N);
 	
-	//if(filename_costs != 'none')
-	//{
-	//	initialize_cost_distribution(filename_costs);
-	//}
-  
 } // end init_arguments
 
 // write down all parameters in the file
@@ -1311,10 +1306,9 @@ void spring_dynamics(int t)
 		
 		else
 		{
-		//	SummerPop[i].cost = 25;
-		//	// setting up a sampling function to sample from the vector of observed costs
-		//	std::uniform_int_distribution<int> cost_sample(0, cost_distribution.size()-1);
-			SummerPop[i].cost = cost_sample(rng_r);
+			int sampled_flock_size = flock_size_sample(rng_r);
+			SummerPop[i].cost = migration_cost(sampled_flock_size);
+			SummerPop[i].flock_size = sampled_flock_size;
 		}
 		SummerPop[i].resources -= SummerPop[i].cost;
 		SummerPop[i].resources = std::min(SummerPop[i].resources, resource_max);
