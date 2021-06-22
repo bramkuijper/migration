@@ -1,7 +1,7 @@
 // Collective migration when resources vary
 // Bram Kuijper & Simon Evans
 // 2019
-// ADDING THIS SO THAT IT COMMITS
+
 #define DEBUG
 
 #include <iostream>
@@ -19,7 +19,7 @@ std::random_device rd;
 unsigned seed = rd();
 std::mt19937 rng_r(seed);
 
-// make a standard uniform distribution
+// make a standard distribution
 std::uniform_real_distribution<> uniform(0.0,1.0);
 
 // parameters & variables:
@@ -27,14 +27,14 @@ std::uniform_real_distribution<> uniform(0.0,1.0);
 // function
 
 // number of individuals in population
-const int N = 2000;  // DEAFULT: 2000
+const int N = 200;  // DEAFULT: 2000
 
 // number of generations
 long int number_generations = 600000;  // DEFAULT: 1000000
 
 // sampling interval
 int skip = std::ceil(number_generations / 500);
-//int skip = 10;
+//int skip = 10;  // BRAM: This has to be used when running short trial simulations. I've not figured out why the ceiling function won't ensure the minimum value for skip is 1 but for whatever reason it doesn't and you get 'Floating point exception 8' in response.
 
 // initial values for phi (social dependency) and theta (resource dependency)
 // a is an intercept, b is a gradient
@@ -224,7 +224,7 @@ Individual SummerPop[N];
 
 // allocate vector to deal with the distribution of
 // migration costs
-std::vector<double> cost_distribution; 
+std::vector<int> flock_size_distribution; 
 
 std::string filename_costs;
 std::string filename_output;
@@ -236,7 +236,7 @@ double clamp(double const val, double const min, double const max)
 }
 
 // open a file and fill the cost array
-void initialize_cost_distribution(std::string file_name)
+void initialize_flock_size_distribution(std::string file_name)
 {
     std::ifstream cost_file(file_name);
 
@@ -271,7 +271,7 @@ void initialize_cost_distribution(std::string file_name)
         while (std::getline(ss_line, column, delim))
         {
 
-            if (column == "cost")
+            if (column == "flock_size")
             {
                 found_column = true;
 
@@ -282,7 +282,7 @@ void initialize_cost_distribution(std::string file_name)
         } // end while()
     } // end if (cost_file.good())
 
-    double csv_val;
+//	double csv_val;  Added by Bram but isn't in use (signed: SRE 10/06/21)
 
     if (found_column)
     {
@@ -299,7 +299,7 @@ void initialize_cost_distribution(std::string file_name)
 
                 if (data_idx == col_idx)
                 {
-                    cost_distribution.push_back(std::stod(column));
+                    flock_size_distribution.push_back(std::stod(column));
                     break;
                 }
 
@@ -307,8 +307,10 @@ void initialize_cost_distribution(std::string file_name)
             }
         } // end while getline 1
     } // end if (found_column)
-} // end initialize_cost_distribution()
+} // end initialize_flock_size_distribution()
 
+// setting up a sampling function to sample from flock_size_distribution
+std::uniform_int_distribution<> flock_size_sample(0, flock_size_distribution.size()-1);
 
 // get parameters from the command line when 
 // running the executable file
@@ -364,8 +366,7 @@ void init_arguments(int argc, char **argv)
 	
 	assert(max_migration_cost >= min_migration_cost);
 	assert(capacity <= N);
-
-    initialize_cost_distribution(filename_costs);
+	
 } // end init_arguments
 
 // write down all parameters in the file
@@ -1183,6 +1184,7 @@ void spring_dynamics(int t)
             // add individual to the staging pool
             StagingPool[staging_pop] = WinterPop[i];
 			StagingPool[staging_pop].latency = 0;
+			StagingPool[staging_pop].cost = 0.0;  // reset individual's migration cost to zero
 			StagingPool[staging_pop].signal_resources = StagingPool[staging_pop].resources;
             ++staging_pop; // increment the number of individuals in the staging pool
 
@@ -1296,8 +1298,18 @@ void spring_dynamics(int t)
     {		
 		// Resource cost of migration to the individual
 		SummerPop[i].flock_size = NFlock;
-		SummerPop[i].cost = migration_cost(NFlock);
-		SummerPop[i].resources -= migration_cost(NFlock);
+		
+		if (filename_costs.length() == 0){
+			SummerPop[i].cost = migration_cost(NFlock);
+		}
+		
+		else
+		{
+			int sampled_flock_size = flock_size_sample(rng_r);
+			SummerPop[i].cost = migration_cost(sampled_flock_size);
+			SummerPop[i].flock_size = sampled_flock_size;
+		}
+		SummerPop[i].resources -= SummerPop[i].cost;
 		SummerPop[i].resources = std::min(SummerPop[i].resources, resource_max);
 		SummerPop[i].fecundity = 0;
 		
@@ -1610,6 +1622,7 @@ void postbreeding_dynamics(int t)
             // add individual to the staging pool
             StagingPool[staging_pop] = SummerPop[i];
 			StagingPool[staging_pop].latency = 0.0;
+			StagingPool[staging_pop].cost = 0.0;  // reset individual's migration cost to zero
 			StagingPool[staging_pop].signal_resources = StagingPool[staging_pop].resources;
             ++staging_pop; // increment the number of individuals in the staging pool
 
