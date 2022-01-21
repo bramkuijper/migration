@@ -294,8 +294,6 @@ void initialize_flock_size_distribution(std::string file_name)
             // chop up each value and put it into a double
             while (std::getline(ss_line, column, delim))
             {
-//                std::cout << column << std::endl;
-
                 if (data_idx == col_idx)
                 {
                     flock_size_distribution.push_back(std::stod(column));
@@ -1983,7 +1981,7 @@ int main(int argc, char **argv)
         // let individuals die with a certain probability 
         autumn_mortality();
 		
-		assert(winter_pop = remainer_pop + autumn_migrant_pop - autumn_migrant_deaths);
+		assert(winter_pop == remainer_pop + autumn_migrant_pop - autumn_migrant_deaths);
 		
 		if (generation == 0)
 		{

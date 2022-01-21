@@ -42,7 +42,8 @@ relative_mortality_risk_of_migration = [5]
 carryover_proportion = [0]
 
 #costs_sourcefile = "~/Documents/Research/PENRYN/Modelling migration/hpcbatch_24_02_2021_131605/sim_migration_24_2_2021_131805_1286542699_dist"  # If none, enter "none"
-costs_sourcefile = "sim_migration_10_9_2020_150907_1995502144_dist" 
+costs_sourcefile = "sim_migration_11_06_2021_125822_1_dist" 
+
 
 number_replicates = 1
 
