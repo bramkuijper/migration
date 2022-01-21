@@ -283,8 +283,6 @@ void initialize_flock_size_distribution(std::string file_name)
         } // end while()
     } // end if (cost_file.good())
 
-//	double csv_val;  Added by Bram but isn't in use (signed: SRE 10/06/21)
-
     if (found_column)
     {
         while (std::getline(cost_file, single_line))
@@ -310,8 +308,6 @@ void initialize_flock_size_distribution(std::string file_name)
     } // end if (found_column)
 } // end initialize_flock_size_distribution()
 
-// setting up a sampling function to sample from flock_size_distribution
-std::uniform_int_distribution<> flock_size_sample(0, flock_size_distribution.size()-1);
 
 // get parameters from the command line when 
 // running the executable file
@@ -367,7 +363,8 @@ void init_arguments(int argc, char **argv)
 	
 	assert(max_migration_cost >= min_migration_cost);
 	assert(capacity <= N);
-	
+
+	initialize_flock_size_distribution(filename_costs);
 } // end init_arguments
 
 // write down all parameters in the file
@@ -1106,6 +1103,10 @@ void spring_dynamics(int t)
 	// individuals can continue to forage
     // individuals can continue to accumulate resources
     // individuals make dispersal decisions
+    // setting up a sampling function to sample from flock_size_distribution
+    
+    assert(flock_size_distribution.size() > 0);
+    std::uniform_int_distribution<> flock_size_sample(0, flock_size_distribution.size()-1);
 	
 	// foraging of individuals who are just at the wintering site
     // and who have yet to decide to go to the staging site
