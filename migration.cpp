@@ -1305,7 +1305,6 @@ void spring_dynamics(int t)
 		else
 		{
 			int sampled_flock_size = flock_size_sample(rng_r);
-			//SummerPop[i].flock_size = flock_size_distribution[sampled_flock_size];
 			SummerPop[i].cost = migration_cost(flock_size_distribution[sampled_flock_size]);
 		}
 		SummerPop[i].resources -= SummerPop[i].cost;
