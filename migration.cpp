@@ -282,8 +282,6 @@ void initialize_flock_size_distribution(std::string file_name)
         } // end while()
     } // end if (cost_file.good())
 
-//	double csv_val;  Added by Bram but isn't in use (signed: SRE 10/06/21)
-
     if (found_column)
     {
         while (std::getline(cost_file, single_line))
@@ -295,8 +293,6 @@ void initialize_flock_size_distribution(std::string file_name)
             // chop up each value and put it into a double
             while (std::getline(ss_line, column, delim))
             {
-//                std::cout << column << std::endl;
-
                 if (data_idx == col_idx)
                 {
                     flock_size_distribution.push_back(std::stod(column));
@@ -309,8 +305,6 @@ void initialize_flock_size_distribution(std::string file_name)
     } // end if (found_column)
 } // end initialize_flock_size_distribution()
 
-// setting up a sampling function to sample from flock_size_distribution
-std::uniform_int_distribution<> flock_size_sample(0, flock_size_distribution.size()-1);
 
 // get parameters from the command line when 
 // running the executable file
@@ -366,7 +360,8 @@ void init_arguments(int argc, char **argv)
 	
 	assert(max_migration_cost >= min_migration_cost);
 	assert(capacity <= N);
-	
+
+	initialize_flock_size_distribution(filename_costs);
 } // end init_arguments
 
 // write down all parameters in the file
@@ -1105,6 +1100,10 @@ void spring_dynamics(int t)
 	// individuals can continue to forage
     // individuals can continue to accumulate resources
     // individuals make dispersal decisions
+    // setting up a sampling function to sample from flock_size_distribution
+    
+    assert(flock_size_distribution.size() > 0);
+    std::uniform_int_distribution<> flock_size_sample(0, flock_size_distribution.size()-1);
 	
 	// foraging of individuals who are just at the wintering site
     // and who have yet to decide to go to the staging site
@@ -1306,8 +1305,8 @@ void spring_dynamics(int t)
 		else
 		{
 			int sampled_flock_size = flock_size_sample(rng_r);
-			SummerPop[i].cost = migration_cost(sampled_flock_size);
-			SummerPop[i].flock_size = sampled_flock_size;
+			//SummerPop[i].flock_size = flock_size_distribution[sampled_flock_size];
+			SummerPop[i].cost = migration_cost(flock_size_distribution[sampled_flock_size]);
 		}
 		SummerPop[i].resources -= SummerPop[i].cost;
 		SummerPop[i].resources = std::min(SummerPop[i].resources, resource_max);
@@ -1981,7 +1980,7 @@ int main(int argc, char **argv)
         // let individuals die with a certain probability 
         autumn_mortality();
 		
-		assert(winter_pop = remainer_pop + autumn_migrant_pop - autumn_migrant_deaths);
+		assert(winter_pop == remainer_pop + autumn_migrant_pop - autumn_migrant_deaths);
 		
 		if (generation == 0)
 		{
