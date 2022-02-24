@@ -1544,7 +1544,11 @@ void summer_reproduction(std::ofstream &DataFile)
 // & fly back
 void postbreeding_dynamics(int t)
 {
-    // foraging of individuals who are just at the breeding site
+    // As for spring, setting up a sampling function to sample from flock_size_distribution
+    assert(flock_size_distribution.size() > 0);
+    std::uniform_int_distribution<> flock_size_sample(0, flock_size_distribution.size()-1);
+    
+	// foraging of individuals who are just at the breeding site
     // and who have yet to decide to go to the staging site
     for (int i = 0; i < summer_pop; ++i)
     {
