@@ -1736,12 +1736,19 @@ void postbreeding_dynamics(int t)
     // been added to the pool dependent on their flock size
     for (int i = winter_pop_old; i < winter_pop; ++i)
     {	
-        // resources are reduced due to migration,
-		WinterPop[i].cost = migration_cost(NFlock);
-		WinterPop[i].resources -= migration_cost(NFlock);
+        WinterPop[i].flock_size = NFlock;
+		
+		if (filename_costs.length() == 0){
+			WinterPop[i].cost = migration_cost(NFlock);  // Flcok size-depedent cost of migration
+		}
+		
+		else{
+			int sampled_flock_size = flock_size_sample(rng_r);
+			WinterPop[i].cost = migration_cost(flock_size_distribution[sampled_flock_size]);
+		}
+		WinterPop[i].resources -= WinterPop[i].cost;
 		WinterPop[i].resources = std::min(WinterPop[i].resources, resource_max);  // Individual resource values cannot exceed resource max
 		WinterPop[i].resources *= carryover_proportion;
-		WinterPop[i].flock_size = NFlock;
 
     } // Ends: update resource levels of winter arrivals
 
