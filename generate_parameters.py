@@ -24,8 +24,8 @@ resource_starvation_threshold = 0
 resource_max = [60]
 
 # mutation rates
-mu_theta = 0.01
-mu_phi = 0.01
+mu_theta = 0.02
+mu_phi = 0.02
 sdmu_theta = 0.05
 sdmu_phi = [0.05]
     
@@ -42,8 +42,7 @@ relative_mortality_risk_of_migration = [5]
 carryover_proportion = [0]
 
 costs_sourcefile = ["~/hpcbatch_29_08_2021_075422/sim_migration_30_8_2021_075422_139529932_dist", "~/hpcbatch_29_08_2021_172728/sim_migration_30_8_2021_075227_1496541961_dist", "~/hpcbatch_29_08_2021_172728/sim_migration_30_8_2021_075428_1418409188_dist", "~/hpcbatch_29_08_2021_172728/sim_migration_30_8_2021_075227_1191646591_dist", "~/hpcbatch_29_08_2021_172728/sim_migration_30_8_2021_075227_1140373795_dist", "~/hpcbatch_29_08_2021_172948/sim_migration_30_8_2021_075428_1605237909_dist", "~/hpcbatch_29_08_2021_172948/sim_migration_30_8_2021_075432_1732123732_dist", "~/hpcbatch_29_08_2021_172948/sim_migration_30_8_2021_075431_665834704_dist", "~/hpcbatch_29_08_2021_172948/sim_migration_30_8_2021_075434_333892663_dist", "~/hpcbatch_29_08_2021_172948/sim_migration_30_8_2021_075429_1503304252_dist", "~/hpcbatch_29_08_2021_172948/sim_migration_30_8_2021_075431_660393031_dist", "~/hpcbatch_29_08_2021_172948/sim_migration_30_8_2021_075429_1499475050_dist", "~/hpcbatch_29_08_2021_172948/sim_migration_30_8_2021_075428_1777764160_dist"]  # If none, enter "none"
-#costs_sourcefile = "none" 
-
+#costs_sourcefile = "none"
 number_replicates = 1
 
 executable = "./xmigration"
@@ -93,6 +92,7 @@ for rep_i in range(0, number_replicates):
                 #                                                                print("echo " + str(counter))
 
 
+<<<<<<< HEAD
                                                                                     print(executable + " " 
                                                                                             + str(init_phi_a_i) + " "
                                                                                             + str(init_phi_b_i) + " "
@@ -128,3 +128,40 @@ for rep_i in range(0, number_replicates):
                                                                                     # increment the counter for the number of 
                                                                                     # runs
                                                                                     counter += 1
+=======
+                                                                                print(executable + " " 
+                                                                                        + str(init_phi_a_i) + " "
+                                                                                        + str(init_phi_b_i) + " "
+                                                                                        + str(init_theta_a_i) + " "
+                                                                                        + str(init_theta_b_i) + " "
+                                                                                        + str(pmort_i) + " " #5
+                                                                                        + str(pgood) + " "
+                                                                                        + str(patch_consistency_factor_i) + " "
+                                                                                        + str(rgood_i) + " "
+                                                                                        + str(rbad_i) + " "  #9
+                                                                                        + str(preparation_penalty_i) + " "  #10
+                                                                                        + str(resource_reproduction_threshold_i) + " "
+                                                                                        + str(resource_starvation_threshold) + " "
+                                                                                        + str(mu_theta) + " "
+                                                                                        + str(mu_phi) + " "  #14
+                                                                                        + str(sdmu_theta) + " "  #15
+                                                                                        + str(sdmu_phi_i) + " "  #16
+                                                                                        + str(max_migration_cost) + " "
+                                                                                        + str(min_migration_cost_i) + " "
+                                                                                        + str(migration_cost_power_i) + " "  #19
+                                                                                        + str(twinter) + " "  #20
+                                                                                        + str(tspring) + " " 
+                                                                                        + str(resource_max_i) + " "
+                                                                                        + str(min_offspring_cost_i) + " "
+                                                                                        + str(offspring_cost_magnifier_i) + " "  #24
+                                                                                        + str(carryover_proportion_i) + " "  #25
+                                                                                        + str(relative_mortality_risk_of_migration_i) + " "
+                                                                                        + str(capacity_i) + " " #27
+                                                                                        + str(costs_sourcefile) + " "
+                                                                                        + str(base_name) + "_" + str(counter) + " "
+                                                                                        + backgroundstr)
+
+                                                                                # increment the counter for the number of 
+                                                                                # runs
+                                                                                counter += 1
+>>>>>>> 62f5f6396f8a134c8b075fb0651d7ba97140f340

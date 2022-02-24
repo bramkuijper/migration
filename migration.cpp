@@ -30,12 +30,11 @@ std::uniform_real_distribution<> uniform(0.0,1.0);
 const int N = 200;  // DEAFULT: 2000
 
 // number of generations
-long int number_generations = 40;  // DEFAULT: 1000000
+long int number_generations = 600000;  // DEFAULT: 1000000
 
 // sampling interval
-//int skip = std::ceil(number_generations / 500);
-int skip = 10;  // BRAM: This has to be used when running short trial simulations. I've not figured out why the ceiling function won't ensure the minimum value for skip is 1 but for whatever reason it doesn't and you get 'Floating point exception 8' in response.
-
+int skip = std::ceil(number_generations / 500);
+//int skip = 10;  // BRAM: This has to be used when running short trial simulations. I've not figured out why the ceiling function won't ensure the minimum value for skip is 1 but for whatever reason it doesn't and you get 'Floating point exception 8' in response.
 
 // initial values for phi (social dependency) and theta (resource dependency)
 // a is an intercept, b is a gradient
@@ -1306,7 +1305,6 @@ void spring_dynamics(int t)
 		else
 		{
 			int sampled_flock_size = flock_size_sample(rng_r);
-			//SummerPop[i].flock_size = flock_size_distribution[sampled_flock_size];
 			SummerPop[i].cost = migration_cost(flock_size_distribution[sampled_flock_size]);
 		}
 		SummerPop[i].resources -= SummerPop[i].cost;
