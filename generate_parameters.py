@@ -31,8 +31,8 @@ sdmu_phi = [0.05]
     
 # migration cost parameters
 max_migration_cost = 20  # Default is 20 
-min_migration_cost = [20, 18, 16, 14, 12, 10, 8, 6, 4, 2]
-migration_cost_power = [2, 0, -2] #[3, 2, 1, 0, -1, -2, -3]
+min_migration_cost = [10] # [20, 18, 16, 14, 12, 10, 8, 6, 4, 2]
+migration_cost_power = [2] #[3, 2, 1, 0, -1, -2, -3]
 capacity = [8] # [2, 4, 6, 8, 10, 12, 14, 16, 18, 20]
 # reproductive cost parameters
 min_offspring_cost = [ 5 ]
@@ -41,10 +41,10 @@ relative_mortality_risk_of_migration = [5]
 
 carryover_proportion = [0]
 
-#costs_sourcefile = "~/Documents/Research/PENRYN/Modelling migration/hpcbatch_24_02_2021_131605/sim_migration_24_2_2021_131805_1286542699_dist"  # If none, enter "none"
+costs_sourcefile = "/nobackup/beegfs/home/ISAD/sre206/hpcbatch_29_08_2021_172948/sim_migration_30_8_2021_075428_1777764160_dist"  # If none, enter "none"
 #costs_sourcefile = "none"
 
-number_replicates = 3
+number_replicates = 1
 
 executable = "./xmigration"
 
@@ -121,8 +121,8 @@ for rep_i in range(0, number_replicates):
                                                                                         + str(carryover_proportion_i) + " "  #25
                                                                                         + str(relative_mortality_risk_of_migration_i) + " "
                                                                                         + str(capacity_i) + " " #27
-                                                                                       # + "'" + str(costs_sourcefile) + "' "
-                                                                                       # + "'" + str(base_name) + "_" + str(counter) + "' "
+                                                                                        + str(costs_sourcefile) + " "
+                                                                                        + str(base_name) + "_" + str(counter) + " "
                                                                                         + backgroundstr)
 
                                                                                 # increment the counter for the number of 
