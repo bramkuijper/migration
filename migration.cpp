@@ -1403,7 +1403,8 @@ void summer_reproduction(std::ofstream &DataFile)
     {
 
         // if individual does not meet minimum standards then no reproduction through female function
-        if (SummerPop[i].resources < breeding_threshold * (tspring + SummerPop[i].timing - 1) / tspring)  // Cost of clutch size of one. Further offspring incur a smaller, incremental cost that also increases through the season (below)
+        if (SummerPop[i].resources < breeding_threshold * (tspring + SummerPop[i].timing - 1) / tspring)  // 20/09/22: This function retained a cost to late breeding in the model
+		if (SummerPop[i].resources < breeding_threshold)  // Cost of clutch size of one. Further offspring incur a smaller, incremental cost that also increases through the season (below)
         {
             SummerPop[i].fecundity = 0.0;
 			SummerPop[i].cost = 0.0;
@@ -1446,7 +1447,9 @@ void summer_reproduction(std::ofstream &DataFile)
 	        //
 	        // first round to lowest integer (+ 1 to account for first offspring, cost of which is represented by the phenologically-sensitive breeding_threshold)
 	        //resource_integer = 1 + floor((SummerPop[i].resources - (breeding_threshold * (tspring + SummerPop[i].timing - 1) / tspring)) / (min_offspring_cost + ((SummerPop[i].timing - 1) * offspring_cost_magnifier * min_offspring_cost / tspring)));
-	        offspring_equivalence = 1 + (SummerPop[i].resources - (breeding_threshold * (tspring + SummerPop[i].timing - 1) / tspring)) / (min_offspring_cost + (min_offspring_cost * offspring_cost_magnifier * (SummerPop[i].timing - 1) / tspring));
+	        //offspring_equivalence = 1 + (SummerPop[i].resources - (breeding_threshold * (tspring + SummerPop[i].timing - 1) / tspring)) / (min_offspring_cost + (min_offspring_cost * offspring_cost_magnifier * (SummerPop[i].timing - 1) / tspring));
+	        offspring_equivalence = 1 + (SummerPop[i].resources - breeding_threshold) / min_offspring_cost;
+	
 			resource_integer = floor(offspring_equivalence);
 		
 	        // TODO (slightly digressing): can we come up with an analytical 
