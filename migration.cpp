@@ -27,14 +27,14 @@ std::uniform_real_distribution<> uniform(0.0,1.0);
 // function
 
 // number of individuals in population
-const int N = 2000;  // DEAFULT: 2000
+const int N = 100;  // DEAFULT: 2000
 
 // number of generations
-long int number_generations = 1000000;  // DEFAULT: 1000000
+long int number_generations = 50;  // DEFAULT: 1000000
 
 // sampling interval
-int skip = std::ceil(number_generations / 500);
-//int skip = 10;  // BRAM: This has to be used when running short trial simulations. I've not figured out why the ceiling function won't ensure the minimum value for skip is 1 but for whatever reason it doesn't and you get 'Floating point exception 8' in response.
+//int skip = std::ceil(number_generations / 500);
+int skip = 10;  // BRAM: This has to be used when running short trial simulations. I've not figured out why the ceiling function won't ensure the minimum value for skip is 1 but for whatever reason it doesn't and you get 'Floating point exception 8' in response.
 
 // initial values for phi (social dependency) and theta (resource dependency)
 // a is an intercept, b is a gradient
@@ -46,6 +46,7 @@ double init_phi_b = 0.0;
 // mortality probability 
 double pmort = 0.0;
 double relative_mortality_risk_of_migration = 0.0;
+double socially_sensitive_mortality = 0.0;
 
 // initial probability per season to encounter a good resource patch
 double pgood = 0.0;
@@ -171,48 +172,23 @@ struct Individual
     double resources;
 
     // RESOURCE SENSITIVITY reaction norm (determines entry into staging pool)
-    //
-    // elevation (baseline leaving rate) 
-    double theta_a[2];
-
-    // reaction norm, dependency on the amount of resources
-    double theta_b[2];
+    double theta_a[2];  // elevation (baseline leaving rate)
+    double theta_b[2];  // reaction norm, dependency on the amount of resources
 
     // COLLECTIVE DISPERSAL reaction norm 
     // determines migration dependent on number of individuals
-    //
-    // collective dispersal elevation
-    double phi_a[2];
-
-    // collective dispersal slope, dependency on number of individuals
-    double phi_b[2];
+    double phi_a[2];  // collective dispersal elevation
+    double phi_b[2];  // collective dispersal slope, dependency on number of individuals
 	
-	// individual departure latency
-	int latency;
-	
-	// individual departure timing
-	int timing;
-	
-	// size of flock individual was in
-	int flock_size;
-	
-	// resource cost of migration for individual
-	double cost;
-	
-	// phenology of signalling
-	int signal_timing;
-	
-	// resource value when signalling begins
-	double signal_resources;
-	
+	int latency;  // individual departure latency
+	int timing;  // individual departure timing
+	int flock_size;  // size of flock individual was in
+	double cost;  // resource cost of migration for individual
+	int signal_timing;  // phenology of signalling
+	double signal_resources;  // resource value when signalling begins
 	double signalling_proportion;
-	
-	// individual age (start out at 1 as they are reproductively mature)
-	int age;
-	
-	// number of offspring produced
-	int fecundity;
-	
+	int age;  // individual age (start out at 1 as they are reproductively mature)
+	int fecundity;  // number of offspring produced
 	int patch_quality;
 };
 
@@ -335,10 +311,11 @@ void init_arguments(int argc, char **argv)
 	offspring_cost_magnifier = atof(argv[24]);
 	carryover_proportion = atof(argv[25]);
 	relative_mortality_risk_of_migration = atof(argv[26]);
-	capacity = atof(argv[27]);
+	socially_sensitive_mortality = atof(argv[27]);
+	capacity = atof(argv[28]);
 
-    filename_costs = argv[28];
-    filename_output = argv[29];
+    filename_costs = argv[29];
+    filename_output = argv[30];
 
     // some bounds checking on parameters
     // probability of encountering a good environment
@@ -399,7 +376,8 @@ void write_parameters(std::ofstream &DataFile)  // at top of outputted file
 			<< "offspring_cost_magnifier;" << offspring_cost_magnifier << std::endl
 			<< "carryover_proportion;" << carryover_proportion << std::endl
 			<< "relative_mortality_risk_of_migration;" << relative_mortality_risk_of_migration << std::endl
-            << "seed;" << seed << std::endl
+			<< "socially_sensitive_mortality;" << socially_sensitive_mortality << std::endl
+			<< "seed;" << seed << std::endl
 			<< std::endl;
 }
 
@@ -984,7 +962,7 @@ void spring_mortality()
         } // ends: death due to starvation
 		
 		// random mortality of migrants
-        else if (uniform(rng_r) < 1-sqrt(1 - pmort))
+        else if (uniform(rng_r) < 1-sqrt(1 - ((socially_sensitive_mortality * pmort) / SummerPop[i].flock_size + (1-socially_sensitive_mortality) * pmort)))
         {
             SummerPop[i] = SummerPop[summer_pop - 1];
             --summer_pop;
@@ -1018,7 +996,7 @@ void autumn_mortality()
 			}
 				
 		//random mortality
-	    else if (uniform(rng_r) < 1 - sqrt(1 - pmort))
+	    else if (uniform(rng_r) < 1-sqrt(1 - ((socially_sensitive_mortality * pmort) / SummerPop[i].flock_size + (1-socially_sensitive_mortality) * pmort)))
 	        {
 	            WinterPop[i] = WinterPop[winter_pop - 1];
 	            --winter_pop;

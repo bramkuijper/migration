@@ -38,7 +38,7 @@ capacity = [8] # [2, 4, 6, 8, 10, 12, 14, 16, 18, 20]
 min_offspring_cost = [ 5 ]
 offspring_cost_magnifier = [ 1 ] # The relative difference in resource cost per offspring having migrated at the earliest opportunity versus the last
 relative_mortality_risk_of_migration = [5]
-socially_sensitive_migration = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]  # Default would be 0, where the mortality rate is indepdendent of flock size
+socially_sensitive_mortality = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]  # Default would be 0, where the mortality rate is indepdendent of flock size
 
 carryover_proportion = [0]
 
@@ -83,7 +83,7 @@ for rep_i in range(0, number_replicates):
                                                 for offspring_cost_magnifier_i in offspring_cost_magnifier:
                                                     for carryover_proportion_i in carryover_proportion:
                                                         for relative_mortality_risk_of_migration_i in relative_mortality_risk_of_migration:
-                                                            for socially_sensitive_migration_i in socially_sensitive_migration:
+                                                            for socially_sensitive_mortality_i in socially_sensitive_mortality:
                                                                 for costs_sourcefile_i in costs_sourcefile:
 
 
@@ -117,7 +117,7 @@ for rep_i in range(0, number_replicates):
                                                                             + str(offspring_cost_magnifier_i) + " "  #24
                                                                             + str(carryover_proportion_i) + " "  #25
                                                                             + str(relative_mortality_risk_of_migration_i) + " "
-                                                                            + str(socially_sensitive_migration_i) + " "
+                                                                            + str(socially_sensitive_mortality_i) + " "
                                                                             + str(capacity_i) + " " #28
                                                                             + str(costs_sourcefile_i) + " "
                                                                             + str(base_name) + "_" + str(counter) + " "
