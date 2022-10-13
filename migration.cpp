@@ -30,7 +30,7 @@ std::uniform_real_distribution<> uniform(0.0,1.0);
 const int N = 2000;  // DEAFULT: 2000
 
 // number of generations
-long int number_generations = 1000000;  // DEFAULT: 1000000
+long int number_generations = 50;  // DEFAULT: 1000000
 
 // sampling interval
 int skip = std::ceil(number_generations / 500);
@@ -239,8 +239,7 @@ double clamp(double const val, double const min, double const max)
 void initialize_flock_size_distribution(std::string file_name)
 {
     std::ifstream cost_file(file_name);
-
-    if (!cost_file.is_open())
+	if (!cost_file.is_open())
     {
         throw std::runtime_error("Cannot open file " + file_name);
     }
@@ -360,8 +359,11 @@ void init_arguments(int argc, char **argv)
 	
 	assert(max_migration_cost >= min_migration_cost);
 	assert(capacity <= N);
-
-	initialize_flock_size_distribution(filename_costs);
+	
+	if (filename_costs != "none"){
+		initialize_flock_size_distribution(filename_costs);
+	}
+	
 } // end init_arguments
 
 // write down all parameters in the file
@@ -1101,9 +1103,9 @@ void spring_dynamics(int t)
     // individuals can continue to accumulate resources
     // individuals make dispersal decisions
     // setting up a sampling function to sample from flock_size_distribution
-    
-    assert(flock_size_distribution.size() > 0);
-    std::uniform_int_distribution<> flock_size_sample(0, flock_size_distribution.size()-1);
+	    //assert(flock_size_distribution.size() > 0);
+		//std::uniform_int_distribution<> flock_size_sample(0, flock_size_distribution.size()-1);
+   
 	
 	// foraging of individuals who are just at the wintering site
     // and who have yet to decide to go to the staging site
@@ -1298,12 +1300,15 @@ void spring_dynamics(int t)
 		// Resource cost of migration to the individual
 		SummerPop[i].flock_size = NFlock;
 		
-		if (filename_costs.length() == 0){
+		//if (filename_costs.length() == 0){
+		if (filename_costs == "none"){
 			SummerPop[i].cost = migration_cost(NFlock);
 		}
 		
 		else
 		{
+			assert(flock_size_distribution.size() > 0);
+			std::uniform_int_distribution<> flock_size_sample(0, flock_size_distribution.size()-1);
 			int sampled_flock_size = flock_size_sample(rng_r);
 			SummerPop[i].cost = migration_cost(flock_size_distribution[sampled_flock_size]);
 		}
@@ -1403,7 +1408,7 @@ void summer_reproduction(std::ofstream &DataFile)
     {
 
         // if individual does not meet minimum standards then no reproduction through female function
-        if (SummerPop[i].resources < breeding_threshold * (tspring + SummerPop[i].timing - 1) / tspring)  // 20/09/22: This function retained a cost to late breeding in the model
+        //if (SummerPop[i].resources < breeding_threshold * (tspring + SummerPop[i].timing - 1) / tspring)  20/09/22: This function retained a cost to late breeding in the model
 		if (SummerPop[i].resources < breeding_threshold)  // Cost of clutch size of one. Further offspring incur a smaller, incremental cost that also increases through the season (below)
         {
             SummerPop[i].fecundity = 0.0;
@@ -1548,8 +1553,8 @@ void summer_reproduction(std::ofstream &DataFile)
 void postbreeding_dynamics(int t)
 {
     // As for spring, setting up a sampling function to sample from flock_size_distribution
-    assert(flock_size_distribution.size() > 0);
-    std::uniform_int_distribution<> flock_size_sample(0, flock_size_distribution.size()-1);
+    //assert(flock_size_distribution.size() > 0);
+    //std::uniform_int_distribution<> flock_size_sample(0, flock_size_distribution.size()-1);
     
 	// foraging of individuals who are just at the breeding site
     // and who have yet to decide to go to the staging site
@@ -1745,11 +1750,14 @@ void postbreeding_dynamics(int t)
     {	
         WinterPop[i].flock_size = NFlock;
 		
-		if (filename_costs.length() == 0){
+		//if (filename_costs.length() == 0){
+		if (filename_costs == "none"){
 			WinterPop[i].cost = migration_cost(NFlock);  // Flcok size-depedent cost of migration
 		}
 		
 		else{
+			assert(flock_size_distribution.size() > 0);
+			std::uniform_int_distribution<> flock_size_sample(0, flock_size_distribution.size()-1);
 			int sampled_flock_size = flock_size_sample(rng_r);
 			WinterPop[i].cost = migration_cost(flock_size_distribution[sampled_flock_size]);
 		}
