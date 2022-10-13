@@ -30,7 +30,7 @@ std::uniform_real_distribution<> uniform(0.0,1.0);
 const int N = 2000;  // DEAFULT: 2000
 
 // number of generations
-long int number_generations = 50;  // DEFAULT: 1000000
+long int number_generations = 600000;  // DEFAULT: 1000000
 
 // sampling interval
 int skip = std::ceil(number_generations / 500);
