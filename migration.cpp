@@ -965,13 +965,13 @@ void spring_mortality()
 		
 		// migration-induced starvation
         else if (SummerPop[i].resources < resource_starvation_threshold)
-        {
-            SummerPop[i] = SummerPop[summer_pop - 1];
-            --summer_pop;
-            --i;
+		 {
+			 SummerPop[i] = SummerPop[summer_pop - 1];
+			 --summer_pop;
+			 --i;
 			
 			++spring_migrant_deaths;
-        } // ends: death due to starvation
+		} // ends: death due to starvation
 		
 		else
 		{
@@ -987,18 +987,8 @@ void autumn_mortality()
 	// MIGRANTS
 	for (int i = remainer_pop; i < winter_pop; ++i)
 		
-		// migration-induced mortality
-		if (WinterPop[i].resources < resource_starvation_threshold)        
-			{            
-				WinterPop[i] = WinterPop[winter_pop - 1];           
-				--winter_pop;            
-				--i;
-				
-				++autumn_migrant_deaths;
-			}
-				
 		//random mortality
-	    else if (uniform(rng_r) < 1-sqrt(1 - ((socially_sensitive_mortality * pmort) / SummerPop[i].flock_size + (1-socially_sensitive_mortality) * pmort)))
+	    if (uniform(rng_r) < 1-sqrt(1 - ((socially_sensitive_mortality * pmort) / SummerPop[i].flock_size + (1-socially_sensitive_mortality) * pmort)))
 	        {
 	            WinterPop[i] = WinterPop[winter_pop - 1];
 	            --winter_pop;
@@ -1007,6 +997,16 @@ void autumn_mortality()
 				++autumn_migrant_deaths;
 	        } 
 			
+		// migration-induced mortality
+		else if (WinterPop[i].resources < resource_starvation_threshold)        
+			{            
+				WinterPop[i] = WinterPop[winter_pop - 1];           
+				--winter_pop;            
+				--i;
+				
+				++autumn_migrant_deaths;
+				}
+				
 		else
 			{
 				WinterPop[i].timing = 1;  // individual survives: timing is reset to 1, ready for spring phenology monitoring
