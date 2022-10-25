@@ -27,14 +27,14 @@ std::uniform_real_distribution<> uniform(0.0,1.0);
 // function
 
 // number of individuals in population
-const int N = 2000;  // DEAFULT: 2000
+const int N = 200;  // DEAFULT: 2000
 
 // number of generations
-long int number_generations = 1000000;  // DEFAULT: 1000000
+long int number_generations = 200;  // DEFAULT: 1000000
 
 // sampling interval
-int skip = std::ceil(number_generations / 500);
-//int skip = 10;  // BRAM: This has to be used when running short trial simulations. I've not figured out why the ceiling function won't ensure the minimum value for skip is 1 but for whatever reason it doesn't and you get 'Floating point exception 8' in response.
+//int skip = std::ceil(number_generations / 500);
+int skip = 5;  // BRAM: This has to be used when running short trial simulations. I've not figured out why the ceiling function won't ensure the minimum value for skip is 1 but for whatever reason it doesn't and you get 'Floating point exception 8' in response.
 
 // initial values for phi (social dependency) and theta (resource dependency)
 // a is an intercept, b is a gradient
@@ -952,19 +952,9 @@ void spring_mortality()
     	
 	for (int i = 0; i < summer_pop;++i)
     {
-		
-		// migration-induced starvation
-        if (SummerPop[i].resources < resource_starvation_threshold)
-        {
-            SummerPop[i] = SummerPop[summer_pop - 1];
-            --summer_pop;
-            --i;
-			
-			++spring_migrant_deaths;
-        } // ends: death due to starvation
-		
-		// random mortality of migrants		 
-		else if (uniform(rng_r) < 1-sqrt(1 - (((-1*(socially_sensitive_mortality - pmort))/individual_mean_spring_flock_size) * SummerPop[i].flock_size + socially_sensitive_mortality)))
+		// mortality of migrants, weighted (according to socially_sensitive_mortality) to being negatively flock-size-dependent
+		//double intercept = (1 - pmort) * socially_sensitive_mortality + pmort;	// The hypothetical annual mortality for an individual in a flock size of zero for both spring and autumn migrations	 
+		if (uniform(rng_r) < 1-sqrt(1 - (((-1*(((1 - pmort) * socially_sensitive_mortality + pmort) - pmort))/(population_ss_spring_flock_size/summer_pop)) * SummerPop[i].flock_size + ((1 - pmort) * socially_sensitive_mortality + pmort))))
 		{
             SummerPop[i] = SummerPop[summer_pop - 1];
             --summer_pop;
@@ -972,6 +962,16 @@ void spring_mortality()
 			
 			++spring_migrant_deaths;
         }
+		
+		// migration-induced starvation
+        else if (SummerPop[i].resources < resource_starvation_threshold)
+        {
+            SummerPop[i] = SummerPop[summer_pop - 1];
+            --summer_pop;
+            --i;
+			
+			++spring_migrant_deaths;
+        } // ends: death due to starvation
 		
 		else
 		{

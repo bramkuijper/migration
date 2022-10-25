@@ -38,7 +38,7 @@ capacity = [8] # [2, 4, 6, 8, 10, 12, 14, 16, 18, 20]
 min_offspring_cost = [ 5 ]
 offspring_cost_magnifier = [ 1 ] # The relative difference in resource cost per offspring having migrated at the earliest opportunity versus the last
 relative_mortality_risk_of_migration = [5]
-socially_sensitive_mortality = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]  # Default would be 0, where the mortality rate is indepdendent of flock size
+socially_sensitive_mortality = [1] #[0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]  # Default would be 0, where the mortality rate is indepdendent of flock size
 
 carryover_proportion = [0]
 
