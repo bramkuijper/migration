@@ -949,8 +949,10 @@ void spring_mortality()
     }
 	
 	// MIGRANTS
-    for (int i = 0; i < summer_pop;++i)
+    	
+	for (int i = 0; i < summer_pop;++i)
     {
+		
 		// migration-induced starvation
         if (SummerPop[i].resources < resource_starvation_threshold)
         {
@@ -961,9 +963,9 @@ void spring_mortality()
 			++spring_migrant_deaths;
         } // ends: death due to starvation
 		
-		// random mortality of migrants
-        else if (uniform(rng_r) < 1-sqrt(1 - ((socially_sensitive_mortality * pmort) / SummerPop[i].flock_size + (1-socially_sensitive_mortality) * pmort)))
-        {
+		// random mortality of migrants		 
+		else if (uniform(rng_r) < 1-sqrt(1 - (((-1*(socially_sensitive_mortality - pmort))/individual_mean_spring_flock_size) * SummerPop[i].flock_size + socially_sensitive_mortality)))
+		{
             SummerPop[i] = SummerPop[summer_pop - 1];
             --summer_pop;
             --i;
@@ -977,7 +979,7 @@ void spring_mortality()
 			SummerPop[i].signal_timing = 1;  // signal phenology is also reset to 1 for autumn
 		}
     }
-}
+}  // ENDS spring_mortality
 
 void autumn_mortality()
 {
