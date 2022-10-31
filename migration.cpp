@@ -23,8 +23,7 @@ std::mt19937 rng_r(seed);
 std::uniform_real_distribution<> uniform(0.0,1.0);
 
 // parameters & variables:
-// values of the most of these are overridden in the init_arguments()
-// function
+// values of the most of these are overridden in the init_arguments() function
 
 // number of individuals in population
 const int N = 2000;  // DEFAULT: 2000
@@ -34,7 +33,6 @@ long int number_generations = 100000;  // DEFAULT: 1000000
 
 // sampling interval
 int skip = std::ceil((double)number_generations / 500);
-//int skip = 5;  // BRAM: This has to be used when running short trial simulations. I've not figured out why the ceiling function won't ensure the minimum value for skip is 1 but for whatever reason it doesn't and you get 'Floating point exception 8' in response.
 
 // initial values for phi (social dependency) and theta (resource dependency)
 // a is an intercept, b is a gradient
@@ -155,7 +153,7 @@ double autumn_migrant_pop = 0;
 int autumn_migrants_resource_cap = 0;
 int n_spring_flocks = 0;  // recording the number of spring flocks (tspring - n(unusued departure intervals))
 int n_autumn_flocks = 0;
-int summer_pop_old = 0;  // 06/02/20: So that I can track summer_pop old
+int summer_pop_old = 0;
 int Nvacancies = 0;
 int Nsurplus = 0;
 int autumn_migrant_deaths = 0;
@@ -175,8 +173,7 @@ struct Individual
     double theta_a[2];  // elevation (baseline leaving rate)
     double theta_b[2];  // reaction norm, dependency on the amount of resources
 
-    // COLLECTIVE DISPERSAL reaction norm 
-    // determines migration dependent on number of individuals
+    // COLLECTIVE DISPERSAL reaction norm (determines migration dependent on number of individuals)
     double phi_a[2];  // collective dispersal elevation
     double phi_b[2];  // collective dispersal slope, dependency on number of individuals
 	
@@ -242,7 +239,6 @@ void initialize_flock_size_distribution(std::string file_name)
         std::stringstream ss_line(single_line);
 
         // now split line into bits of string separated by separator
-        // each bit is a column name
         while (std::getline(ss_line, column, delim))
         {
 
