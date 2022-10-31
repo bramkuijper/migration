@@ -27,13 +27,13 @@ std::uniform_real_distribution<> uniform(0.0,1.0);
 // function
 
 // number of individuals in population
-const int N = 2000;  // DEFAULT: 2000
+const int N = 200;  // DEFAULT: 2000
 
 // number of generations
 long int number_generations = 50;  // DEFAULT: 1000000
 
 // sampling interval
-int skip = std::ceil((double)number_generations / 500);
+int skip = std::ceil((double)number_generations / 10);
 //int skip = 5;  // BRAM: This has to be used when running short trial simulations. I've not figured out why the ceiling function won't ensure the minimum value for skip is 1 but for whatever reason it doesn't and you get 'Floating point exception 8' in response.
 
 // initial values for phi (social dependency) and theta (resource dependency)
@@ -731,7 +731,7 @@ void write_spring_stats(std::ofstream &DataFile, int generation)
 
     // write statistics to a file
     DataFile
-        << generation << ";"  // 1
+        << generation + 1 << ";"  // 1  # Translating generation number to more inutuitive start in year 1
 		<< spring_pop_start << ";"
 		<< mean_spring_staging_size << ";"  // 3
 		<< var_spring_staging_size << ";"
@@ -1878,10 +1878,10 @@ int main(int argc, char **argv)
 		
 		clear_staging_pool();
 		
-		if (generation == 0)
-		{
-			write_spring_stats(DataFile, generation);
-		}
+		if (generation == 0 && skip > 1)
+		 {
+			 write_spring_stats(DataFile, generation);
+		  }
 		
 		if ((generation + 1) % skip == 0)
 		 {
@@ -1910,11 +1910,11 @@ int main(int argc, char **argv)
 		{
 			summer_reproduction(DataFile);	
 		}
-		
-		if (generation == 0)
-		{
-			write_summer_stats(DataFile);
-		}
+
+		if (generation == 0 && skip > 1)
+		 {
+			 write_summer_stats(DataFile);
+		  }
 		
 		if ((generation + 1) % skip == 0)
 		{
@@ -1962,11 +1962,11 @@ int main(int argc, char **argv)
 		var_autumn_staging_size = (ss_autumn_staging_size / tspring) - (mean_autumn_staging_size * mean_autumn_staging_size);
 		
 		autumn_nonmigrant_pop = summer_pop + staging_pop;
-	  
-		if (generation == 0)
-		{
-			write_autumn_stats(DataFile);
-		}
+		
+		if (generation == 0 && skip > 1)
+		 {
+			 write_autumn_stats(DataFile);
+		  }
 		
 		if ((generation+1) % skip == 0)
 		{
@@ -1983,10 +1983,10 @@ int main(int argc, char **argv)
 		
 		assert(winter_pop == remainer_pop + autumn_migrant_pop - autumn_migrant_deaths);
 		
-		if (generation == 0)
-		{
-			write_winter_stats(DataFile);
-		}
+		if (generation == 0 && skip > 1)
+		 {
+			 write_winter_stats(DataFile);
+		  }
 		
 		if ((generation+1) % skip == 0)
         {
