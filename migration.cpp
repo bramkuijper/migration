@@ -1,7 +1,7 @@
 // Collective migration when resources vary
 // Bram Kuijper & Simon Evans
 // 2019
-//
+
 #define DEBUG
 
 #include <iostream>
@@ -14,34 +14,27 @@
 #include <cmath>
 #include <random>
 
-// various functions, such as unique filename creation
-#include "auxiliary.h"
+// set up the random number generator 
+std::random_device rd;
+unsigned seed = rd();
+std::mt19937 rng_r(seed);
 
-
-// standard namespace
-using namespace std;
-
-// set random seed etc
-unsigned int seed = get_nanoseconds();
-//unsigned int seed =550476143; 
-mt19937 rng_r{seed};
-uniform_real_distribution<> uniform(0.0,1.0);
-
+// make a standard distribution
+std::uniform_real_distribution<> uniform(0.0,1.0);
 
 // parameters & variables:
 // values of the most of these are overridden in the init_arguments()
 // function
 
 // number of individuals in population
-const int N = 2000;  // DEAFULT: 2000
+const int N = 2000;  // DEFAULT: 2000
 
 // number of generations
 long int number_generations = 100000;  // DEFAULT: 1000000
 
 // sampling interval
-int skip = ceil(number_generations / 500);
-//int skip = 10;
-
+int skip = std::ceil((double)number_generations / 500);
+//int skip = 5;  // BRAM: This has to be used when running short trial simulations. I've not figured out why the ceiling function won't ensure the minimum value for skip is 1 but for whatever reason it doesn't and you get 'Floating point exception 8' in response.
 
 // initial values for phi (social dependency) and theta (resource dependency)
 // a is an intercept, b is a gradient
@@ -53,6 +46,7 @@ double init_phi_b = 0.0;
 // mortality probability 
 double pmort = 0.0;
 double relative_mortality_risk_of_migration = 0.0;
+double socially_sensitive_mortality = 0.0;
 
 // initial probability per season to encounter a good resource patch
 double pgood = 0.0;
@@ -178,48 +172,23 @@ struct Individual
     double resources;
 
     // RESOURCE SENSITIVITY reaction norm (determines entry into staging pool)
-    //
-    // elevation (baseline leaving rate) 
-    double theta_a[2];
-
-    // reaction norm, dependency on the amount of resources
-    double theta_b[2];
+    double theta_a[2];  // elevation (baseline leaving rate)
+    double theta_b[2];  // reaction norm, dependency on the amount of resources
 
     // COLLECTIVE DISPERSAL reaction norm 
     // determines migration dependent on number of individuals
-    //
-    // collective dispersal elevation
-    double phi_a[2];
-
-    // collective dispersal slope, dependency on number of individuals
-    double phi_b[2];
+    double phi_a[2];  // collective dispersal elevation
+    double phi_b[2];  // collective dispersal slope, dependency on number of individuals
 	
-	// individual departure latency
-	int latency;
-	
-	// individual departure timing
-	int timing;
-	
-	// size of flock individual was in
-	int flock_size;
-	
-	// resource cost of migration for individual
-	double cost;
-	
-	// phenology of signalling
-	int signal_timing;
-	
-	// resource value when signalling begins
-	double signal_resources;
-	
+	int latency;  // individual departure latency
+	int timing;  // individual departure timing
+	int flock_size;  // size of flock individual was in
+	double cost;  // resource cost of migration for individual
+	int signal_timing;  // phenology of signalling
+	double signal_resources;  // resource value when signalling begins
 	double signalling_proportion;
-	
-	// individual age (start out at 1 as they are reproductively mature)
-	int age;
-	
-	// number of offspring produced
-	int fecundity;
-	
+	int age;  // individual age (start out at 1 as they are reproductively mature)
+	int fecundity;  // number of offspring produced
 	int patch_quality;
 };
 
@@ -229,11 +198,87 @@ Individual WinterPop[N];
 Individual StagingPool[N];
 Individual SummerPop[N];
 
+// allocate vector to deal with the distribution of
+// migration costs
+std::vector<int> flock_size_distribution; 
+
+std::string filename_costs;
+std::string filename_output;
+
 // bounds value val between (min and max)
 double clamp(double const val, double const min, double const max) 
 {
     return(val > max ? max : val < min ? min : val);
 }
+
+// open a file and fill the cost array
+void initialize_flock_size_distribution(std::string file_name)
+{
+    std::ifstream cost_file(file_name);
+	if (!cost_file.is_open())
+    {
+        throw std::runtime_error("Cannot open file " + file_name);
+    }
+
+    // auxiliary variable to store a single line
+    std::string single_line;
+    std::string column;
+
+    // the separator we are using
+    char delim = ';';
+
+    int col_idx = 0;
+
+    // indicator whether we found our desired column
+    bool found_column = false;
+
+    // first read in header file
+    if (cost_file.good())
+    {
+        std::getline(cost_file, single_line);
+
+        // allocate some memory to go through the line
+        // and split it up by separator
+        std::stringstream ss_line(single_line);
+
+        // now split line into bits of string separated by separator
+        // each bit is a column name
+        while (std::getline(ss_line, column, delim))
+        {
+
+            if (column == "flock_size")
+            {
+                found_column = true;
+
+                break;
+            }
+            // count column name
+            ++col_idx;
+        } // end while()
+    } // end if (cost_file.good())
+
+    if (found_column)
+    {
+        while (std::getline(cost_file, single_line))
+        {
+            int data_idx = 0;
+
+            std::stringstream ss_line(single_line);
+
+            // chop up each value and put it into a double
+            while (std::getline(ss_line, column, delim))
+            {
+                if (data_idx == col_idx)
+                {
+                    flock_size_distribution.push_back(std::stod(column));
+                    break;
+                }
+
+                ++data_idx;
+            }
+        } // end while getline 1
+    } // end if (found_column)
+} // end initialize_flock_size_distribution()
 
 
 // get parameters from the command line when 
@@ -266,8 +311,12 @@ void init_arguments(int argc, char **argv)
 	offspring_cost_magnifier = atof(argv[24]);
 	carryover_proportion = atof(argv[25]);
 	relative_mortality_risk_of_migration = atof(argv[26]);
-	capacity = atof(argv[27 ]);
-		
+	socially_sensitive_mortality = atof(argv[27]);
+	capacity = atof(argv[28]);
+
+    filename_costs = argv[29];
+    filename_output = argv[30];
+
     // some bounds checking on parameters
     // probability of encountering a good environment
     // initially should be 0 <= pgood <= 1
@@ -287,51 +336,57 @@ void init_arguments(int argc, char **argv)
 	
 	assert(max_migration_cost >= min_migration_cost);
 	assert(capacity <= N);
-
-}
+	
+	if (filename_costs != "none"){
+		initialize_flock_size_distribution(filename_costs);
+	}
+	
+} // end init_arguments
 
 // write down all parameters in the file
-void write_parameters(ofstream &DataFile)  // at top of outputted file
+void write_parameters(std::ofstream &DataFile)  // at top of outputted file
 {
     DataFile
-            << "init_theta_a;" << init_theta_a << endl
-            << "init_theta_b;" << init_theta_b << endl
-            << "init_phi_a;" << init_phi_a << endl
-            << "init_phi_b;" << init_phi_b << endl
-            << "pmort;" << pmort << endl
-            << "pgood;" << pgood << endl
-            << "rgood_init;" << rgood_init << endl
-            << "rbad_init;" << rbad_init << endl
-			<< "patch_consistency_factor;" << patch_consistency_factor << endl
-			<< "preparation_penalty;" << preparation_penalty << endl
-            << "resource_max;"  << resource_max << endl
-            << "resource_reproduction_threshold;" << resource_reproduction_threshold << endl
-            << "resource_starvation_threshold;" << resource_starvation_threshold << endl
-            << "mu_theta;" << mu_theta << endl
-            << "mu_phi;" << mu_phi << endl
-            << "sdmu_theta;" << sdmu_theta << endl
-            << "sdmu_phi;" << sdmu_phi << endl
-            << "tspring;" << tspring << endl
-			<< "twinter;" << twinter << endl
-            << "N;" << N << endl
-			<< "number_generations;" << number_generations << endl
-            << "migration_cost_power;" << migration_cost_power << endl
-            << "max_migration_cost;" << max_migration_cost << endl
-			<< "min_migration_cost;" << min_migration_cost << endl
-			<< "capacity;" << capacity << endl
-			<< "offspring_cost_magnifier;" << offspring_cost_magnifier << endl
-			<< "carryover_proportion;" << carryover_proportion << endl
-			<< "relative_mortality_risk_of_migration;" << relative_mortality_risk_of_migration << endl
-            << "seed;" << seed << endl
-			<< endl;
+            << "init_theta_a;" << init_theta_a << std::endl
+            << "init_theta_b;" << init_theta_b << std::endl
+            << "init_phi_a;" << init_phi_a << std::endl
+            << "init_phi_b;" << init_phi_b << std::endl
+            << "pmort;" << pmort << std::endl
+            << "pgood;" << pgood << std::endl
+            << "filename_costs;" << filename_costs << std::endl
+            << "rgood_init;" << rgood_init << std::endl
+            << "rbad_init;" << rbad_init << std::endl
+			<< "patch_consistency_factor;" << patch_consistency_factor << std::endl
+			<< "preparation_penalty;" << preparation_penalty << std::endl
+            << "resource_max;"  << resource_max << std::endl
+            << "resource_reproduction_threshold;" << resource_reproduction_threshold << std::endl
+            << "resource_starvation_threshold;" << resource_starvation_threshold << std::endl
+            << "mu_theta;" << mu_theta << std::endl
+            << "mu_phi;" << mu_phi << std::endl
+            << "sdmu_theta;" << sdmu_theta << std::endl
+            << "sdmu_phi;" << sdmu_phi << std::endl
+            << "tspring;" << tspring << std::endl
+			<< "twinter;" << twinter << std::endl
+            << "N;" << N << std::endl
+			<< "number_generations;" << number_generations << std::endl
+            << "migration_cost_power;" << migration_cost_power << std::endl
+            << "max_migration_cost;" << max_migration_cost << std::endl
+			<< "min_migration_cost;" << min_migration_cost << std::endl
+			<< "capacity;" << capacity << std::endl
+			<< "offspring_cost_magnifier;" << offspring_cost_magnifier << std::endl
+			<< "carryover_proportion;" << carryover_proportion << std::endl
+			<< "relative_mortality_risk_of_migration;" << relative_mortality_risk_of_migration << std::endl
+			<< "socially_sensitive_mortality;" << socially_sensitive_mortality << std::endl
+			<< "seed;" << seed << std::endl
+			<< std::endl;
 }
 
 // write the distribution of all individuals
-// ofstream &DataFile: the distribution file to write it to
+// std::ofstream &DataFile: the distribution file to write it to
 // int const generation: the particular generation in which the function is called
 // int const factor: a particular number allowing you to distinguish
 // between different writes of the distribution within the same generation
-void write_dist(ofstream &DataFile, 
+void write_dist(std::ofstream &DataFile, 
         int const generation,
         int const factor)
 
@@ -356,9 +411,9 @@ void write_dist(ofstream &DataFile,
             << SummerPop[summer_idx].age << ";"
 			<< SummerPop[summer_idx].patch_quality << ";" << std::endl;
 	    }
-} // ENDS: ()
+} // end write_dist()
 
-void write_dist_data_headers(ofstream &DataFile)
+void write_dist_data_headers(std::ofstream &DataFile)
 {
     DataFile << "generation;"
 //        << "factor;" // allows you to distinguish between multiple calls of ()
@@ -377,10 +432,10 @@ void write_dist_data_headers(ofstream &DataFile)
         << "phi_b;"
         << "age;"
 		<< "patch_quality;" << std::endl;
-}
+} // end write_dist_data_headers
 
-// list of the data headers 
-void write_data_headers(ofstream &DataFile)
+// write data headers to file
+void write_data_headers(std::ofstream &DataFile)
 {
     // SPRING MIGRATION STATS (n = 24):
 	DataFile << "generation;"  // 1		
@@ -462,12 +517,12 @@ void write_data_headers(ofstream &DataFile)
 	    << "var_phi_b_winter;"
 		<< "mean_age;"
 		<< "var_age;"
-		<< endl;
-}
+		<< std::endl;
+} // end write_data_headers
 
 
 // write data for winter population (post mortality)
-void write_winter_stats(ofstream &DataFile)
+void write_winter_stats(std::ofstream &DataFile)
 {
     double mean_theta_a = 0.0;
     double ss_theta_a = 0.0;
@@ -557,11 +612,11 @@ void write_winter_stats(ofstream &DataFile)
         << (ss_phi_b - mean_phi_b * mean_phi_b) << ";"
 		<< mean_age << ";"
 		<< (ss_age - mean_age * mean_age) << ";"
-		<< endl;
+		<< std::endl;
 // ENDS: write data both for winter population and ends line entry in DataFile
-}
+} // write_winter_stats
 
-void write_summer_stats(ofstream &DataFile)
+void write_summer_stats(std::ofstream &DataFile)
 {
     double val;
 		
@@ -608,7 +663,7 @@ void write_summer_stats(ofstream &DataFile)
 }  // ENDS: write summer stats
 
 
-void write_spring_stats(ofstream &DataFile, int generation)
+void write_spring_stats(std::ofstream &DataFile, int generation)
 {
 	mean_latency = 0.0;
 	ss_latency = 0.0;
@@ -676,7 +731,7 @@ void write_spring_stats(ofstream &DataFile, int generation)
 
     // write statistics to a file
     DataFile
-        << generation << ";"  // 1
+        << generation + 1 << ";"  // 1  # Translating generation number to more inutuitive start in year 1
 		<< spring_pop_start << ";"
 		<< mean_spring_staging_size << ";"  // 3
 		<< var_spring_staging_size << ";"
@@ -703,7 +758,7 @@ void write_spring_stats(ofstream &DataFile, int generation)
 
 }  // ENDS: write data for spring migrants
 
-void write_autumn_stats(ofstream &DataFile)
+void write_autumn_stats(std::ofstream &DataFile)
 {
 	mean_latency = 0.0;
 	ss_latency = 0.0;
@@ -795,7 +850,6 @@ void write_autumn_stats(ofstream &DataFile)
 		<< (ss_autumn_cost - mean_autumn_cost * mean_autumn_cost) << ";";
 // ENDS: write data both for autumn migrants
 }
-
 
 
 // initialize the population at the start of the simulation
@@ -895,21 +949,13 @@ void spring_mortality()
     }
 	
 	// MIGRANTS
-    for (int i = 0; i < summer_pop;++i)
+    	
+	for (int i = 0; i < summer_pop;++i)
     {
-		// migration-induced starvation
-        if (SummerPop[i].resources < resource_starvation_threshold)
-        {
-            SummerPop[i] = SummerPop[summer_pop - 1];
-            --summer_pop;
-            --i;
-			
-			++spring_migrant_deaths;
-        } // ends: death due to starvation
-		
-		// random mortality of migrants
-        else if (uniform(rng_r) < 1-sqrt(1 - pmort))
-        {
+		// mortality of migrants, weighted (according to socially_sensitive_mortality) to being negatively flock-size-dependent
+		//double intercept = (1 - pmort) * socially_sensitive_mortality + pmort;	// The hypothetical annual mortality for an individual in a flock size of zero for both spring and autumn migrations	 
+		if (uniform(rng_r) < 1-sqrt(1 - (((-1*(((1 - pmort) * socially_sensitive_mortality + pmort) - pmort))/(population_ss_spring_flock_size/summer_pop)) * SummerPop[i].flock_size + ((1 - pmort) * socially_sensitive_mortality + pmort))))
+		{
             SummerPop[i] = SummerPop[summer_pop - 1];
             --summer_pop;
             --i;
@@ -917,13 +963,23 @@ void spring_mortality()
 			++spring_migrant_deaths;
         }
 		
+		// migration-induced starvation
+        else if (SummerPop[i].resources < resource_starvation_threshold)
+		 {
+			 SummerPop[i] = SummerPop[summer_pop - 1];
+			 --summer_pop;
+			 --i;
+			
+			++spring_migrant_deaths;
+		} // ends: death due to starvation
+		
 		else
 		{
 			SummerPop[i].timing = 1;  // individual survives: timing is reset to 1 for autumn migration
 			SummerPop[i].signal_timing = 1;  // signal phenology is also reset to 1 for autumn
 		}
     }
-}
+}  // ENDS spring_mortality
 
 void autumn_mortality()
 {
@@ -931,18 +987,8 @@ void autumn_mortality()
 	// MIGRANTS
 	for (int i = remainer_pop; i < winter_pop; ++i)
 		
-		// migration-induced mortality
-		if (WinterPop[i].resources < resource_starvation_threshold)        
-			{            
-				WinterPop[i] = WinterPop[winter_pop - 1];           
-				--winter_pop;            
-				--i;
-				
-				++autumn_migrant_deaths;
-			}
-				
 		//random mortality
-	    else if (uniform(rng_r) < 1 - sqrt(1 - pmort))
+	    if (uniform(rng_r) < 1-sqrt(1 - ((socially_sensitive_mortality * pmort) / SummerPop[i].flock_size + (1-socially_sensitive_mortality) * pmort)))
 	        {
 	            WinterPop[i] = WinterPop[winter_pop - 1];
 	            --winter_pop;
@@ -951,6 +997,16 @@ void autumn_mortality()
 				++autumn_migrant_deaths;
 	        } 
 			
+		// migration-induced mortality
+		else if (WinterPop[i].resources < resource_starvation_threshold)        
+			{            
+				WinterPop[i] = WinterPop[winter_pop - 1];           
+				--winter_pop;            
+				--i;
+				
+				++autumn_migrant_deaths;
+				}
+				
 		else
 			{
 				WinterPop[i].timing = 1;  // individual survives: timing is reset to 1, ready for spring phenology monitoring
@@ -1010,7 +1066,7 @@ void winter_dynamics(int t)
         }
         
 		
-	WinterPop[i].resources = min(WinterPop[i].resources, resource_max); // individuals can reach a (uniform) maximum resource value
+	WinterPop[i].resources = std::min(WinterPop[i].resources, resource_max); // individuals can reach a (uniform) maximum resource value
     
 	} // ok, resource dynamic done
 
@@ -1026,6 +1082,10 @@ void spring_dynamics(int t)
 	// individuals can continue to forage
     // individuals can continue to accumulate resources
     // individuals make dispersal decisions
+    // setting up a sampling function to sample from flock_size_distribution
+	    //assert(flock_size_distribution.size() > 0);
+		//std::uniform_int_distribution<> flock_size_sample(0, flock_size_distribution.size()-1);
+   
 	
 	// foraging of individuals who are just at the wintering site
     // and who have yet to decide to go to the staging site
@@ -1046,7 +1106,7 @@ void spring_dynamics(int t)
             WinterPop[i].patch_quality = 1 - WinterPop[i].patch_quality;  // switch of patch quality (good to poor; poor to good)
         }
 		
-	WinterPop[i].resources = min(WinterPop[i].resources, resource_max);
+	WinterPop[i].resources = std::min(WinterPop[i].resources, resource_max);
 		 
     } // ok, resource dynamic done
 
@@ -1072,7 +1132,7 @@ void spring_dynamics(int t)
             StagingPool[i].patch_quality = 1 - StagingPool[i].patch_quality;  // switch of patch quality (good to poor; poor to good)
         }
 	
-	StagingPool[i].resources = min(StagingPool[i].resources, resource_max);	
+	StagingPool[i].resources = std::min(StagingPool[i].resources, resource_max);	
 		
     } // ENDS staging site foraging loop
 
@@ -1105,6 +1165,7 @@ void spring_dynamics(int t)
             // add individual to the staging pool
             StagingPool[staging_pop] = WinterPop[i];
 			StagingPool[staging_pop].latency = 0;
+			StagingPool[staging_pop].cost = 0.0;  // reset individual's migration cost to zero
 			StagingPool[staging_pop].signal_resources = StagingPool[staging_pop].resources;
             ++staging_pop; // increment the number of individuals in the staging pool
 
@@ -1218,9 +1279,21 @@ void spring_dynamics(int t)
     {		
 		// Resource cost of migration to the individual
 		SummerPop[i].flock_size = NFlock;
-		SummerPop[i].cost = migration_cost(NFlock);
-		SummerPop[i].resources -= migration_cost(NFlock);
-		SummerPop[i].resources = min(SummerPop[i].resources, resource_max);
+		
+		//if (filename_costs.length() == 0){
+		if (filename_costs == "none"){
+			SummerPop[i].cost = migration_cost(NFlock);
+		}
+		
+		else
+		{
+			assert(flock_size_distribution.size() > 0);
+			std::uniform_int_distribution<> flock_size_sample(0, flock_size_distribution.size()-1);
+			int sampled_flock_size = flock_size_sample(rng_r);
+			SummerPop[i].cost = migration_cost(flock_size_distribution[sampled_flock_size]);
+		}
+		SummerPop[i].resources -= SummerPop[i].cost;
+		SummerPop[i].resources = std::min(SummerPop[i].resources, resource_max);
 		SummerPop[i].fecundity = 0;
 		
     } // ENDS: updating resources of migrants
@@ -1233,7 +1306,7 @@ double mutation(double val, double mu, double sdmu)
 {
     if (uniform(rng_r) < mu)
     {
-        normal_distribution<> allelic_dist(0,sdmu*val);
+        std::normal_distribution<double> allelic_dist(0,sdmu*val);
         val += allelic_dist(rng_r);
     }
 
@@ -1247,7 +1320,7 @@ void create_offspring(
         ,Individual &father
         ,Individual &offspring)
 {
-    bernoulli_distribution allele_sample(0.5);
+    std::bernoulli_distribution allele_sample(0.5);
 
     offspring.resources = 0.0;
 	offspring.signal_resources = 0.0;
@@ -1285,7 +1358,7 @@ void create_offspring(
 
 // in summary, they reproduce dependent on 
 // resources and arrival time
-void summer_reproduction(ofstream &DataFile)
+void summer_reproduction(std::ofstream &DataFile)
 {
 	// the next three lines are now duplicated in the main text of the model at the bottom of the script, so I think this is redundant
 	mean_resources = 0.0;
@@ -1305,9 +1378,9 @@ void summer_reproduction(ofstream &DataFile)
     int father_id;
 
     // use a flexible array for the kids
-    vector<Individual> Kids;
+    std::vector<Individual> Kids;
 
-    uniform_int_distribution<> summer_sample(0, summer_pop - 1);
+    std::uniform_int_distribution<> summer_sample(0, summer_pop - 1);
 
     // Mating dynamic. Presumes that there are an even number of individuals so we  
     // just discard the last individual
@@ -1315,7 +1388,8 @@ void summer_reproduction(ofstream &DataFile)
     {
 
         // if individual does not meet minimum standards then no reproduction through female function
-        if (SummerPop[i].resources < breeding_threshold * (tspring + SummerPop[i].timing - 1) / tspring)  // Cost of clutch size of one. Further offspring incur a smaller, incremental cost that also increases through the season (below)
+        //if (SummerPop[i].resources < breeding_threshold * (tspring + SummerPop[i].timing - 1) / tspring)  20/09/22: This function retained a cost to late breeding in the model
+		if (SummerPop[i].resources < breeding_threshold)  // Cost of clutch size of one. Further offspring incur a smaller, incremental cost that also increases through the season (below)
         {
             SummerPop[i].fecundity = 0.0;
 			SummerPop[i].cost = 0.0;
@@ -1358,7 +1432,9 @@ void summer_reproduction(ofstream &DataFile)
 	        //
 	        // first round to lowest integer (+ 1 to account for first offspring, cost of which is represented by the phenologically-sensitive breeding_threshold)
 	        //resource_integer = 1 + floor((SummerPop[i].resources - (breeding_threshold * (tspring + SummerPop[i].timing - 1) / tspring)) / (min_offspring_cost + ((SummerPop[i].timing - 1) * offspring_cost_magnifier * min_offspring_cost / tspring)));
-	        offspring_equivalence = 1 + (SummerPop[i].resources - (breeding_threshold * (tspring + SummerPop[i].timing - 1) / tspring)) / (min_offspring_cost + (min_offspring_cost * offspring_cost_magnifier * (SummerPop[i].timing - 1) / tspring));
+	        //offspring_equivalence = 1 + (SummerPop[i].resources - (breeding_threshold * (tspring + SummerPop[i].timing - 1) / tspring)) / (min_offspring_cost + (min_offspring_cost * offspring_cost_magnifier * (SummerPop[i].timing - 1) / tspring));
+	        offspring_equivalence = 1 + (SummerPop[i].resources - breeding_threshold) / min_offspring_cost;
+	
 			resource_integer = floor(offspring_equivalence);
 		
 	        // TODO (slightly digressing): can we come up with an analytical 
@@ -1414,7 +1490,7 @@ void summer_reproduction(ofstream &DataFile)
             break;
         }
     
-        uniform_int_distribution<> kids_sample(0, Kids.size() - 1);
+        std::uniform_int_distribution<> kids_sample(0, Kids.size() - 1);
     
         random_kid_id = kids_sample(rng_r);
 
@@ -1456,7 +1532,11 @@ void summer_reproduction(ofstream &DataFile)
 // & fly back
 void postbreeding_dynamics(int t)
 {
-    // foraging of individuals who are just at the breeding site
+    // As for spring, setting up a sampling function to sample from flock_size_distribution
+    //assert(flock_size_distribution.size() > 0);
+    //std::uniform_int_distribution<> flock_size_sample(0, flock_size_distribution.size()-1);
+    
+	// foraging of individuals who are just at the breeding site
     // and who have yet to decide to go to the staging site
     for (int i = 0; i < summer_pop; ++i)
     {
@@ -1475,7 +1555,7 @@ void postbreeding_dynamics(int t)
             SummerPop[i].patch_quality = 1 - SummerPop[i].patch_quality;  // switch of patch quality (good to poor; poor to good)
         }
 		
-		SummerPop[i].resources = min(SummerPop[i].resources, resource_max);
+		SummerPop[i].resources = std::min(SummerPop[i].resources, resource_max);
 	
     } // ok resource dynamic done
 
@@ -1500,7 +1580,7 @@ void postbreeding_dynamics(int t)
             StagingPool[i].patch_quality = 1 - StagingPool[i].patch_quality;  // switch of patch quality (good to poor; poor to good)
         }
     
-	StagingPool[i].resources = min(StagingPool[i].resources, resource_max);
+	StagingPool[i].resources = std::min(StagingPool[i].resources, resource_max);
 	
 	}
 
@@ -1532,6 +1612,7 @@ void postbreeding_dynamics(int t)
             // add individual to the staging pool
             StagingPool[staging_pop] = SummerPop[i];
 			StagingPool[staging_pop].latency = 0.0;
+			StagingPool[staging_pop].cost = 0.0;  // reset individual's migration cost to zero
 			StagingPool[staging_pop].signal_resources = StagingPool[staging_pop].resources;
             ++staging_pop; // increment the number of individuals in the staging pool
 
@@ -1647,12 +1728,22 @@ void postbreeding_dynamics(int t)
     // been added to the pool dependent on their flock size
     for (int i = winter_pop_old; i < winter_pop; ++i)
     {	
-        // resources are reduced due to migration,
-		WinterPop[i].cost = migration_cost(NFlock);
-		WinterPop[i].resources -= migration_cost(NFlock);
-		WinterPop[i].resources = min(WinterPop[i].resources, resource_max);  // Individual resource values cannot exceed resource max
+        WinterPop[i].flock_size = NFlock;
+		
+		//if (filename_costs.length() == 0){
+		if (filename_costs == "none"){
+			WinterPop[i].cost = migration_cost(NFlock);  // Flcok size-depedent cost of migration
+		}
+		
+		else{
+			assert(flock_size_distribution.size() > 0);
+			std::uniform_int_distribution<> flock_size_sample(0, flock_size_distribution.size()-1);
+			int sampled_flock_size = flock_size_sample(rng_r);
+			WinterPop[i].cost = migration_cost(flock_size_distribution[sampled_flock_size]);
+		}
+		WinterPop[i].resources -= WinterPop[i].cost;
+		WinterPop[i].resources = std::min(WinterPop[i].resources, resource_max);  // Individual resource values cannot exceed resource max
 		WinterPop[i].resources *= carryover_proportion;
-		WinterPop[i].flock_size = NFlock;
 
     } // Ends: update resource levels of winter arrivals
 
@@ -1666,15 +1757,14 @@ void postbreeding_dynamics(int t)
 // accepting command line arguments
 int main(int argc, char **argv)
 {
-    string filename = "sim_migration";
-    create_filename(filename);
-    ofstream DataFile(filename.c_str());  // output file 
+    init_arguments(argc, argv);
+
+    std::ofstream DataFile(filename_output.c_str());  // output file 
 
     // setting up filename for distribution file
-    string dist_filename{filename + "_dist"};
-    ofstream DistFile(dist_filename.c_str());
+    std::string dist_filename{filename_output + "_dist"};
+    std::ofstream DistFile(dist_filename.c_str());
 
-    init_arguments(argc, argv);
 
     write_parameters(DataFile);
 	
@@ -1788,10 +1878,10 @@ int main(int argc, char **argv)
 		
 		clear_staging_pool();
 		
-		if (generation == 0)
-		{
-			write_spring_stats(DataFile, generation);
-		}
+		if (generation == 0 && skip > 1)
+		 {
+			 write_spring_stats(DataFile, generation);
+		  }
 		
 		if ((generation + 1) % skip == 0)
 		 {
@@ -1820,11 +1910,11 @@ int main(int argc, char **argv)
 		{
 			summer_reproduction(DataFile);	
 		}
-		
-		if (generation == 0)
-		{
-			write_summer_stats(DataFile);
-		}
+
+		if (generation == 0 && skip > 1)
+		 {
+			 write_summer_stats(DataFile);
+		  }
 		
 		if ((generation + 1) % skip == 0)
 		{
@@ -1872,11 +1962,11 @@ int main(int argc, char **argv)
 		var_autumn_staging_size = (ss_autumn_staging_size / tspring) - (mean_autumn_staging_size * mean_autumn_staging_size);
 		
 		autumn_nonmigrant_pop = summer_pop + staging_pop;
-	  
-		if (generation == 0)
-		{
-			write_autumn_stats(DataFile);
-		}
+		
+		if (generation == 0 && skip > 1)
+		 {
+			 write_autumn_stats(DataFile);
+		  }
 		
 		if ((generation+1) % skip == 0)
 		{
@@ -1891,12 +1981,12 @@ int main(int argc, char **argv)
         // let individuals die with a certain probability 
         autumn_mortality();
 		
-		assert(winter_pop = remainer_pop + autumn_migrant_pop - autumn_migrant_deaths);
+		assert(winter_pop == remainer_pop + autumn_migrant_pop - autumn_migrant_deaths);
 		
-		if (generation == 0)
-		{
-			write_winter_stats(DataFile);
-		}
+		if (generation == 0 && skip > 1)
+		 {
+			 write_winter_stats(DataFile);
+		  }
 		
 		if ((generation+1) % skip == 0)
         {
