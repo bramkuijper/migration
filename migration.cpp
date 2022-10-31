@@ -905,13 +905,6 @@ void init_population()
     winter_pop = N;
 } // ENDS: initialize the population at the start of the simulation
 
-// individuals in both summer and winter populations
-// die at a certain rate. If this function is called in winter
-// the summer pool will be empty so no individuals die there
-// If this function is called in summer, however, both the summer
-// ground individuals die, as well as the individuals who have
-// stayed at the wintering ground
-
 double migration_cost(int NFlock)
 {
 
@@ -1078,10 +1071,7 @@ void spring_dynamics(int t)
 	// individuals can continue to forage
     // individuals can continue to accumulate resources
     // individuals make dispersal decisions
-    // setting up a sampling function to sample from flock_size_distribution
-	    //assert(flock_size_distribution.size() > 0);
-		//std::uniform_int_distribution<> flock_size_sample(0, flock_size_distribution.size()-1);
-   
+    // setting up a sampling function to sample from flock_size_distribution   
 	
 	// foraging of individuals who are just at the wintering site
     // and who have yet to decide to go to the staging site
@@ -1105,7 +1095,6 @@ void spring_dynamics(int t)
 	WinterPop[i].resources = std::min(WinterPop[i].resources, resource_max);
 		 
     } // ok, resource dynamic done
-
 
 
     // foraging of individuals who are already at the staging site
@@ -1146,9 +1135,7 @@ void spring_dynamics(int t)
 		// reaction norm dependent on resources
         // resulting in signaling a willingness to disperse
         // => go to the staging level
-		
-		// SIGMOIDAL MODEL
-		// of the form psignal = (1 + e^-theta_b.(resources - theta_a))^-1
+
 		psignal = pow(1 + exp(-0.5 * (WinterPop[i].theta_b[0] + WinterPop[i].theta_b[1]) 
 			* (WinterPop[i].resources - 0.5 * (WinterPop[i].theta_a[0] + WinterPop[i].theta_a[1]))), -1);
 
@@ -1185,8 +1172,6 @@ void spring_dynamics(int t)
 
     // store current number of individuals at the breeding ground
     // so that we know which individuals have just arrived there
-    // (we need to update their resources dependent on their migration
-    // group size)
     int summer_pop_old = summer_pop;
 
     // keep track of flock size of individuals who will disperse
@@ -1203,12 +1188,7 @@ void spring_dynamics(int t)
     for (int i = 0; i < staging_pop; ++i)
     {
         assert(staging_pop < N);
-		
-		// later we will consider collective dispersal decisions
-        // for now, individuals leave dependent on the current amount of individuals
-        // within the staging pool
         
-		// SIGMOIDAL MODEL
 		pdisperse = pow(1 + exp(-0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) 
 			* (((double) staging_pop_start / (staging_pop_start + winter_pop)) - 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1]))), -1);
 		
@@ -1268,8 +1248,7 @@ void spring_dynamics(int t)
 		population_ss_spring_flock_size += NFlock * NFlock;  // Also serves as sum of squares of spring migrant population size
 	}
 	
-	// update resource levels for all new individuals that have just
-    // been added to the summer pool dependent on their flock size
+	// update resource levels for all new individuals that have just been added to the summer pool dependent on their flock size
     for (int i = summer_pop_old; i < summer_pop; ++i)  // Selecting individuals that have been added to the summer pop this timepoint
 		
     {		
@@ -1384,7 +1363,7 @@ void summer_reproduction(std::ofstream &DataFile)
     {
 
         // if individual does not meet minimum standards then no reproduction through female function
-        //if (SummerPop[i].resources < breeding_threshold * (tspring + SummerPop[i].timing - 1) / tspring)  20/09/22: This function retained a cost to late breeding in the model
+		
 		if (SummerPop[i].resources < breeding_threshold)  // Cost of clutch size of one. Further offspring incur a smaller, incremental cost that also increases through the season (below)
         {
             SummerPop[i].fecundity = 0.0;
@@ -1392,7 +1371,6 @@ void summer_reproduction(std::ofstream &DataFile)
 			
 			++nonreproductive_pop;  // Tally of non-reproductive adults.
 			
-			//continue;  // breaks current iteration in the loop and proceeds to the next one
         }  // Closes IF loop
 		
 		else 
@@ -1408,33 +1386,19 @@ void summer_reproduction(std::ofstream &DataFile)
 		    // get the mother
 	        mother = SummerPop[i];
 
-	        //assert(mother.theta_b[1] >= 0.0);
-	        //assert(mother.theta_b[1] <= 1.0);
-
 	        // now randomly select a father
 	        do {
-	            // sample integer uniformly between 0 and summer_pop
-	            // (not including summer_pop itself)
+	            // sample integer uniformly between 0 and summer_pop (not including summer_pop itself)
 	            father_id = summer_sample(rng_r);
 	        }
 	        while (father_id == i);
 
 	        father = SummerPop[father_id];
-        
-	        //assert(father.theta_b[1] >= 0.0);
-	        //assert(father.theta_b[1] <= 1.0);
 
-	        // translate maternal resources to numbers of offspring
-	        //
-	        // first round to lowest integer (+ 1 to account for first offspring, cost of which is represented by the phenologically-sensitive breeding_threshold)
-	        //resource_integer = 1 + floor((SummerPop[i].resources - (breeding_threshold * (tspring + SummerPop[i].timing - 1) / tspring)) / (min_offspring_cost + ((SummerPop[i].timing - 1) * offspring_cost_magnifier * min_offspring_cost / tspring)));
-	        //offspring_equivalence = 1 + (SummerPop[i].resources - (breeding_threshold * (tspring + SummerPop[i].timing - 1) / tspring)) / (min_offspring_cost + (min_offspring_cost * offspring_cost_magnifier * (SummerPop[i].timing - 1) / tspring));
 	        offspring_equivalence = 1 + (SummerPop[i].resources - breeding_threshold) / min_offspring_cost;
 	
 			resource_integer = floor(offspring_equivalence);
 		
-	        // TODO (slightly digressing): can we come up with an analytical 
-	        // description of this rounding process of w into integer values?
 	        if (uniform(rng_r) < offspring_equivalence - resource_integer)
 	        {
 	            // make an additional offspring (adding stochasticity to fecundity)
@@ -1529,11 +1493,7 @@ void summer_reproduction(std::ofstream &DataFile)
 void postbreeding_dynamics(int t)
 {
     // As for spring, setting up a sampling function to sample from flock_size_distribution
-    //assert(flock_size_distribution.size() > 0);
-    //std::uniform_int_distribution<> flock_size_sample(0, flock_size_distribution.size()-1);
-    
-	// foraging of individuals who are just at the breeding site
-    // and who have yet to decide to go to the staging site
+    // foraging of individuals who are just at the breeding site and who have yet to decide to go to the staging site
     for (int i = 0; i < summer_pop; ++i)
     {
 		if (SummerPop[i].patch_quality == 1)
@@ -1585,17 +1545,13 @@ void postbreeding_dynamics(int t)
 
     double psignal = 0.0;
 
-    // individuals decide whether to go to staging site
-    // i.e., prepare for dispersal
+    // individuals decide whether to go to staging site, i.e., prepare for dispersal
     // signal to disperse
     for (int i = 0; i < summer_pop; ++i) 
     {
         // reaction norm dependent on resources
         // resulting in signaling a willingness to disperse
         // => go to the staging level
-        //psignal = 0.5 * (SummerPop[i].theta_a[0] + SummerPop[i].theta_a[1])
-        //    + 0.5 * (SummerPop[i].theta_b[0] + SummerPop[i].theta_b[1]) * SummerPop[i].resources; // resource_max;
-
 		psignal = pow(1 + exp(-0.5 * (SummerPop[i].theta_b[0] + SummerPop[i].theta_b[1]) 
 			* (SummerPop[i].resources - 0.5 * (SummerPop[i].theta_a[0] + SummerPop[i].theta_a[1]))), -1);
 		
@@ -1612,8 +1568,7 @@ void postbreeding_dynamics(int t)
 			StagingPool[staging_pop].signal_resources = StagingPool[staging_pop].resources;
             ++staging_pop; // increment the number of individuals in the staging pool
 
-            // delete this individual from the summer population
-			// and replace with the individual from the end of the summer_pop stack
+            // delete this individual from the summer population and replace with the individual from the end of the summer_pop stack
             SummerPop[i] = SummerPop[summer_pop - 1];
 
             // decrement the number of individuals in the summer population
@@ -1650,14 +1605,6 @@ void postbreeding_dynamics(int t)
     // actual autumn dispersal at time t
     for (int i = 0; i < staging_pop; ++i)
     {
-        // later we will consider collective dispersal decisions
-        // for now, individuals leave dependent on the current amount of individuals
-        // within the staging pool
-
-        //pdisperse = 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1])
-        //    + 0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) * (double) staging_pop_start / (staging_pop_start + summer_pop);
-
-		// SIGMOIDAL MODEL
 		pdisperse = pow(1 + exp(-0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) 
 			* (((double) staging_pop_start / (staging_pop_start + summer_pop)) - 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1]))), -1);
 		
@@ -1820,17 +1767,6 @@ int main(int argc, char **argv)
 			{
 				breeding_threshold = resource_reproduction_threshold;
 			}
-
-		// If individuals did not migrate to the breeding ground then the population size has potentially swollen above N. Random mortality returns population to N.
-		// uniform_int_distribution <> pop_sample(0, winter_pop - 1);
-		
-		// while(winter_pop > N)
-		//{
-		//	WinterPop[pop_sample(rng_r)] = WinterPop[winter_pop - 1];
-		//	--winter_pop;
-			//} 
-			
-			// TODO Check that it is phenologically non-random to simply take the first N individuals as the population for year t+1
 	
 		assert(winter_pop <= N);
 		
