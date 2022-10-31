@@ -27,13 +27,13 @@ std::uniform_real_distribution<> uniform(0.0,1.0);
 // function
 
 // number of individuals in population
-const int N = 200;  // DEFAULT: 2000
+const int N = 2000;  // DEFAULT: 2000
 
 // number of generations
-long int number_generations = 50;  // DEFAULT: 1000000
+long int number_generations = 1000000;  // DEFAULT: 1000000
 
 // sampling interval
-int skip = std::ceil((double)number_generations / 10);
+int skip = std::ceil((double)number_generations / 500);
 //int skip = 5;  // BRAM: This has to be used when running short trial simulations. I've not figured out why the ceiling function won't ensure the minimum value for skip is 1 but for whatever reason it doesn't and you get 'Floating point exception 8' in response.
 
 // initial values for phi (social dependency) and theta (resource dependency)
