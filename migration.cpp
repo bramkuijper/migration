@@ -29,7 +29,7 @@ std::uniform_real_distribution<> uniform(0.0,1.0);
 const int N = 2000;  // DEFAULT: 2000
 
 // number of generations
-long int number_generations = 100000;  // DEFAULT: 1000000
+long int number_generations = 1000000;  // DEFAULT: 1000000
 
 // sampling interval
 int skip = std::ceil((double)number_generations / 500);
@@ -71,7 +71,7 @@ double sdmu_theta = 0.0;
 double sdmu_phi = 0.0;
 
 // migration cost function
-double migration_cost_power = 0.0;
+double cost_power = 0.0;
 double max_migration_cost = 0.0;
 double min_migration_cost = 0.0;
 double capacity = 0.0;  // group size at which minimum migration cost is reached. Made this a double rather than an integer so as to avoid problems with division in the migration cost function.
@@ -299,7 +299,7 @@ void init_arguments(int argc, char **argv)
     sdmu_phi = atof(argv[16]);
     max_migration_cost = atof(argv[17]);
 	min_migration_cost = atof(argv[18]);
-    migration_cost_power = atof(argv[19]);
+    cost_power = atof(argv[19]);
 	twinter = atoi(argv[20]);
     tspring = atoi(argv[21]);
 	resource_max = atof(argv[22]);
@@ -365,7 +365,7 @@ void write_parameters(std::ofstream &DataFile)  // at top of outputted file
 			<< "twinter;" << twinter << std::endl
             << "N;" << N << std::endl
 			<< "number_generations;" << number_generations << std::endl
-            << "migration_cost_power;" << migration_cost_power << std::endl
+            << "cost_power;" << cost_power << std::endl
             << "max_migration_cost;" << max_migration_cost << std::endl
 			<< "min_migration_cost;" << min_migration_cost << std::endl
 			<< "capacity;" << capacity << std::endl
@@ -913,10 +913,11 @@ double migration_cost(int NFlock)
 		cost = min_migration_cost;
 	}
 	else{	
-		cost = min_migration_cost + ((max_migration_cost - min_migration_cost) * pow(1 - ((NFlock-1) / (capacity-1)), exp(migration_cost_power)));
+		cost = min_migration_cost + ((max_migration_cost - min_migration_cost) * pow(1 - ((NFlock-1) / (capacity-1)), exp(cost_power)));
 	}
 	return(cost);
 }  // ENDS: migration cost function
+
 
 void spring_mortality()
 {
@@ -943,7 +944,7 @@ void spring_mortality()
     {
 		// mortality of migrants, weighted (according to socially_sensitive_mortality) to being negatively flock-size-dependent
 		//double intercept = (1 - pmort) * socially_sensitive_mortality + pmort;	// The hypothetical annual mortality for an individual in a flock size of zero for both spring and autumn migrations	 
-		if (uniform(rng_r) < 1-sqrt(1 - (((-1*(((1 - pmort) * socially_sensitive_mortality + pmort) - pmort))/(population_ss_spring_flock_size/summer_pop)) * SummerPop[i].flock_size + ((1 - pmort) * socially_sensitive_mortality + pmort))))
+		if (uniform(rng_r) < 1 - sqrt(1 - pmort + (1-pmort) * socially_sensitive_mortality * pow(1 - (SummerPop[i].flock_size/ capacity), exp(cost_power))))
 		{
             SummerPop[i] = SummerPop[summer_pop - 1];
             --summer_pop;
@@ -977,7 +978,7 @@ void autumn_mortality()
 	for (int i = remainer_pop; i < winter_pop; ++i)
 		
 		//random mortality
-	    if (uniform(rng_r) < 1-sqrt(1 - ((socially_sensitive_mortality * pmort) / SummerPop[i].flock_size + (1-socially_sensitive_mortality) * pmort)))
+		if (uniform(rng_r) < 1 - sqrt(1 - pmort + (1-pmort) * socially_sensitive_mortality * pow(1 - (SummerPop[i].flock_size / capacity), exp(cost_power))))
 	        {
 	            WinterPop[i] = WinterPop[winter_pop - 1];
 	            --winter_pop;

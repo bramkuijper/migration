@@ -31,14 +31,14 @@ sdmu_phi = [0.05]
     
 # migration cost parameters
 max_migration_cost = 20  # Default is 20 
-min_migration_cost = [10] #[20, 18, 16, 14, 12, 10, 8, 6, 4, 2]  # Default is 10
-migration_cost_power = [2] #[3, 2, 1, 0, -1, -2, -3]
+min_migration_cost = [20] #[20, 18, 16, 14, 12, 10, 8, 6, 4, 2]  # Default is 10
+cost_power = [2] #[3, 2, 1, 0, -1, -2, -3]
 capacity = [8] # [2, 4, 6, 8, 10, 12, 14, 16, 18, 20]
 # reproductive cost parameters
 min_offspring_cost = 5
 offspring_cost_magnifier = 1 # The relative difference in resource cost per offspring having migrated at the earliest opportunity versus the last
 relative_mortality_risk_of_migration = 5
-socially_sensitive_mortality = [0]  # Default would be 0, where the mortality rate is indepdendent of flock size
+socially_sensitive_mortality = [0, 1]  # Default would be 0, where the mortality rate is indepdendent of flock size
 
 carryover_proportion = 0
 
@@ -73,7 +73,7 @@ for rep_i in range(0, number_replicates):
         for preparation_penalty_i in preparation_penalty:
             for sdmu_phi_i in sdmu_phi:
                 for min_migration_cost_i in min_migration_cost:
-                    for migration_cost_power_i in migration_cost_power:
+                    for cost_power_i in cost_power:
                        for capacity_i in capacity:
                             for socially_sensitive_mortality_i in socially_sensitive_mortality:
                                 for costs_sourcefile_i in costs_sourcefile:
@@ -103,7 +103,7 @@ for rep_i in range(0, number_replicates):
                                                             + str(sdmu_phi_i) + " "  #16
                                                             + str(max_migration_cost) + " "
                                                             + str(min_migration_cost_i) + " "
-                                                            + str(migration_cost_power_i) + " "  #19
+                                                            + str(cost_power_i) + " "  #19
                                                             + str(twinter) + " "  #20
                                                             + str(tspring) + " " 
                                                             + str(resource_max) + " "
