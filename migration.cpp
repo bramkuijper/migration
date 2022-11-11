@@ -29,7 +29,7 @@ std::uniform_real_distribution<> uniform(0.0,1.0);
 const int N = 2000;  // DEFAULT: 2000
 
 // number of generations
-long int number_generations = 1000000;  // DEFAULT: 1000000
+long int number_generations = 100000;  // DEFAULT: 1000000
 
 // sampling interval
 int skip = std::ceil((double)number_generations / 500);
@@ -459,7 +459,8 @@ void write_data_headers(std::ofstream &DataFile)
 		<< "mean_spring_cost;"  // 23
 		<< "var_spring_cost;"  // 24
 		
-		// SUMMER STATS (10):	
+		// SUMMER STATS (11):	
+		<< "spring_migrant_deaths;"
 		<< "spring_migrant_mortality_rate;"
 		<< "summer_pop;"
 	    << "breeder_pop;"
@@ -645,7 +646,8 @@ void write_summer_stats(std::ofstream &DataFile)
 	
     // write statistics to a file
     DataFile 
-        << (spring_migrant_deaths / spring_migrant_pop) << ";"		
+        << spring_migrant_deaths << ";"
+		<< (spring_migrant_deaths / spring_migrant_pop) << ";"		
 		<< (breeder_pop + nonreproductive_pop) << ";"
 	    << breeder_pop << ";"
 		<< nonreproductive_pop << ";"
@@ -953,7 +955,7 @@ void spring_mortality()
 			++spring_migrant_deaths;
         }
 		
-		// migration-induced starvation
+		// mortality due to resource exhaustion
         else if (SummerPop[i].resources < resource_starvation_threshold)
 		 {
 			 SummerPop[i] = SummerPop[summer_pop - 1];
@@ -977,7 +979,7 @@ void autumn_mortality()
 	// MIGRANTS
 	for (int i = remainer_pop; i < winter_pop; ++i)
 		
-		//random mortality
+		//  flock-size dependent mortality
 		if (uniform(rng_r) < 1 - sqrt(1 - pmort + (1-pmort) * socially_sensitive_mortality * pow(1 - (SummerPop[i].flock_size / capacity), exp(cost_power))))
 	        {
 	            WinterPop[i] = WinterPop[winter_pop - 1];
@@ -987,7 +989,7 @@ void autumn_mortality()
 				++autumn_migrant_deaths;
 	        } 
 			
-		// migration-induced mortality
+		// mortality to resource exhaustion
 		else if (WinterPop[i].resources < resource_starvation_threshold)        
 			{            
 				WinterPop[i] = WinterPop[winter_pop - 1];           
