@@ -74,7 +74,7 @@ double sdmu_phi = 0.0;
 double cost_power = 0.0;
 double max_migration_cost = 0.0;
 double min_migration_cost = 0.0;
-double capacity = 0.0;  // group size at which minimum migration cost is reached. Made this a double rather than an integer so as to avoid problems with division in the migration cost function.
+int capacity = 0;  // group size at which minimum migration cost is reached. Made this a double rather than an integer so as to avoid problems with division in the migration cost function.
 double cost = 0.0;
 
 // reproductive cost function
@@ -308,7 +308,7 @@ void init_arguments(int argc, char **argv)
 	carryover_proportion = atof(argv[25]);
 	relative_mortality_risk_of_migration = atof(argv[26]);
 	socially_sensitive_mortality = atof(argv[27]);
-	capacity = atof(argv[28]);
+	capacity = atoi(argv[28]);
 
     filename_costs = argv[29];
     filename_output = argv[30];
@@ -332,6 +332,7 @@ void init_arguments(int argc, char **argv)
 	
 	assert(max_migration_cost >= min_migration_cost);
 	assert(capacity <= N);
+	assert(capacity > 1);
 	
 	if (filename_costs != "none"){
 		initialize_flock_size_distribution(filename_costs);
@@ -909,7 +910,6 @@ void init_population()
 
 double migration_cost(int NFlock)
 {
-
 	if (NFlock >= capacity)
 	{
 		cost = min_migration_cost;
@@ -947,6 +947,8 @@ void spring_mortality()
 		// mortality of migrants, weighted (according to socially_sensitive_mortality) to being negatively flock-size-dependent
 		//double intercept = (1 - pmort) * socially_sensitive_mortality + pmort;	// The hypothetical annual mortality for an individual in a flock size of zero for both spring and autumn migrations	 
 		int functional_flock_size = std::min(capacity, SummerPop[i].flock_size);
+
+
 		if (uniform(rng_r) < 1 - sqrt(1 - pmort - pow((1-pmort) * socially_sensitive_mortality * ((capacity - functional_flock_size)/ capacity), exp(cost_power))))
 		{
             SummerPop[i] = SummerPop[summer_pop - 1];
