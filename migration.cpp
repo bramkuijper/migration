@@ -979,9 +979,11 @@ void autumn_mortality()
     
 	// MIGRANTS
 	for (int i = remainer_pop; i < winter_pop; ++i)
+    {
 		
 		//  flock-size dependent mortality
 		int functional_flock_size = std::min(capacity, WinterPop[i].flock_size);
+
 		if (uniform(rng_r) < 1 - sqrt(1 - pmort - pow((1-pmort) * socially_sensitive_mortality * ((capacity - functional_flock_size)/ capacity), exp(cost_power))))
 			{
 	            WinterPop[i] = WinterPop[winter_pop - 1];
@@ -1012,7 +1014,7 @@ void autumn_mortality()
 	// (they effectively have two bouts of mortality in one go
 	// ('pmort' being the annual mortality probability, 
 	// modified by 'relative_mortality_risk')
-	
+    }
 }
 
 // remove individuals from the staging pool and put them
