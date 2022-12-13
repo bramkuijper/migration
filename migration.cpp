@@ -947,8 +947,6 @@ void spring_mortality()
 		// mortality of migrants, weighted (according to socially_sensitive_mortality) to being negatively flock-size-dependent
 		//double intercept = (1 - pmort) * socially_sensitive_mortality + pmort;	// The hypothetical annual mortality for an individual in a flock size of zero for both spring and autumn migrations	 
 		int functional_flock_size = std::min(capacity, SummerPop[i].flock_size);
-
-
 		if (uniform(rng_r) < 1 - sqrt(1 - pmort - pow((1-pmort) * socially_sensitive_mortality * ((capacity - functional_flock_size)/ capacity), exp(cost_power))))
 		{
             SummerPop[i] = SummerPop[summer_pop - 1];
@@ -983,7 +981,8 @@ void autumn_mortality()
 	for (int i = remainer_pop; i < winter_pop; ++i)
 		
 		//  flock-size dependent mortality
-		if (uniform(rng_r) < 1 - sqrt(1 - pmort - pow((1-pmort) * socially_sensitive_mortality * ((capacity - SummerPop[i].flock_size)/ capacity), exp(cost_power))))
+		int functional_flock_size_winter = std::min(capacity, WinterPop[i].flock_size);
+		if (uniform(rng_r) < 1 - sqrt(1 - pmort - pow((1-pmort) * socially_sensitive_mortality * ((capacity - functional_flock_size_winter)/ capacity), exp(cost_power))))
 	        {
 	            WinterPop[i] = WinterPop[winter_pop - 1];
 	            --winter_pop;
