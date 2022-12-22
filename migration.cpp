@@ -60,7 +60,7 @@ double rbad = 0.0;
 double preparation_penalty = 0.0;
 
 double resource_reproduction_threshold = 0.0;  // minimum resource level necessary to reproduce 
-double resource_starvation_threshold = 0.0;  // minimum resource level necessary to survive
+double starvation_threshold = 0.0;  // minimum resource level necessary to survive
 double resource_max = 0.0;  // maximum resource value an individual can achieve
 double breeding_threshold = 0.0;
 
@@ -119,9 +119,9 @@ double ss_departure_timing = 0.0;
 double mean_signal_timing = 0.0;
 double var_signal_timing = 0.0;
 double ss_signal_timing = 0.0;
-double mean_signal_resources = 0.0;
-double var_signal_resources = 0.0;
-double ss_signal_resources = 0.0;
+double mean_signal_condition = 0.0;
+double var_signal_condition = 0.0;
+double ss_signal_condition = 0.0;
 double mean_age = 0.0;
 double var_age = 0.0;
 double ss_age = 0.0;
@@ -168,6 +168,7 @@ double ss_autumn_staging_size = 0.0;
 struct Individual 
 {
     double resources;
+	double condition;
 
     // RESOURCE SENSITIVITY reaction norm (determines entry into staging pool)
     double theta_a[2];  // elevation (baseline leaving rate)
@@ -182,7 +183,7 @@ struct Individual
 	int flock_size;  // size of flock individual was in
 	double cost;  // resource cost of migration for individual
 	int signal_timing;  // phenology of signalling
-	double signal_resources;  // resource value when signalling begins
+	double signal_condition;  // condition when signalling begins
 	double signalling_proportion;
 	int age;  // individual age (start out at 1 as they are reproductively mature)
 	int fecundity;  // number of offspring produced
@@ -292,7 +293,7 @@ void init_arguments(int argc, char **argv)
     rbad_init = atof(argv[9]);
 	preparation_penalty = atof(argv[10]);
     resource_reproduction_threshold = atof(argv[11]);
-    resource_starvation_threshold = atof(argv[12]);
+    starvation_threshold = atof(argv[12]);
     mu_theta = atof(argv[13]);
     mu_phi = atof(argv[14]);
     sdmu_theta = atof(argv[15]);
@@ -357,7 +358,7 @@ void write_parameters(std::ofstream &DataFile)  // at top of outputted file
 			<< "preparation_penalty;" << preparation_penalty << std::endl
             << "resource_max;"  << resource_max << std::endl
             << "resource_reproduction_threshold;" << resource_reproduction_threshold << std::endl
-            << "resource_starvation_threshold;" << resource_starvation_threshold << std::endl
+            << "starvation_threshold;" << starvation_threshold << std::endl
             << "mu_theta;" << mu_theta << std::endl
             << "mu_phi;" << mu_phi << std::endl
             << "sdmu_theta;" << sdmu_theta << std::endl
@@ -394,7 +395,7 @@ void write_dist(std::ofstream &DataFile,
         DataFile << generation << ";"
 			<< "summer;"
 			<< SummerPop[summer_idx].signal_timing << ";"
-			<< SummerPop[summer_idx].signal_resources << ";"
+			<< SummerPop[summer_idx].signal_condition << ";"
             << SummerPop[summer_idx].timing << ";"
 			<< SummerPop[summer_idx].signalling_proportion << ";"
             << SummerPop[summer_idx].latency << ";"
@@ -416,7 +417,7 @@ void write_dist_data_headers(std::ofstream &DataFile)
 //        << "factor;" // allows you to distinguish between multiple calls of ()
         << "season;"
 		<< "signal_timing;"	
-		<< "signal_resources;"
+		<< "signal_condition;"
 		<< "departure_timing;"
 		<< "signalling_proportion;"
 		<< "latency;"
@@ -442,8 +443,8 @@ void write_data_headers(std::ofstream &DataFile)
         << "spring_migrant_pop;"  // 5
 		<< "spring_migrants_resource_cap;"  // 6
 		<< "spring_nonmigrant_pop;"  // 7
-		<< "mean_spring_signal_resources;"  // 8
-		<< "var_spring_signal_resources;"  // 9
+		<< "mean_spring_signal_condition;"  // 8
+		<< "var_spring_signal_condition;"  // 9
 		<< "mean_spring_signal_timing;"  // 10
 		<< "var_spring_signal_timing;"  // 11
 		<< "mean_spring_latency;"
@@ -479,8 +480,8 @@ void write_data_headers(std::ofstream &DataFile)
         << "autumn_migrant_pop;"
 		<< "autumn_migrants_resource_cap;"
 		<< "autumn_nonmigrant_pop;"
-		<< "mean_autumn_signal_resources;"
-		<< "var_autumn_signal_resources;"
+		<< "mean_autumn_signal_condition;"
+		<< "var_autumn_signal_condition;"
 		<< "mean_autumn_signal_timing;"
 		<< "var_autumn_signal_timing;"
 		<< "mean_autumn_latency;"
@@ -674,8 +675,8 @@ void write_spring_stats(std::ofstream &DataFile, int generation)
 	individual_ss_spring_flock_size = 0.0;
 	mean_spring_cost = 0.0;
 	ss_spring_cost = 0.0;
-	mean_signal_resources = 0.0;
-	ss_signal_resources = 0.0;
+	mean_signal_condition = 0.0;
+	ss_signal_condition = 0.0;
 	int lat;
 	int ticktock;
 	int calendar;
@@ -697,9 +698,9 @@ void write_spring_stats(std::ofstream &DataFile, int generation)
 		mean_signal_timing += calendar;
 		ss_signal_timing += calendar * calendar;
 		
-		fatness = SummerPop[i].signal_resources;
-		mean_signal_resources += fatness;
-		ss_signal_resources += fatness * fatness;
+		fatness = SummerPop[i].signal_condition;
+		mean_signal_condition += fatness;
+		ss_signal_condition += fatness * fatness;
 		
 		group_size = SummerPop[i].flock_size;
 		individual_mean_spring_flock_size += group_size;
@@ -724,8 +725,8 @@ void write_spring_stats(std::ofstream &DataFile, int generation)
 		ss_spring_cost /= summer_pop;
 		mean_resources /= summer_pop;
 		ss_resources /= summer_pop;
-		mean_signal_resources /= summer_pop;
-		ss_signal_resources /= summer_pop;
+		mean_signal_condition /= summer_pop;
+		ss_signal_condition /= summer_pop;
     }
 
     // write statistics to a file
@@ -737,8 +738,8 @@ void write_spring_stats(std::ofstream &DataFile, int generation)
 		<< spring_migrant_pop << ";"  // 5
 		<< spring_migrants_resource_cap << ";"
 		<< spring_nonmigrant_pop << ";"  // 7
-		<< mean_signal_resources << ";"
-		<< (ss_signal_resources - mean_signal_resources * mean_signal_resources) << ";"  // 9
+		<< mean_signal_condition << ";"
+		<< (ss_signal_condition - mean_signal_condition * mean_signal_condition) << ";"  // 9
 		<< mean_signal_timing << ";"
 		<< (ss_signal_timing - mean_signal_timing * mean_signal_timing) << ";"  // 11
 		<< mean_latency << ";"
@@ -769,8 +770,8 @@ void write_autumn_stats(std::ofstream &DataFile)
 	individual_ss_autumn_flock_size = 0.0;
 	mean_autumn_cost = 0.0;
 	ss_autumn_cost = 0.0;
-	mean_signal_resources = 0.0;
-	ss_signal_resources = 0.0;
+	mean_signal_condition = 0.0;
+	ss_signal_condition = 0.0;
 	int lat;
 	int ticktock;
 	int calendar;
@@ -792,9 +793,9 @@ void write_autumn_stats(std::ofstream &DataFile)
 		mean_signal_timing += calendar;
 		ss_signal_timing += calendar * calendar;
 		
-		fatness = WinterPop[i].signal_resources;
-		mean_signal_resources += fatness;
-		ss_signal_resources += fatness * fatness;
+		fatness = WinterPop[i].signal_condition;
+		mean_signal_condition += fatness;
+		ss_signal_condition += fatness * fatness;
 		
 		group_size = WinterPop[i].flock_size;
 		individual_mean_autumn_flock_size += group_size;
@@ -815,8 +816,8 @@ void write_autumn_stats(std::ofstream &DataFile)
 		ss_resources /= autumn_migrant_pop;
 		mean_signal_timing /= autumn_migrant_pop;
 		ss_signal_timing /= autumn_migrant_pop;
-		mean_signal_resources /= autumn_migrant_pop;
-		ss_signal_resources /= autumn_migrant_pop;
+		mean_signal_condition /= autumn_migrant_pop;
+		ss_signal_condition /= autumn_migrant_pop;
 		individual_mean_autumn_flock_size /= autumn_migrant_pop;
 		individual_ss_autumn_flock_size /= autumn_migrant_pop;
 		mean_autumn_cost /= autumn_migrant_pop;
@@ -830,8 +831,8 @@ void write_autumn_stats(std::ofstream &DataFile)
         << autumn_migrant_pop << ";"
 		<< autumn_migrants_resource_cap << ";"
 		<< autumn_nonmigrant_pop << ";"
-		<< mean_signal_resources << ";"
-		<< (ss_signal_resources - mean_signal_resources * mean_signal_resources) << ";"
+		<< mean_signal_condition << ";"
+		<< (ss_signal_condition - mean_signal_condition * mean_signal_condition) << ";"
 		<< mean_signal_timing << ";"
 		<< (ss_signal_timing - mean_signal_timing * mean_signal_timing) << ";"
 		<< mean_latency << ";"
@@ -859,8 +860,9 @@ void init_population()
     for (int i = 0; i < N; ++i)
     {
         WinterPop[i].resources = 0.0;  // at start of simulation, initial resource level for all individuals is 0
+		WinterPop[i].condition = WinterPop[i].resources / resource_max;
 		
-		WinterPop[i].signal_resources = 0.0;
+		WinterPop[i].signal.condition = 0.0;
 		
 		// set individual latency to 0
 		WinterPop[i].latency = 0;
@@ -958,7 +960,7 @@ void spring_mortality()
 			}
 		
 		// mortality due to resource exhaustion
-        else if (SummerPop[i].resources < resource_starvation_threshold)
+        else if (SummerPop[i].condition < starvation_threshold)
 		 {
 			 SummerPop[i] = SummerPop[summer_pop - 1];
 			 --summer_pop;
@@ -995,7 +997,7 @@ void autumn_mortality()
 	        } 
 			
 		// mortality to resource exhaustion
-		else if (WinterPop[i].resources < resource_starvation_threshold)        
+		else if (WinterPop[i].condition < starvation_threshold)        
 			{            
 				WinterPop[i] = WinterPop[winter_pop - 1];           
 				--winter_pop;            
@@ -1157,7 +1159,7 @@ void spring_dynamics(int t)
             StagingPool[staging_pop] = WinterPop[i];
 			StagingPool[staging_pop].latency = 0;
 			StagingPool[staging_pop].cost = 0.0;  // reset individual's migration cost to zero
-			StagingPool[staging_pop].signal_resources = StagingPool[staging_pop].resources;
+			StagingPool[staging_pop].signal_condition = StagingPool[staging_pop].condition;
             ++staging_pop; // increment the number of individuals in the staging pool
 
             assert(staging_pop <= N);
@@ -1306,7 +1308,7 @@ void create_offspring(
     std::bernoulli_distribution allele_sample(0.5);
 
     offspring.resources = 0.0;
-	offspring.signal_resources = 0.0;
+	offspring.signal_condition = 0.0;
 	offspring.latency = 0;
 	offspring.timing = 1;
 	offspring.signal_timing = 1;
@@ -1581,7 +1583,7 @@ void postbreeding_dynamics(int t)
             StagingPool[staging_pop] = SummerPop[i];
 			StagingPool[staging_pop].latency = 0.0;
 			StagingPool[staging_pop].cost = 0.0;  // reset individual's migration cost to zero
-			StagingPool[staging_pop].signal_resources = StagingPool[staging_pop].resources;
+			StagingPool[staging_pop].signal_condition = StagingPool[staging_pop].condition;
             ++staging_pop; // increment the number of individuals in the staging pool
 
             // delete this individual from the summer population and replace with the individual from the end of the summer_pop stack
@@ -1745,9 +1747,9 @@ int main(int argc, char **argv)
 		ss_spring_staging_size = 0.0;
 		mean_spring_cost = 0.0;
 		ss_spring_cost = 0.0;
-		mean_signal_resources = 0.0;
-		var_signal_resources = 0.0;
-		ss_signal_resources = 0.0;
+		mean_signal_condition = 0.0;
+		var_signal_condition = 0.0;
+		ss_signal_condition = 0.0;
 		mean_cost = 0.0;
 		ss_cost = 0.0;
 		staging_pop = 0;
