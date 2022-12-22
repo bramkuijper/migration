@@ -3,7 +3,7 @@ import datetime
 # TESTING TO SEE IF THIS FILE COMMITS TO GITHUB
 # generate all parameter combinations to run the migration simulation
 
-init_theta_a = [60]  # Default is 60
+init_theta_a = [1]  # Default is 60
 init_theta_b = [1]  # Default is 1
 init_phi_a = [0.3]  # Default is 0.3
 init_phi_b = [25]  # Default is 25
@@ -20,7 +20,7 @@ rbad = 0.02
 preparation_penalty = [0.5] # [1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1, 0] # The reduction in resource acquisition, relative to the normal feeding phase. Default is 0.5
 
 resource_reproduction_threshold = 30
-resource_starvation_threshold = 0
+starvation_threshold = 0
 resource_max = 60
 
 # mutation rates
@@ -96,7 +96,7 @@ for rep_i in range(0, number_replicates):
                                                             + str(rbad) + " "  #9
                                                             + str(preparation_penalty_i) + " "  #10
                                                             + str(resource_reproduction_threshold) + " "
-                                                            + str(resource_starvation_threshold) + " "
+                                                            + str(starvation_threshold) + " "
                                                             + str(mu_theta) + " "
                                                             + str(mu_phi) + " "  #14
                                                             + str(sdmu_theta) + " "  #15

@@ -129,8 +129,8 @@ double mean_summer_cost_breederpop = 0.0;
 double ss_summer_cost_breederpop = 0.0;
 double mean_fecundity_breederpop = 0.0;
 double ss_fecundity_breederpop = 0.0;
-double mean_resources = 0.0;
-double ss_resources = 0.0;
+double mean_condition = 0.0;
+double ss_condition = 0.0;
 double rv =0.0;
 
 // keep track of the current number of 
@@ -172,7 +172,7 @@ struct Individual
 
     // RESOURCE SENSITIVITY reaction norm (determines entry into staging pool)
     double theta_a[2];  // elevation (baseline leaving rate)
-    double theta_b[2];  // reaction norm, dependency on the amount of resources
+    double theta_b[2];  // reaction norm: dependency on individual's condition
 
     // COLLECTIVE DISPERSAL reaction norm (determines migration dependent on number of individuals)
     double phi_a[2];  // collective dispersal elevation
@@ -401,7 +401,7 @@ void write_dist(std::ofstream &DataFile,
             << SummerPop[summer_idx].latency << ";"
 			<< SummerPop[summer_idx].flock_size << ";"
            	<< SummerPop[summer_idx].cost << ";"
-			<< SummerPop[summer_idx].resources << ";"  // At arrival
+			<< SummerPop[summer_idx].condition << ";"  // At arrival
 	        << SummerPop[summer_idx].theta_a[0]*0.5 + SummerPop[summer_idx].theta_a[1]*0.5 << ";"
 	        << SummerPop[summer_idx].theta_b[0]*0.5 + SummerPop[summer_idx].theta_b[1]*0.5 << ";"
 	        << SummerPop[summer_idx].phi_a[0]*0.5 + SummerPop[summer_idx].phi_a[1]*0.5 << ";"
@@ -423,7 +423,7 @@ void write_dist_data_headers(std::ofstream &DataFile)
 		<< "latency;"
 		<< "flock_size;"
 		<< "cost;"
-		<< "arrival_resources;"
+		<< "arrival_condition;"
         << "theta_a;"
         << "theta_b;"
         << "phi_a;"
@@ -504,8 +504,8 @@ void write_data_headers(std::ofstream &DataFile)
 		<< "total_autumn_mortality_rate;"	
 		<< "remainer_pop;"
 		<< "winter_pop;"
-		<< "mean_resources_winter;"
-	    << "var_resources_winter;"
+		<< "mean_condition_winter;"
+	    << "var_condition_winter;"
 		<< "mean_theta_a_winter;"
 	    << "var_theta_a_winter;"
 	    << "mean_theta_b_winter;"
@@ -533,8 +533,8 @@ void write_winter_stats(std::ofstream &DataFile)
     double mean_phi_b = 0.0;
     double ss_phi_b = 0.0;
 
-    double mean_resources = 0.0;
-    double ss_resources = 0.0;
+    double mean_condition = 0.0;
+    double ss_condition = 0.0;
 	
 	double val;
 	
@@ -564,9 +564,9 @@ void write_winter_stats(std::ofstream &DataFile)
         mean_phi_b += val;
         ss_phi_b += val * val;
         
-        val = WinterPop[i].resources;  // the resource level of individual i  // 18 Feb 2020: I've changed this from StagingPool[i].resources
-        mean_resources += val;
-        ss_resources += val * val;
+        val = WinterPop[i].condition; 
+        mean_condition += val;
+        ss_condition += val * val;
 		
 		age = WinterPop[i].age;
 		mean_age += age;
@@ -581,14 +581,14 @@ void write_winter_stats(std::ofstream &DataFile)
         mean_theta_b /=  winter_pop;
         mean_phi_a /=  winter_pop;
         mean_phi_b /=  winter_pop;
-        mean_resources /=  winter_pop;
+        mean_condition /=  winter_pop;
 		mean_age /= winter_pop;
          
         ss_theta_a /= winter_pop; 
         ss_theta_b /= winter_pop; 
         ss_phi_a /= winter_pop; 
         ss_phi_b /= winter_pop;
-        ss_resources /= winter_pop; 
+        ss_condition /= winter_pop; 
 		ss_age /= winter_pop;
     }
 	
@@ -599,8 +599,8 @@ void write_winter_stats(std::ofstream &DataFile)
 		<< (autumn_nonmigrant_pop + autumn_migrant_deaths) / (autumn_nonmigrant_pop + autumn_migrant_pop ) << ";"
 		<< remainer_pop << ";"
 		<< winter_pop << ";"
-        << mean_resources << ";"
-        << (ss_resources - mean_resources * mean_resources) << ";"
+        << mean_condition << ";"
+        << (ss_condition - mean_condition * mean_condition) << ";"
         << mean_theta_a << ";"
         << (ss_theta_a - mean_theta_a * mean_theta_a) << ";"
         << mean_theta_b << ";"
@@ -723,8 +723,8 @@ void write_spring_stats(std::ofstream &DataFile, int generation)
 		individual_ss_spring_flock_size /= summer_pop;
 		mean_spring_cost /= summer_pop;
 		ss_spring_cost /= summer_pop;
-		mean_resources /= summer_pop;
-		ss_resources /= summer_pop;
+		mean_condition /= summer_pop;
+		ss_condition /= summer_pop;
 		mean_signal_condition /= summer_pop;
 		ss_signal_condition /= summer_pop;
     }
@@ -746,8 +746,8 @@ void write_spring_stats(std::ofstream &DataFile, int generation)
 		<< (ss_latency - mean_latency * mean_latency) << ";"  // 13
 		<< mean_departure_timing << ";"
 		<< (ss_departure_timing - mean_departure_timing * mean_departure_timing) << ";"  // 15
-		<< mean_resources << ";"
-		<< (ss_resources - mean_resources * mean_resources) << ";"  // 17
+		<< mean_condition << ";"
+		<< (ss_condition - mean_condition * mean_condition) << ";"  // 17
 		<< n_spring_flocks << ";"
 		<< population_mean_spring_flock_size << ";"  // 19
 		<< population_var_spring_flock_size << ";"
@@ -812,8 +812,8 @@ void write_autumn_stats(std::ofstream &DataFile)
         ss_latency /= autumn_migrant_pop;
         mean_departure_timing /= autumn_migrant_pop;
         ss_departure_timing /= autumn_migrant_pop;
-		mean_resources /= autumn_migrant_pop;
-		ss_resources /= autumn_migrant_pop;
+		mean_condition /= autumn_migrant_pop;
+		ss_condition /= autumn_migrant_pop;
 		mean_signal_timing /= autumn_migrant_pop;
 		ss_signal_timing /= autumn_migrant_pop;
 		mean_signal_condition /= autumn_migrant_pop;
@@ -839,8 +839,8 @@ void write_autumn_stats(std::ofstream &DataFile)
 		<< (ss_latency - mean_latency * mean_latency) << ";"
 		<< mean_departure_timing << ";"
 		<< (ss_departure_timing - mean_departure_timing * mean_departure_timing) << ";"
-		<< mean_resources << ";"
-		<< (ss_resources - mean_resources * mean_resources) << ";"
+		<< mean_condition << ";"
+		<< (ss_condition - mean_condition * mean_condition) << ";"
 		<< n_autumn_flocks << ";"
 		<< population_mean_autumn_flock_size << ";" 
 		<< population_var_autumn_flock_size << ";"
@@ -1142,12 +1142,13 @@ void spring_dynamics(int t)
     // signal to disperse
     for (int i = 0; i < winter_pop; ++i) 
     {	
-		// reaction norm dependent on resources
+		// reaction norm dependent on condition (individual resource value a
+		// as a proportion of resource_max)
         // resulting in signaling a willingness to disperse
         // => go to the staging level
 
 		psignal = pow(1 + exp(-0.5 * (WinterPop[i].theta_b[0] + WinterPop[i].theta_b[1]) 
-			* (WinterPop[i].resources - 0.5 * (WinterPop[i].theta_a[0] + WinterPop[i].theta_a[1]))), -1);
+			* (WinterPop[i].condition - 0.5 * (WinterPop[i].theta_a[0] + WinterPop[i].theta_a[1]))), -1);
 
         // bound the probability
         psignal = clamp(psignal, 0, 1);
@@ -1219,9 +1220,9 @@ void spring_dynamics(int t)
 				++spring_migrants_resource_cap;
 			}
 
-			rv = StagingPool[i].resources;
-			mean_resources += rv;
-			ss_resources += rv * rv;
+			rv = StagingPool[i].condition;
+			mean_condition += rv;
+			ss_condition += rv * rv;
 			
             // delete this individual from the staging population
             StagingPool[i] = StagingPool[staging_pop - 1];
@@ -1350,12 +1351,12 @@ void create_offspring(
 
 
 // in summary, they reproduce dependent on 
-// resources and arrival time
+// condition (and arrival time, if activated)
 void summer_reproduction(std::ofstream &DataFile)
 {
 	// the next three lines are now duplicated in the main text of the model at the bottom of the script, so I think this is redundant
-	mean_resources = 0.0;
-	ss_resources = 0.0;
+	mean_condition = 0.0;
+	ss_condition = 0.0;
 	rv = 0.0;
 	
 	// auxiliary variables storing current mom and dad
@@ -1397,9 +1398,9 @@ void summer_reproduction(std::ofstream &DataFile)
 	        // update stats
 	        ++breeder_pop;
 		
-			rv = SummerPop[i].resources;
-			mean_resources += rv;
-			ss_resources += rv * rv;
+			rv = SummerPop[i].condition;
+			mean_condition += rv;
+			ss_condition += rv * rv;
 		
 		    // get the mother
 	        mother = SummerPop[i];
@@ -1507,7 +1508,7 @@ void summer_reproduction(std::ofstream &DataFile)
 
 
 // gaining resources at breeding ground
-// & fly back
+// & fly back to overwintering grounds
 void postbreeding_dynamics(int t)
 {
     // As for spring, setting up a sampling function to sample from flock_size_distribution
@@ -1567,11 +1568,11 @@ void postbreeding_dynamics(int t)
     // signal to disperse
     for (int i = 0; i < summer_pop; ++i) 
     {
-        // reaction norm dependent on resources
+        // reaction norm dependent on condition
         // resulting in signaling a willingness to disperse
         // => go to the staging level
 		psignal = pow(1 + exp(-0.5 * (SummerPop[i].theta_b[0] + SummerPop[i].theta_b[1]) 
-			* (SummerPop[i].resources - 0.5 * (SummerPop[i].theta_a[0] + SummerPop[i].theta_a[1]))), -1);
+			* (SummerPop[i].condition - 0.5 * (SummerPop[i].theta_a[0] + SummerPop[i].theta_a[1]))), -1);
 		
 		// bound the probability
         psignal = clamp(psignal, 0.0, 1.0);
@@ -1632,9 +1633,9 @@ void postbreeding_dynamics(int t)
         if (uniform(rng_r) < pdisperse)
         {
 			
-			rv = StagingPool[i].resources;  // Record individual's resource value at departure
-			mean_resources += rv;
-			ss_resources += rv * rv;
+			rv = StagingPool[i].condition;  // Record individual's resource condition at departure
+			mean_condition += rv;
+			ss_condition += rv * rv;
 			
 			if (StagingPool[i].resources == resource_max)
 			{
@@ -1802,8 +1803,8 @@ int main(int argc, char **argv)
 		}
 		
 		// time during spring during which individuals can migrate (or carry on foraging)
-		mean_resources = 0.0;
-		ss_resources = 0.0;
+		mean_condition = 0.0;
+		ss_condition = 0.0;
 		rv = 0;
 		
 		for (int t = 0; t < tspring; ++t)
@@ -1852,8 +1853,8 @@ int main(int argc, char **argv)
 		Nvacancies = 0;
 		rv = 0;
 				
-		mean_resources = 0.0;
-		ss_resources = 0.0;
+		mean_condition = 0.0;
+		ss_condition = 0.0;
 		rv = 0.0;
 		
 		if (summer_pop > 1)
@@ -1886,8 +1887,8 @@ int main(int argc, char **argv)
 		ss_autumn_cost = 0.0;
 		mean_autumn_cost = 0.0;
 		ss_autumn_cost = 0.0;
-		mean_resources = 0.0;
-		ss_resources = 0.0;
+		mean_condition = 0.0;
+		ss_condition = 0.0;
 		rv = 0;
 		autumn_migrant_deaths = 0;
 		autumn_migrant_mortality_rate = 0.0;
