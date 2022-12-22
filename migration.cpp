@@ -451,8 +451,8 @@ void write_data_headers(std::ofstream &DataFile)
 		<< "var_spring_latency;"  // 13
 		<< "mean_spring_departure_timing;"
 		<< "var_spring_departure_timing;"  // 15
-		<< "mean_spring_departure_resources;"  // 16
-		<< "var_spring_departure_resources;"  // 17
+		<< "mean_spring_departure_condition;"  // 16
+		<< "var_spring_departure_condition;"  // 17
         << "n_spring_flocks;"
         << "population_mean_spring_flock_size;"
         << "population_var_spring_flock_size;"  // 20
@@ -488,8 +488,8 @@ void write_data_headers(std::ofstream &DataFile)
 		<< "var_autumn_latency;"
 		<< "mean_autumn_departure_timing;"
 		<< "var_autumn_departure_timing;"
-		<< "mean_autumn_departure_resources;"
-		<< "var_autumn_departure_resources;"
+		<< "mean_autumn_departure_condition;"
+		<< "var_autumn_departure_condition;"
         << "n_autumn_flocks;"
         << "population_mean_autumn_flock_size;"
         << "population_var_autumn_flock_size;"
@@ -862,7 +862,7 @@ void init_population()
         WinterPop[i].resources = 0.0;  // at start of simulation, initial resource level for all individuals is 0
 		WinterPop[i].condition = WinterPop[i].resources / resource_max;
 		
-		WinterPop[i].signal.condition = 0.0;
+		WinterPop[i].signal_condition = 0.0;
 		
 		// set individual latency to 0
 		WinterPop[i].latency = 0;
