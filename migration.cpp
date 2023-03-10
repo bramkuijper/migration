@@ -26,7 +26,7 @@ std::uniform_real_distribution<> uniform(0.0,1.0);
 // values of the most of these are overridden in the init_arguments() function
 
 // number of individuals in population
-const int N = 2000;  // DEFAULT: 2000
+const int N = 1000;  // DEFAULT: 2000
 
 // number of generations
 long int number_generations = 1000000;  // DEFAULT: 1000000
@@ -950,7 +950,7 @@ void spring_mortality()
 		//double intercept = (1 - pmort) * socially_sensitive_mortality + pmort;	// The hypothetical annual mortality for an individual in a flock size of zero for both spring and autumn migrations	 
 		int functional_flock_size = std::min(capacity, SummerPop[i].flock_size);
 		double psurv = 1 - pmort;
-		if (uniform(rng_r) < 1 - sqrt(psurv - pow(socially_sensitive_mortality * ((capacity - functional_flock_size)/ capacity), cost_power)))
+		if (uniform(rng_r) < 1 - sqrt(psurv - pow(socially_sensitive_mortality * ((capacity - (functional_flock_size-0.5))/ capacity), cost_power)))
 			{
             	SummerPop[i] = SummerPop[summer_pop - 1];
             	--summer_pop;
@@ -987,7 +987,7 @@ void autumn_mortality()
 		//  flock-size dependent mortality
 		int functional_flock_size = std::min(capacity, WinterPop[i].flock_size);
 		double psurv = 1 - pmort;
-		if (uniform(rng_r) < 1 - sqrt(psurv - pow(socially_sensitive_mortality * ((capacity - functional_flock_size)/ capacity), cost_power)))
+		if (uniform(rng_r) < 1 - sqrt(psurv - pow(socially_sensitive_mortality * ((capacity - (functional_flock_size-0.5))/ capacity), cost_power)))
 			{
 	            WinterPop[i] = WinterPop[winter_pop - 1];
 	            --winter_pop;
