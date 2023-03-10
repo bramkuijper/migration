@@ -29,7 +29,7 @@ std::uniform_real_distribution<> uniform(0.0,1.0);
 const int N = 1000;  // As of 2023: default is now 1000 (was previously 2000)
 
 // number of generations
-long int number_generations = 100;  // DEFAULT: 1000000
+long int number_generations = 1000000;  // DEFAULT: 1000000
 
 // sampling interval
 int skip = std::ceil((double)number_generations / 500);
@@ -1103,6 +1103,7 @@ void spring_dynamics(int t)
         }
 		
 	WinterPop[i].resources = std::min(WinterPop[i].resources, resource_max);
+	WinterPop[i].condition = WinterPop[i].resources / resource_max;
 		 
     } // ok, resource dynamic done
 
@@ -1127,7 +1128,8 @@ void spring_dynamics(int t)
             StagingPool[i].patch_quality = 1 - StagingPool[i].patch_quality;  // switch of patch quality (good to poor; poor to good)
         }
 	
-	StagingPool[i].resources = std::min(StagingPool[i].resources, resource_max);	
+	StagingPool[i].resources = std::min(StagingPool[i].resources, resource_max);
+	StagingPool[i].condition = StagingPool[i].resources / resource_max;	
 		
     } // ENDS staging site foraging loop
 
@@ -1531,6 +1533,7 @@ void postbreeding_dynamics(int t)
         }
 		
 		SummerPop[i].resources = std::min(SummerPop[i].resources, resource_max);
+		SummerPop[i].condition = SummerPop[i].resources / resource_max;
 	
     } // ok resource dynamic done
 
@@ -1556,7 +1559,7 @@ void postbreeding_dynamics(int t)
         }
     
 	StagingPool[i].resources = std::min(StagingPool[i].resources, resource_max);
-	
+	StagingPool[i].condition = StagingPool[i].resources / resource_max;
 	}
 
     assert(summer_pop + winter_pop + staging_pop <= N);
