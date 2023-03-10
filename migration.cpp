@@ -26,7 +26,7 @@ std::uniform_real_distribution<> uniform(0.0,1.0);
 // values of the most of these are overridden in the init_arguments() function
 
 // number of individuals in population
-const int N = 2000;  // DEFAULT: 2000
+const int N = 1000;  // DEFAULT: 2000
 
 // number of generations
 long int number_generations = 1000000;  // DEFAULT: 1000000
