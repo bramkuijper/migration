@@ -115,7 +115,7 @@ for rep_i in range(0, number_replicates):
                                                                     + str(relative_mortality_risk_of_migration) + " "
                                                                     + str(socially_sensitive_mortality_i) + " "
                                                                     + str(capacity_i) + " " #28
-                                                                    + str(K_decline_factor) + " "
+                                                                    + str(K_decline_factor_i) + " "
                                                                     + str(costs_sourcefile_i) + " "
                                                                     + str(base_name) + "_" + str(counter) + " "
                                                                     + backgroundstr)
