@@ -969,7 +969,6 @@ void spring_mortality()
 		
 		else
 		{
-			SummerPop[i].timing = 1;  // individual survives: timing is reset to 1 for autumn migration
 			SummerPop[i].signal_timing = 1;  // signal phenology is also reset to 1 for autumn
 		}
     }
@@ -1319,20 +1318,14 @@ void create_offspring(
 
     // each parental allele has probability 0.5 to make it into offspring
     offspring.theta_a[0] = mutation(mother.theta_a[allele_sample(rng_r)], mu_theta, sdmu_theta);
-
     offspring.theta_a[1] = mutation(father.theta_a[allele_sample(rng_r)], mu_theta, sdmu_theta);
-
     offspring.theta_b[0] = mutation(mother.theta_b[allele_sample(rng_r)], mu_theta, sdmu_theta);
-
     offspring.theta_b[1] = mutation(father.theta_b[allele_sample(rng_r)], mu_theta, sdmu_theta);
 	
     // inherit phi loci
     offspring.phi_a[0] = mutation(mother.phi_a[allele_sample(rng_r)], mu_phi, sdmu_phi);
-
     offspring.phi_a[1] = mutation(father.phi_a[allele_sample(rng_r)], mu_phi, sdmu_phi);
-    
     offspring.phi_b[0] = mutation(mother.phi_b[allele_sample(rng_r)], mu_phi, sdmu_phi);
-
     offspring.phi_b[1] = mutation(father.phi_b[allele_sample(rng_r)], mu_phi, sdmu_phi);
 	
 }  // ENDS OFFSPRING PRODUCTION
@@ -1371,13 +1364,13 @@ void summer_reproduction(std::ofstream &DataFile)
     {
 
         // if individual does not meet minimum standards then no reproduction through female function
-		
-		if (SummerPop[i].resources < breeding_threshold)  // Cost of clutch size of one. Further offspring incur a smaller, incremental cost that also increases through the season (below)
+		// these minimum standards can be seasonally variable:
+		if (SummerPop[i].resources < (resource_reproduction_threshold + resource_reproduction_threshold * ((offspring_cost_magnifier - 1) * (SummerPop[i].timing / tspring))))  // Cost of clutch size of one. Further offspring incur a smaller, incremental cost
         {
             SummerPop[i].fecundity = 0.0;
 			SummerPop[i].cost = 0.0;
 			
-			++nonreproductive_pop;  // Tally of non-reproductive adults.
+			++nonreproductive_pop;  // Tally of non-reproductive adults
 			
         }  // Closes IF loop
 		
@@ -1433,6 +1426,9 @@ void summer_reproduction(std::ofstream &DataFile)
 	            Kids.push_back(kid);
 	        }
 		}  // Close ELSE loop
+		
+		SummerPop[i].timing = 1; // Reset all adults' timing counters to 1, ready for autumn
+		
 	} // end for (int i = 0; i < summer_pop; ++i)
 
 	assert((breeder_pop + nonreproductive_pop) <= summer_pop);
@@ -1501,7 +1497,7 @@ void summer_reproduction(std::ofstream &DataFile)
 void postbreeding_dynamics(int t)
 {
     // As for spring, setting up a sampling function to sample from flock_size_distribution
-    // foraging of individuals who are just at the breeding site and who have yet to decide to go to the staging site
+    // foraging of individuals who are just at the breeding site and who have yet to decide to signal
     for (int i = 0; i < summer_pop; ++i)
     {
 		if (SummerPop[i].patch_quality == 1)
@@ -1553,8 +1549,7 @@ void postbreeding_dynamics(int t)
 
     double psignal = 0.0;
 
-    // individuals decide whether to go to staging site, i.e., prepare for dispersal
-    // signal to disperse
+    // individuals decide whether to signal
     for (int i = 0; i < summer_pop; ++i) 
     {
         // reaction norm dependent on resources
@@ -1590,7 +1585,6 @@ void postbreeding_dynamics(int t)
 		else
 		{
 			SummerPop[i].signal_timing +=1;  // Individual did not signal at time t
-			
 			SummerPop[i].timing +=1;  // Individuals that do not enter the staging population will not be departing at time t
 		}
     } // end for (int i = 0; i < summer_pop; ++i)
@@ -1764,17 +1758,6 @@ int main(int argc, char **argv)
 		autumn_nonmigrant_pop = 0;
 		autumn_migrant_pop = 0;
 		autumn_migrants_resource_cap = 0;
-		
-		
-		// Allow populations to become established (individuals must acquire resources)
-		if(generation < 0)  
-			{	
-				breeding_threshold = resource_reproduction_threshold * generation / 10000;
-			}
-		else
-			{
-				breeding_threshold = resource_reproduction_threshold;
-			}
 	
 		assert(winter_pop <= N);
 		
