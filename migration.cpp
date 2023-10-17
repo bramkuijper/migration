@@ -29,7 +29,7 @@ std::uniform_real_distribution<> uniform(0.0,1.0);
 const int N = 1000;  // DEFAULT: 2000
 
 // number of generations
-long int number_generations = 1000000;  // DEFAULT: 1000000
+long int number_generations = 1100000;  // DEFAULT: 1000000
 
 // sampling interval
 int skip = std::ceil((double)number_generations / 500);
@@ -82,6 +82,8 @@ double min_offspring_cost = 0.0;
 double offspring_cost_magnifier = 0.0;
 
 double carryover_proportion = 0.0;  // proportion of an individual's resource value that can be carried over to the following year
+double K_decline_factor = 0.0;  // Proportion of the original carrying capacity that remains after the default time to reach evolutionary equilibrium
+int K = 0; // Carrying capacity for the population
 
 // max number of intervals per season (two seasons: summer, winter)
 int twinter = 0;
@@ -309,9 +311,9 @@ void init_arguments(int argc, char **argv)
 	relative_mortality_risk_of_migration = atof(argv[26]);
 	socially_sensitive_mortality = atof(argv[27]);
 	capacity = atoi(argv[28]);
-
-    filename_costs = argv[29];
-    filename_output = argv[30];
+	K_decline_factor = atof(argv[29]);
+    filename_costs = argv[30];
+    filename_output = argv[31];
 
     // some bounds checking on parameters
     // probability of encountering a good environment
@@ -1437,7 +1439,7 @@ void summer_reproduction(std::ofstream &DataFile)
 
     // number of dead individuals is the max population
     // minus the current individuals in the summer population
-    Nvacancies = N - summer_pop - winter_pop;
+    Nvacancies = K - summer_pop - winter_pop;
 
     assert(staging_pop == 0);
     assert(Nvacancies >= 0);
@@ -1828,6 +1830,14 @@ int main(int argc, char **argv)
 		mean_resources = 0.0;
 		ss_resources = 0.0;
 		rv = 0.0;
+		
+		if(generation > 1000000)
+		{
+			K = round(N * K_decline_factor);
+		}
+		else{
+			K = N;
+		}
 		
 		if (summer_pop > 1)
 		{
