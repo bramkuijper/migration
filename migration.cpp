@@ -29,10 +29,12 @@ std::uniform_real_distribution<> uniform(0.0,1.0);
 const int N = 1000;  // DEFAULT: 2000
 
 // number of generations
-long int number_generations = 1100000;  // DEFAULT: 1000000
+long int number_generations = 1010000;  // DEFAULT: 1000000
 
 // sampling interval
 int skip = std::ceil((double)number_generations / 500);
+
+long int evolutionary_equilibrising_time = 0;
 
 // initial values for phi (social dependency) and theta (resource dependency)
 // a is an intercept, b is a gradient
@@ -84,6 +86,8 @@ double offspring_cost_magnifier = 0.0;
 double carryover_proportion = 0.0;  // proportion of an individual's resource value that can be carried over to the following year
 double K_decline_factor = 0.0;  // Proportion of the original carrying capacity that remains after the default time to reach evolutionary equilibrium
 int K = 0; // Carrying capacity for the population
+double cull_rate = 0.0; // Default culling rate (prior to introduction of new harvesting regime)
+double autumn_harvest = 0.0;  // proportion of the autumn population culled to a newly introduced harvest
 
 // max number of intervals per season (two seasons: summer, winter)
 int twinter = 0;
@@ -311,9 +315,11 @@ void init_arguments(int argc, char **argv)
 	relative_mortality_risk_of_migration = atof(argv[26]);
 	socially_sensitive_mortality = atof(argv[27]);
 	capacity = atoi(argv[28]);
-	K_decline_factor = atof(argv[29]);
-    filename_costs = argv[30];
-    filename_output = argv[31];
+	evolutionary_equilibrising_time = atoi(argv[29]);
+	K_decline_factor = atof(argv[30]);
+	autumn_harvest = atof(argv[31]);
+    filename_costs = argv[32];
+    filename_output = argv[33];
 
     // some bounds checking on parameters
     // probability of encountering a good environment
@@ -376,6 +382,9 @@ void write_parameters(std::ofstream &DataFile)  // at top of outputted file
 			<< "carryover_proportion;" << carryover_proportion << std::endl
 			<< "relative_mortality_risk_of_migration;" << relative_mortality_risk_of_migration << std::endl
 			<< "socially_sensitive_mortality;" << socially_sensitive_mortality << std::endl
+			<< "evolutionary_equilibrising_time" << evolutionary_equilibrising_time << std::endl
+			<< "K_decline_factor;" << K_decline_factor << std::endl
+			<< "autumn_harvest;" << autumn_harvest << std::endl
 			<< "seed;" << seed << std::endl
 			<< std::endl;
 }
@@ -994,6 +1003,16 @@ void autumn_mortality()
 				
 				++autumn_migrant_deaths;
 	        } 
+			
+		// User-controlled autumn cull/harvest
+		else if (uniform(rng_r) < cull_rate)
+			{
+	            WinterPop[i] = WinterPop[winter_pop - 1];
+	            --winter_pop;
+	            --i;
+				
+				++autumn_migrant_deaths;
+			}
 			
 		// mortality to resource exhaustion
 		else if (WinterPop[i].resources < resource_starvation_threshold)        
@@ -1831,12 +1850,14 @@ int main(int argc, char **argv)
 		ss_resources = 0.0;
 		rv = 0.0;
 		
-		if(generation > 1000000)
+		if(generation > evolutionary_equilibrising_time)
 		{
 			K = round(N * K_decline_factor);
+			cull_rate = autumn_harvest;
 		}
 		else{
 			K = N;
+			cull_rate = 0.0;
 		}
 		
 		if (summer_pop > 1)
