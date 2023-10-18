@@ -28,11 +28,11 @@ std::uniform_real_distribution<> uniform(0.0,1.0);
 // number of individuals in population
 const int N = 1000;  // DEFAULT: 2000
 
-// number of generations
-long int number_generations = 500000;  // DEFAULT: 1000000;  18 Oct 2023: assessing with 500,000 can serve as the new default
+// number of years simulation will run for
+long int number_years = 500000;  // DEFAULT: 1000000;  18 Oct 2023: assessing with 500,000 can serve as the new default
 
 // sampling interval
-int skip = std::ceil((double)number_generations / 500);
+int skip = std::ceil((double)number_years / 500);
 
 long int evolutionary_equilibrising_time = 0;
 
@@ -373,7 +373,7 @@ void write_parameters(std::ofstream &DataFile)  // at top of outputted file
             << "tspring;" << tspring << std::endl
 			<< "twinter;" << twinter << std::endl
             << "N;" << N << std::endl
-			<< "number_generations;" << number_generations << std::endl
+			<< "number_years;" << number_years << std::endl
             << "cost_power;" << cost_power << std::endl
             << "max_migration_cost;" << max_migration_cost << std::endl
 			<< "min_migration_cost;" << min_migration_cost << std::endl
@@ -391,18 +391,18 @@ void write_parameters(std::ofstream &DataFile)  // at top of outputted file
 
 // write the distribution of all individuals
 // std::ofstream &DataFile: the distribution file to write it to
-// int const generation: the particular generation in which the function is called
+// int const year: the particular year in which the function is called
 // int const factor: a particular number allowing you to distinguish
-// between different writes of the distribution within the same generation
+// between different writes of the distribution within the same year
 void write_dist(std::ofstream &DataFile, 
-        int const generation,
+        int const year,
         int const factor)
 
 {
 	
     for (int summer_idx = 0; summer_idx < summer_pop; ++summer_idx)
     {
-        DataFile << generation << ";"
+        DataFile << year << ";"
 			<< "summer;"
 			<< SummerPop[summer_idx].signal_timing << ";"
 			<< SummerPop[summer_idx].signal_resources << ";"
@@ -423,7 +423,7 @@ void write_dist(std::ofstream &DataFile,
 
 void write_dist_data_headers(std::ofstream &DataFile)
 {
-    DataFile << "generation;"
+    DataFile << "year;"
 //        << "factor;" // allows you to distinguish between multiple calls of ()
         << "season;"
 		<< "signal_timing;"	
@@ -446,7 +446,7 @@ void write_dist_data_headers(std::ofstream &DataFile)
 void write_data_headers(std::ofstream &DataFile)
 {
     // SPRING MIGRATION STATS (n = 24):
-	DataFile << "generation;"  // 1		
+	DataFile << "year;"  // 1		
 		<< "spring_pop;"  // 2
 		<< "mean_spring_staging_size;"  // 3
         << "var_spring_staging_size;"  // 4
@@ -673,7 +673,7 @@ void write_summer_stats(std::ofstream &DataFile)
 }  // ENDS: write summer stats
 
 
-void write_spring_stats(std::ofstream &DataFile, int generation)
+void write_spring_stats(std::ofstream &DataFile, int year)
 {
 	mean_latency = 0.0;
 	ss_latency = 0.0;
@@ -741,7 +741,7 @@ void write_spring_stats(std::ofstream &DataFile, int generation)
 
     // write statistics to a file
     DataFile
-        << generation + 1 << ";"  // 1  # Translating generation number to more inutuitive start in year 1
+        << year + 1 << ";"  // 1  # Translating year number to more inutuitive start in year 1
 		<< spring_pop_start << ";"
 		<< mean_spring_staging_size << ";"  // 3
 		<< var_spring_staging_size << ";"
@@ -1741,7 +1741,7 @@ int main(int argc, char **argv)
 
     init_population();
 
-    for (int generation = 0; generation < number_generations; ++generation)
+    for (int year = 0; year < number_years; ++year)
     {
         population_mean_spring_flock_size = 0.0;
 		mean_spring_staging_size = 0.0;
@@ -1804,9 +1804,9 @@ int main(int argc, char **argv)
         {
             spring_dynamics(t);
 			
-			if (generation == number_generations - 1 && t >= tspring - 1)
+			if (year == number_years - 1 && t >= tspring - 1)
 				{
-					write_dist(DistFile, generation, tspring);
+					write_dist(DistFile, year, tspring);
 				}
         }
 				
@@ -1822,14 +1822,14 @@ int main(int argc, char **argv)
 		
 		clear_staging_pool();
 		
-		if (generation == 0 && skip > 1)
+		if (year == 0 && skip > 1)
 		 {
-			 write_spring_stats(DataFile, generation);
+			 write_spring_stats(DataFile, year);
 		  }
 		
-		if ((generation + 1) % skip == 0)
+		if ((year + 1) % skip == 0)
 		 {
-			 write_spring_stats(DataFile, generation);
+			 write_spring_stats(DataFile, year);
 		  }  
 
         // let individuals die with a certain probability 
@@ -1850,7 +1850,7 @@ int main(int argc, char **argv)
 		ss_resources = 0.0;
 		rv = 0.0;
 		
-		if(generation > evolutionary_equilibrising_time)
+		if(year >= evolutionary_equilibrising_time)
 		{
 			K = round(N * K_decline_factor);
 			cull_rate = autumn_harvest;
@@ -1865,12 +1865,12 @@ int main(int argc, char **argv)
 			summer_reproduction(DataFile);	
 		}
 
-		if (generation == 0 && skip > 1)
+		if (year == 0 && skip > 1)
 		 {
 			 write_summer_stats(DataFile);
 		  }
 		
-		if ((generation + 1) % skip == 0)
+		if ((year + 1) % skip == 0)
 		{
 			write_summer_stats(DataFile);
 		}
@@ -1917,12 +1917,12 @@ int main(int argc, char **argv)
 		
 		autumn_nonmigrant_pop = summer_pop + staging_pop;
 		
-		if (generation == 0 && skip > 1)
+		if (year == 0 && skip > 1)
 		 {
 			 write_autumn_stats(DataFile);
 		  }
 		
-		if ((generation+1) % skip == 0)
+		if ((year+1) % skip == 0)
 		{
 			write_autumn_stats(DataFile);
 		}
@@ -1937,12 +1937,12 @@ int main(int argc, char **argv)
 		
 		assert(winter_pop == remainer_pop + autumn_migrant_pop - autumn_migrant_deaths);
 		
-		if (generation == 0 && skip > 1)
+		if (year == 0 && skip > 1)
 		 {
 			 write_winter_stats(DataFile);
 		  }
 		
-		if ((generation+1) % skip == 0)
+		if ((year+1) % skip == 0)
         {
             write_winter_stats(DataFile); 
         }
