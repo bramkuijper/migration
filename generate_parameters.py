@@ -2,11 +2,15 @@
 import datetime
 # TESTING TO SEE IF THIS FILE COMMITS TO GITHUB
 # generate all parameter combinations to run the migration simulation
+# 19th October 2023: the logarithmic growth rate factors become exponential terms, allowing Bram's 
+# desired [-10,10] limitation to be applied while also allowing gradients to evolve to be steep.
+# To facilitate theta_a fitting within these bounds I also need to reduce the resource values
+# by a factor of ten (patch values and also maximum individual capacity)/
 
-init_theta_a = [60]  # Default is 60
-init_theta_b = [1]  # Default is 1
+init_theta_a = [6]  # Default was 60, revising it to 6
+init_theta_b = [0]  # Default was 1, 10^0 ~1
 init_phi_a = [0.3]  # Default is 0.3
-init_phi_b = [25]  # Default is 25
+init_phi_b = [1.4]  # Default was 25, 10^1.4 ~25
 
 twinter = 0
 tspring = 10000  # twinter in manuscript
@@ -15,13 +19,13 @@ pmort = 0.1
 pgood = 0.5
 patch_consistency_factor = [0.30103] #[0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3] # Varies from 0 (switching patch type EVERY timestep, so uniformity in resource value) and upwards. Above 3 (equating to a switch probability of 0.001) the distribution of resource values starts to become bimodal. log(2) gives the previous behaviour, which was a 50:50 likelihood of switching.
 
-rgood = 0.04
-rbad = 0.02
+rgood = 0.004
+rbad = 0.002
 preparation_penalty = [0.5] # [1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1, 0] # The reduction in resource acquisition, relative to the normal feeding phase. Default is 0.5
 
-resource_reproduction_threshold = 30
+resource_reproduction_threshold = 3
 resource_starvation_threshold = 0
-resource_max = 60
+resource_max = 6
 
 # mutation rates
 mu_theta = 0.02
@@ -30,12 +34,12 @@ sdmu_theta = 0.1
 sdmu_phi = [0.1]
     
 # migration cost parameters
-max_migration_cost = 20  # Default is 20 
-min_migration_cost = [20] #[20, 18, 16, 14, 12, 10, 8, 6, 4, 2]  # Default is 10
+max_migration_cost = 2  # Default is 20 
+min_migration_cost = [2] #[20, 18, 16, 14, 12, 10, 8, 6, 4, 2]  # Default is 10
 cost_power = [2] #[3, 2, 1, 0, -1, -2, -3]
 capacity = [8] # [2, 4, 6, 8, 10, 12, 14, 16, 18, 20]
 # reproductive cost parameters
-min_offspring_cost = 5
+min_offspring_cost = 0.5
 offspring_cost_magnifier = [1] #[0.1, 0.5, 1, 2, 10] # The relative difference in resource cost per offspring having migrated at the earliest opportunity versus the last. 1 represents seasonal invariability
 relative_mortality_risk_of_migration = 5
 socially_sensitive_mortality = [0,0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]  # Default would be 0, where the mortality rate is indepdendent of flock size

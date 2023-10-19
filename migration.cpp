@@ -574,7 +574,7 @@ void write_winter_stats(std::ofstream &DataFile)
         mean_phi_b += val;
         ss_phi_b += val * val;
         
-        val = WinterPop[i].resources;  // the resource level of individual i  // 18 Feb 2020: I've changed this from StagingPool[i].resources
+        val = WinterPop[i].resources;  // the resource level of individual i
         mean_resources += val;
         ss_resources += val * val;
 		
@@ -1164,7 +1164,7 @@ void spring_dynamics(int t)
         // resulting in signaling a willingness to disperse
         // => go to the staging level
 
-		psignal = pow(1 + exp(-0.5 * (WinterPop[i].theta_b[0] + WinterPop[i].theta_b[1]) 
+		psignal = pow(1 + exp(-1 * pow(10, (0.5 * (WinterPop[i].theta_b[0] + WinterPop[i].theta_b[1]))) 
 			* (WinterPop[i].resources - 0.5 * (WinterPop[i].theta_a[0] + WinterPop[i].theta_a[1]))), -1);
 
         // bound the probability
@@ -1217,7 +1217,7 @@ void spring_dynamics(int t)
     {
         assert(staging_pop < N);
         
-		pdisperse = pow(1 + exp(-0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) 
+		pdisperse = pow(1 + exp(-1 * pow(10, (0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1])))
 			* (((double) staging_pop_start / (staging_pop_start + winter_pop)) - 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1]))), -1);
 		
 		// bound the probability (not really necessary)
@@ -1339,15 +1339,23 @@ void create_offspring(
 
     // each parental allele has probability 0.5 to make it into offspring
     offspring.theta_a[0] = mutation(mother.theta_a[allele_sample(rng_r)], mu_theta, sdmu_theta);
+	offspring.theta_a[0] = clamp(offspring.theta_a[0], -10, 10);
     offspring.theta_a[1] = mutation(father.theta_a[allele_sample(rng_r)], mu_theta, sdmu_theta);
+	offspring.theta_a[1] = clamp(offspring.theta_a[1], -10, 10);
     offspring.theta_b[0] = mutation(mother.theta_b[allele_sample(rng_r)], mu_theta, sdmu_theta);
+	offspring.theta_b[0] = clamp(offspring.theta_b[0], -10, 10);
     offspring.theta_b[1] = mutation(father.theta_b[allele_sample(rng_r)], mu_theta, sdmu_theta);
+	offspring.theta_b[1] = clamp(offspring.theta_b[1], -10, 10);
 	
     // inherit phi loci
     offspring.phi_a[0] = mutation(mother.phi_a[allele_sample(rng_r)], mu_phi, sdmu_phi);
+	offspring.phi_a[0] = clamp(offspring.phi_a[0], -10, 10);
     offspring.phi_a[1] = mutation(father.phi_a[allele_sample(rng_r)], mu_phi, sdmu_phi);
+	offspring.phi_a[1] = clamp(offspring.phi_a[1], -10, 10);
     offspring.phi_b[0] = mutation(mother.phi_b[allele_sample(rng_r)], mu_phi, sdmu_phi);
+	offspring.phi_b[0] = clamp(offspring.phi_b[0], -10, 10);
     offspring.phi_b[1] = mutation(father.phi_b[allele_sample(rng_r)], mu_phi, sdmu_phi);
+	offspring.phi_b[1] = clamp(offspring.phi_b[1], -10, 10);
 	
 }  // ENDS OFFSPRING PRODUCTION
 
@@ -1576,7 +1584,7 @@ void postbreeding_dynamics(int t)
         // reaction norm dependent on resources
         // resulting in signaling a willingness to disperse
         // => go to the staging level
-		psignal = pow(1 + exp(-0.5 * (SummerPop[i].theta_b[0] + SummerPop[i].theta_b[1]) 
+		psignal = pow(1 + exp(-1 * pow(10, (0.5 * (SummerPop[i].theta_b[0] + SummerPop[i].theta_b[1])))
 			* (SummerPop[i].resources - 0.5 * (SummerPop[i].theta_a[0] + SummerPop[i].theta_a[1]))), -1);
 		
 		// bound the probability
@@ -1628,7 +1636,7 @@ void postbreeding_dynamics(int t)
     // actual autumn dispersal at time t
     for (int i = 0; i < staging_pop; ++i)
     {
-		pdisperse = pow(1 + exp(-0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) 
+		pdisperse = pow(1 + exp(-1 * pow(10, (0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1])))
 			* (((double) staging_pop_start / (staging_pop_start + summer_pop)) - 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1]))), -1);
 		
 		pdisperse = clamp(pdisperse, 0, 1);
