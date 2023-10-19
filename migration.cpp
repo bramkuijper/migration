@@ -29,7 +29,7 @@ std::uniform_real_distribution<> uniform(0.0,1.0);
 const int N = 1000;  // DEFAULT: 2000
 
 // number of years simulation will run for
-long int number_years = 500000;  // DEFAULT: 1000000;  18 Oct 2023: assessing with 500,000 can serve as the new default
+long int number_years = 20;  // DEFAULT: 1000000;  18 Oct 2023: assessing with 500,000 can serve as the new default
 
 // sampling interval
 int skip = std::ceil((double)number_years / 500);
@@ -382,7 +382,7 @@ void write_parameters(std::ofstream &DataFile)  // at top of outputted file
 			<< "carryover_proportion;" << carryover_proportion << std::endl
 			<< "relative_mortality_risk_of_migration;" << relative_mortality_risk_of_migration << std::endl
 			<< "socially_sensitive_mortality;" << socially_sensitive_mortality << std::endl
-			<< "evolutionary_equilibrising_time" << evolutionary_equilibrising_time << std::endl
+			<< "evolutionary_equilibrising_time;" << evolutionary_equilibrising_time << std::endl
 			<< "K_decline_factor;" << K_decline_factor << std::endl
 			<< "autumn_harvest;" << autumn_harvest << std::endl
 			<< "seed;" << seed << std::endl
@@ -1164,8 +1164,18 @@ void spring_dynamics(int t)
         // resulting in signaling a willingness to disperse
         // => go to the staging level
 
-		psignal = pow(1 + exp(-1 * pow(10, (0.5 * (WinterPop[i].theta_b[0] + WinterPop[i].theta_b[1]))) 
-			* (WinterPop[i].resources - 0.5 * (WinterPop[i].theta_a[0] + WinterPop[i].theta_a[1]))), -1);
+		if ((WinterPop[i].theta_b[0] + WinterPop[i].theta_b[1]) > 0)
+		{
+			psignal = pow(1 + exp(-1 * (pow(10, (0.5 * (WinterPop[i].theta_b[0] + WinterPop[i].theta_b[1]))) - 1)
+				* (WinterPop[i].resources - 0.5 * (WinterPop[i].theta_a[0] + WinterPop[i].theta_a[1]))), -1);
+		}
+		else
+		{
+			psignal = pow(1 + exp(1 * (pow(10, (0.5 * abs(WinterPop[i].theta_b[0] + WinterPop[i].theta_b[1]))) - 1) 
+				* (WinterPop[i].resources - 0.5 * (WinterPop[i].theta_a[0] + WinterPop[i].theta_a[1]))), -1);
+		}
+
+		
 
         // bound the probability
         psignal = clamp(psignal, 0, 1);
@@ -1217,8 +1227,17 @@ void spring_dynamics(int t)
     {
         assert(staging_pop < N);
         
-		pdisperse = pow(1 + exp(-1 * pow(10, (0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1])))
-			* (((double) staging_pop_start / (staging_pop_start + winter_pop)) - 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1]))), -1);
+		if ((StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) > 0)
+		{
+			pdisperse = pow(1 + exp(-1 * (pow(10, (0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]))) - 1)
+				* (((double) staging_pop_start / (staging_pop_start + winter_pop)) - 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1]))), -1);
+		}
+		else
+		{
+			pdisperse = pow(1 + exp(1 * (pow(10, (0.5 * abs(StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]))) - 1)
+				* (((double) staging_pop_start / (staging_pop_start + winter_pop)) - 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1]))), -1);
+		}
+	
 		
 		// bound the probability (not really necessary)
         pdisperse = clamp(pdisperse, 0, 1);
@@ -1584,8 +1603,17 @@ void postbreeding_dynamics(int t)
         // reaction norm dependent on resources
         // resulting in signaling a willingness to disperse
         // => go to the staging level
-		psignal = pow(1 + exp(-1 * pow(10, (0.5 * (SummerPop[i].theta_b[0] + SummerPop[i].theta_b[1])))
-			* (SummerPop[i].resources - 0.5 * (SummerPop[i].theta_a[0] + SummerPop[i].theta_a[1]))), -1);
+		
+		if ((SummerPop[i].theta_b[0] + SummerPop[i].theta_b[1]) > 0)
+		{
+			psignal = pow(1 + exp(-1 * (pow(10, (0.5 * (SummerPop[i].theta_b[0] + SummerPop[i].theta_b[1]))) - 1)
+				* (SummerPop[i].resources - 0.5 * (SummerPop[i].theta_a[0] + SummerPop[i].theta_a[1]))), -1);
+		}
+		
+		else{
+			psignal = pow(1 + exp(1 * (pow(10, abs(0.5 * (SummerPop[i].theta_b[0] + SummerPop[i].theta_b[1]))) - 1)
+				* (SummerPop[i].resources - 0.5 * (SummerPop[i].theta_a[0] + SummerPop[i].theta_a[1]))), -1);
+		}
 		
 		// bound the probability
         psignal = clamp(psignal, 0.0, 1.0);
@@ -1636,8 +1664,17 @@ void postbreeding_dynamics(int t)
     // actual autumn dispersal at time t
     for (int i = 0; i < staging_pop; ++i)
     {
-		pdisperse = pow(1 + exp(-1 * pow(10, (0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1])))
-			* (((double) staging_pop_start / (staging_pop_start + summer_pop)) - 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1]))), -1);
+		if ((StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) > 0)
+		{
+			pdisperse = pow(1 + exp(-1 * (pow(10, (0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]))) - 1)
+				* (((double) staging_pop_start / (staging_pop_start + summer_pop)) - 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1]))), -1);
+		}
+		
+		else
+		{
+			pdisperse = pow(1 + exp(1 * (pow(10, (0.5 * abs(StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]))) - 1)
+				* (((double) staging_pop_start / (staging_pop_start + summer_pop)) - 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1]))), -1);
+		}
 		
 		pdisperse = clamp(pdisperse, 0, 1);
 		
