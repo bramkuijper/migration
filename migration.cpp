@@ -1309,7 +1309,7 @@ double mutation(double val, double mu, double sdmu)
 {
     if (uniform(rng_r) < mu)
     {
-        std::normal_distribution<double> allelic_dist(0,sdmu*val);
+        std::normal_distribution<double> allelic_dist(0,sdmu);
         val += allelic_dist(rng_r);
     }
 
