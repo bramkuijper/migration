@@ -50,7 +50,7 @@ def analyze_file(filename):
 
     # first see until what line the parameters stretch
     for idx, line_i in enumerate(fl):
-        if re.match("^year",line_i) != None:
+        if re.match("^generation",line_i) != None:
             endline = idx
             break
 
