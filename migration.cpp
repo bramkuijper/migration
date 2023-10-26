@@ -1850,7 +1850,7 @@ int main(int argc, char **argv)
 		ss_resources = 0.0;
 		rv = 0.0;
 		
-		if(year >= evolutionary_equilibrising_time)
+		if(year > evolutionary_equilibrising_time)
 		{
 			K = round(N * K_decline_factor);
 			cull_rate = autumn_harvest;
