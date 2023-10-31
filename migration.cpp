@@ -29,7 +29,7 @@ std::uniform_real_distribution<> uniform(0.0,1.0);
 const int N = 1000;  // DEFAULT: 2000
 
 // number of years simulation will run for
-long int number_years = 500000;  // DEFAULT: 1000000;  18 Oct 2023: assessing with 500,000 can serve as the new default
+long int number_years = 500100;  // DEFAULT: 1000000;  18 Oct 2023: assessing with 500,000 can serve as the new default
 
 // sampling interval
 int skip = std::ceil((double)number_years / 500);
