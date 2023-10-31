@@ -29,7 +29,7 @@ std::uniform_real_distribution<> uniform(0.0,1.0);
 const int N = 1000;  // DEFAULT: 2000
 
 // number of years simulation will run for
-long int number_years = 500100;  // DEFAULT: 1000000;  18 Oct 2023: assessing with 500,000 can serve as the new default
+long int number_years = 200100;  //
 
 // sampling interval
 int skip = std::ceil((double)number_years / 500);
@@ -1827,7 +1827,7 @@ int main(int argc, char **argv)
 			 write_spring_stats(DataFile, year);
 		  }
 		
-		if ((year + 1) % skip == 0)
+		if (((year) % skip == 0) || year == number_years-1)
 		 {
 			 write_spring_stats(DataFile, year);
 		  }  
@@ -1870,7 +1870,7 @@ int main(int argc, char **argv)
 			 write_summer_stats(DataFile);
 		  }
 		
-		if ((year + 1) % skip == 0)
+		if (((year) % skip == 0) || year == number_years-1)
 		{
 			write_summer_stats(DataFile);
 		}
@@ -1922,7 +1922,7 @@ int main(int argc, char **argv)
 			 write_autumn_stats(DataFile);
 		  }
 		
-		if ((year+1) % skip == 0)
+		if (((year) % skip == 0) || year == number_years-1)
 		{
 			write_autumn_stats(DataFile);
 		}
@@ -1942,7 +1942,7 @@ int main(int argc, char **argv)
 			 write_winter_stats(DataFile);
 		  }
 		
-		if ((year+1) % skip == 0)
+		if (((year) % skip == 0) || year == number_years-1)
         {
             write_winter_stats(DataFile); 
         }
