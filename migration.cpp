@@ -29,12 +29,12 @@ std::uniform_real_distribution<> uniform(0.0,1.0);
 const int N = 1000;  // DEFAULT: 2000
 
 // number of years simulation will run for
-long int number_years = 200100;  //
+long int number_years = 200000;  //
 
 // sampling interval
 int skip = std::ceil((double)number_years / 500);
 
-long int evolutionary_equilibrising_time = 0;
+long int postequilibrialisation_experimental_runtime = 0;
 
 // initial values for phi (social dependency) and theta (resource dependency)
 // a is an intercept, b is a gradient
@@ -315,7 +315,7 @@ void init_arguments(int argc, char **argv)
 	relative_mortality_risk_of_migration = atof(argv[26]);
 	socially_sensitive_mortality = atof(argv[27]);
 	capacity = atoi(argv[28]);
-	evolutionary_equilibrising_time = atoi(argv[29]);
+	postequilibrialisation_experimental_runtime = atoi(argv[29]);
 	K_decline_factor = atof(argv[30]);
 	autumn_harvest = atof(argv[31]);
     filename_costs = argv[32];
@@ -382,7 +382,7 @@ void write_parameters(std::ofstream &DataFile)  // at top of outputted file
 			<< "carryover_proportion;" << carryover_proportion << std::endl
 			<< "relative_mortality_risk_of_migration;" << relative_mortality_risk_of_migration << std::endl
 			<< "socially_sensitive_mortality;" << socially_sensitive_mortality << std::endl
-			<< "evolutionary_equilibrising_time" << evolutionary_equilibrising_time << std::endl
+			<< "postequilibrialisation_experimental_runtime" << postequilibrialisation_experimental_runtime << std::endl
 			<< "K_decline_factor;" << K_decline_factor << std::endl
 			<< "autumn_harvest;" << autumn_harvest << std::endl
 			<< "seed;" << seed << std::endl
@@ -741,7 +741,7 @@ void write_spring_stats(std::ofstream &DataFile, int year)
 
     // write statistics to a file
     DataFile
-        << year + 1 << ";"  // 1  # Translating year number to more inutuitive start in year 1
+        << year << ";"
 		<< spring_pop_start << ";"
 		<< mean_spring_staging_size << ";"  // 3
 		<< var_spring_staging_size << ";"
@@ -1741,7 +1741,7 @@ int main(int argc, char **argv)
 
     init_population();
 
-    for (int year = 0; year < number_years; ++year)
+    for (int year = 0; year < (number_years + postequilibrialisation_experimental_runtime); ++year)
     {
         population_mean_spring_flock_size = 0.0;
 		mean_spring_staging_size = 0.0;
@@ -1827,7 +1827,7 @@ int main(int argc, char **argv)
 			 write_spring_stats(DataFile, year);
 		  }
 		
-		if (((year) % skip == 0) || year == number_years-1)
+		if (((year) % skip == 0) || year == number_years-1 || year == number_years + postequilibrialisation_experimental_runtime - 1)
 		 {
 			 write_spring_stats(DataFile, year);
 		  }  
@@ -1850,7 +1850,7 @@ int main(int argc, char **argv)
 		ss_resources = 0.0;
 		rv = 0.0;
 		
-		if(year > evolutionary_equilibrising_time)
+		if(year >= number_years)
 		{
 			K = round(N * K_decline_factor);
 			cull_rate = autumn_harvest;
@@ -1870,7 +1870,7 @@ int main(int argc, char **argv)
 			 write_summer_stats(DataFile);
 		  }
 		
-		if (((year) % skip == 0) || year == number_years-1)
+		if (((year) % skip == 0) || year == number_years-1 || year == number_years + postequilibrialisation_experimental_runtime - 1)
 		{
 			write_summer_stats(DataFile);
 		}
@@ -1922,7 +1922,7 @@ int main(int argc, char **argv)
 			 write_autumn_stats(DataFile);
 		  }
 		
-		if (((year) % skip == 0) || year == number_years-1)
+		if (((year) % skip == 0) || year == number_years-1 || year == number_years + postequilibrialisation_experimental_runtime - 1)
 		{
 			write_autumn_stats(DataFile);
 		}
@@ -1942,7 +1942,7 @@ int main(int argc, char **argv)
 			 write_winter_stats(DataFile);
 		  }
 		
-		if (((year) % skip == 0) || year == number_years-1)
+		if (((year) % skip == 0) || year == number_years-1 || year == number_years + postequilibrialisation_experimental_runtime - 1)
         {
             write_winter_stats(DataFile); 
         }

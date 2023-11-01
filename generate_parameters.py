@@ -39,7 +39,7 @@ min_offspring_cost = 5
 offspring_cost_magnifier = [1] #[0.1, 0.5, 1, 2, 10] # The relative difference in resource cost per offspring having migrated at the earliest opportunity versus the last. 1 represents seasonal invariability
 relative_mortality_risk_of_migration = 5
 socially_sensitive_mortality = [0, 0.2, 0.4, 0.6, 0.8, 1] # [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]  # Default would be 0, where the mortality rate is indepdendent of flock size
-evolutionary_equilibrising_time = 500000
+postequilibrialisation_experimental_runtime = 100
 K_decline_factor = [1] # 1 represents no decline in carrying capacity
 autumn_harvest = [0.8] # 0 represents no harvest
 carryover_proportion = 0 # carryover of resources from one year to the next
@@ -118,7 +118,7 @@ for rep_i in range(0, number_replicates):
                                                                         + str(relative_mortality_risk_of_migration) + " "
                                                                         + str(socially_sensitive_mortality_i) + " "
                                                                         + str(capacity_i) + " " #28
-                                                                        + str(evolutionary_equilibrising_time) + " "
+                                                                        + str(postequilibrialisation_experimental_runtime) + " "
                                                                         + str(K_decline_factor_i) + " "  #30
                                                                         + str(autumn_harvest_i) + " "  #31
                                                                         + str(costs_sourcefile_i) + " "
