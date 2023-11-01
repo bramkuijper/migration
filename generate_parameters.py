@@ -17,8 +17,7 @@ patch_consistency_factor = [0.30103] #[0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2
 
 rgood = 0.04
 rbad = 0.02
-preparation_penalty = [1] # [1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1, 0] # The 
-reduction in resource acquisition, relative to the normal feeding phase. Default is 0.5
+preparation_penalty = [1] # [1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1, 0] # The reduction in resource acquisition, relative to the normal feeding phase. Default is 0.5
 
 resource_reproduction_threshold = 30
 resource_starvation_threshold = 0
