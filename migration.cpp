@@ -64,7 +64,8 @@ double preparation_penalty = 0.0;
 double resource_reproduction_threshold = 0.0;  // minimum resource level necessary to reproduce 
 double resource_starvation_threshold = 0.0;  // minimum resource level necessary to survive
 double resource_max = 0.0;  // maximum resource value an individual can achieve
-double breeding_threshold = 0.0;
+double individual_breeding_threshold = 0.0;
+double individual_offspring_increment = 0.0;
 
 // mutation rates
 double mu_theta = 0.0;
@@ -1386,7 +1387,9 @@ void summer_reproduction(std::ofstream &DataFile)
 
         // if individual does not meet minimum standards then no reproduction through female function
 		// these minimum standards can be seasonally variable:
-		if (SummerPop[i].resources < (resource_reproduction_threshold + resource_reproduction_threshold * ((offspring_cost_magnifier - 1) * (SummerPop[i].timing / tspring))))  // Cost of clutch size of one. Further offspring incur a smaller, incremental cost
+		individual_breeding_threshold = resource_reproduction_threshold + resource_reproduction_threshold * ((offspring_cost_magnifier - 1) * (SummerPop[i].timing / tspring));
+		
+		if (SummerPop[i].resources < individual_breeding_threshold)  // Cost of clutch size of one. Further offspring incur a smaller, incremental cost
         {
             SummerPop[i].fecundity = 0.0;
 			SummerPop[i].cost = 0.0;
@@ -1416,8 +1419,10 @@ void summer_reproduction(std::ofstream &DataFile)
 	        while (father_id == i);
 
 	        father = SummerPop[father_id];
+			
+			individual_offspring_increment = min_offspring_cost + min_offspring_cost * ((offspring_cost_magnifier - 1) * (SummerPop[i].timing / tspring));
 
-	        offspring_equivalence = 1 + (SummerPop[i].resources - breeding_threshold) / min_offspring_cost;
+	        offspring_equivalence = 1 + ((SummerPop[i].resources - individual_breeding_threshold) / individual_offspring_increment);
 	
 			resource_integer = floor(offspring_equivalence);
 		
