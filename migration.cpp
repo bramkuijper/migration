@@ -26,7 +26,7 @@ std::uniform_real_distribution<> uniform(0.0,1.0);
 // values of the most of these are overridden in the init_arguments() function
 
 // number of individuals in population
-const int N = 1000;  // DEFAULT: 2000
+const int N = 2000;  // DEFAULT: 2000
 
 // number of years simulation will run for
 long int number_years = 250000;  //
@@ -383,7 +383,7 @@ void write_parameters(std::ofstream &DataFile)  // at top of outputted file
 			<< "carryover_proportion;" << carryover_proportion << std::endl
 			<< "relative_mortality_risk_of_migration;" << relative_mortality_risk_of_migration << std::endl
 			<< "socially_sensitive_mortality;" << socially_sensitive_mortality << std::endl
-			<< "postequilibrialisation_experimental_runtime" << postequilibrialisation_experimental_runtime << std::endl
+			<< "postequilibrialisation_experimental_runtime;" << postequilibrialisation_experimental_runtime << std::endl
 			<< "K_decline_factor;" << K_decline_factor << std::endl
 			<< "autumn_harvest;" << autumn_harvest << std::endl
 			<< "seed;" << seed << std::endl
