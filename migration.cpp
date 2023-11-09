@@ -26,13 +26,13 @@ std::uniform_real_distribution<> uniform(0.0,1.0);
 // values of the most of these are overridden in the init_arguments() function
 
 // number of individuals in population
-const int N = 500;  // DEFAULT: 2000
+const int N = 2000;  // DEFAULT: 2000
 
 // number of years simulation will run for
-long int number_years = 50;  //
+long int number_years = 250000;
 
 // sampling interval
-int skip = 10; //std::ceil((double)number_years / 500);
+int skip = std::ceil((double)number_years / 500);
 
 long int postequilibrialisation_experimental_runtime = 0;
 
