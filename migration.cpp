@@ -26,13 +26,13 @@ std::uniform_real_distribution<> uniform(0.0,1.0);
 // values of the most of these are overridden in the init_arguments() function
 
 // number of individuals in population
-const int N = 2000;  // DEFAULT: 2000
+const int N = 500;  // DEFAULT: 2000
 
 // number of years simulation will run for
-long int number_years = 250000;  //
+long int number_years = 50;  //
 
 // sampling interval
-int skip = std::ceil((double)number_years / 500);
+int skip = 10; //std::ceil((double)number_years / 500);
 
 long int postequilibrialisation_experimental_runtime = 0;
 
@@ -1827,12 +1827,7 @@ int main(int argc, char **argv)
 		
 		clear_staging_pool();
 		
-		if (year == 0 && skip > 1)
-		 {
-			 write_spring_stats(DataFile, year);
-		  }
-		
-		if (((year) % skip == 0) || year == number_years-1 || year == number_years + postequilibrialisation_experimental_runtime - 1)
+		if (year == 0 || ((year) % skip == 0) || year == number_years-1 || year >= number_years)
 		 {
 			 write_spring_stats(DataFile, year);
 		  }  
@@ -1870,12 +1865,7 @@ int main(int argc, char **argv)
 			summer_reproduction(DataFile);	
 		}
 
-		if (year == 0 && skip > 1)
-		 {
-			 write_summer_stats(DataFile);
-		  }
-		
-		if (((year) % skip == 0) || year == number_years-1 || year == number_years + postequilibrialisation_experimental_runtime - 1)
+		if (year == 0 || ((year) % skip == 0) || year == number_years-1 || year >= number_years)
 		{
 			write_summer_stats(DataFile);
 		}
@@ -1922,12 +1912,7 @@ int main(int argc, char **argv)
 		
 		autumn_nonmigrant_pop = summer_pop + staging_pop;
 		
-		if (year == 0 && skip > 1)
-		 {
-			 write_autumn_stats(DataFile);
-		  }
-		
-		if (((year) % skip == 0) || year == number_years-1 || year == number_years + postequilibrialisation_experimental_runtime - 1)
+		if (year == 0 || ((year) % skip == 0) || year == number_years-1 || year >= number_years)
 		{
 			write_autumn_stats(DataFile);
 		}
@@ -1942,12 +1927,7 @@ int main(int argc, char **argv)
 		
 		assert(winter_pop == remainer_pop + autumn_migrant_pop - autumn_migrant_deaths);
 		
-		if (year == 0 && skip > 1)
-		 {
-			 write_winter_stats(DataFile);
-		  }
-		
-		if (((year) % skip == 0) || year == number_years-1 || year == number_years + postequilibrialisation_experimental_runtime - 1)
+		if (year == 0 || ((year) % skip == 0) || year == number_years-1 || year >= number_years)
         {
             write_winter_stats(DataFile); 
         }
