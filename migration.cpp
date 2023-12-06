@@ -1006,11 +1006,20 @@ void autumn_mortality()
 	        } 
 			
 		// User-controlled autumn cull/harvest
-		else if (uniform(rng_r) < cull_rate)
+		//else if (uniform(rng_r) < cull_rate)
+		//	{
+	    //        WinterPop[i] = WinterPop[winter_pop - 1];
+	    //        --winter_pop;
+	    //        --i;
+		//		
+		//		++autumn_migrant_deaths;
+		//	}
+		
+		else if (i % int(1 / (1 - cull_rate)) != 0)
 			{
-	            WinterPop[i] = WinterPop[winter_pop - 1];
-	            --winter_pop;
-	            --i;
+				WinterPop[i] = WinterPop[winter_pop - 1];
+				--winter_pop;
+				--i;
 				
 				++autumn_migrant_deaths;
 			}
