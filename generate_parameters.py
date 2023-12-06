@@ -24,29 +24,29 @@ resource_starvation_threshold = 0
 resource_max = 60
 
 # mutation rates
-mu_theta = 0.02
-mu_phi = 0.02
+mu_theta = 0.05
+mu_phi = 0.05
 sdmu_theta = 0.1
 sdmu_phi = [0.1]
     
 # migration cost parameters
 max_migration_cost = 20  # Default is 20 
-min_migration_cost = [20, 18, 16, 14, 12, 10, 8, 6, 4, 2]  # Default is 10
-cost_power = [2] #[3, 2, 1, 0, -1, -2, -3]
-capacity = [8] # [2, 4, 6, 8, 10, 12, 14, 16, 18, 20]
+min_migration_cost = [20] # [20, 18, 16, 14, 12, 10, 8, 6, 4, 2]  # Default is 10
+cost_power = [2]
+capacity = [8]
 # reproductive cost parameters
 min_offspring_cost = 5
 offspring_cost_magnifier = [1] # The relative difference in resource cost per offspring having migrated at the earliest opportunity versus the last. 1 represents seasonal invariability
 relative_mortality_risk_of_migration = 5
-socially_sensitive_mortality = [0] # [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]  # Default would be 0, where the mortality rate is indepdendent of flock size
-postequilibrialisation_experimental_runtime = 0
+socially_sensitive_mortality = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]  # Default would be 0, where the mortality rate is indepdendent of flock size
+postequilibrialisation_experimental_runtime = 100
 K_decline_factor = [1] # 1 represents no decline in carrying capacity
-autumn_harvest = [0] # 0 represents no harvest
+autumn_harvest = [0.5] # Proportion of the population to be harvested: 0 represents no harvest
 carryover_proportion = 0 # carryover of resources from one year to the next
 
 #costs_sourcefile = ["/Users/simonevans/Library/CloudStorage/OneDrive-UniversityofExeter/Research/Modelling\ migration/hpcbatch_30_08_2021_174744/sim_migration_14_9_2021_133518_1302909500_dist"] #["/nobackup/beegfs/home/ISAD/sre206/hpcbatch_29_08_2021_172728/sim_migration_30_8_2021_075422_139529932_dist", "/nobackup/beegfs/home/ISAD/sre206/hpcbatch_29_08_2021_172728/sim_migration_30_8_2021_075227_1496541961_dist", "/nobackup/beegfs/home/ISAD/sre206/hpcbatch_29_08_2021_172728/sim_migration_30_8_2021_075428_1418409188_dist", "/nobackup/beegfs/home/ISAD/sre206/hpcbatch_29_08_2021_172728/sim_migration_30_8_2021_075227_1191646591_dist", "/nobackup/beegfs/home/ISAD/sre206/hpcbatch_29_08_2021_172728/sim_migration_30_8_2021_075227_1140373795_dist", "/nobackup/beegfs/home/ISAD/sre206/hpcbatch_29_08_2021_172948/sim_migration_30_8_2021_075428_1605237909_dist", "/nobackup/beegfs/home/ISAD/sre206/hpcbatch_29_08_2021_172948/sim_migration_30_8_2021_075432_1732123732_dist", "/nobackup/beegfs/home/ISAD/sre206/hpcbatch_29_08_2021_172948/sim_migration_30_8_2021_075431_665834704_dist", "/nobackup/beegfs/home/ISAD/sre206/hpcbatch_29_08_2021_172948/sim_migration_30_8_2021_075434_333892663_dist", "/nobackup/beegfs/home/ISAD/sre206/hpcbatch_29_08_2021_172948/sim_migration_30_8_2021_075429_1503304252_dist", "/nobackup/beegfs/home/ISAD/sre206/hpcbatch_29_08_2021_172948/sim_migration_30_8_2021_075431_660393031_dist", "/nobackup/beegfs/home/ISAD/sre206/hpcbatch_29_08_2021_172948/sim_migration_30_8_2021_075429_1499475050_dist", "/nobackup/beegfs/home/ISAD/sre206/hpcbatch_29_08_2021_172948/sim_migration_30_8_2021_075428_1777764160_dist"]  # If none, enter "none"
 costs_sourcefile = ["none"]
-number_replicates = 10
+number_replicates = 8
 
 executable = "./xmigration"
 
