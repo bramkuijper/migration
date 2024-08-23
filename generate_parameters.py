@@ -38,7 +38,7 @@ capacity = [8]
 min_offspring_cost = 5
 offspring_cost_magnifier = [1] # The relative difference in resource cost per offspring having migrated at the earliest opportunity versus the last. 1 represents seasonal invariability
 relative_mortality_risk_of_migration = 5
-socially_sensitive_mortality = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]  # Default would be 0, where the mortality rate is indepdendent of flock size
+socially_sensitive_mortality = [1]#[0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]  # Default would be 0, where the mortality rate is indepdendent of flock size
 postequilibrialisation_experimental_runtime = 100
 K_decline_factor = [1] # 1 represents no decline in carrying capacity
 autumn_harvest = [0.5] # Proportion of the population to be harvested: 0 represents no harvest
@@ -47,8 +47,17 @@ carryover_proportion = 0 # carryover of resources from one year to the next
 #costs_sourcefile = ["/Users/simonevans/Library/CloudStorage/OneDrive-UniversityofExeter/Research/Modelling\ migration/hpcbatch_30_08_2021_174744/sim_migration_14_9_2021_133518_1302909500_dist"] #["/nobackup/beegfs/home/ISAD/sre206/hpcbatch_29_08_2021_172728/sim_migration_30_8_2021_075422_139529932_dist", "/nobackup/beegfs/home/ISAD/sre206/hpcbatch_29_08_2021_172728/sim_migration_30_8_2021_075227_1496541961_dist", "/nobackup/beegfs/home/ISAD/sre206/hpcbatch_29_08_2021_172728/sim_migration_30_8_2021_075428_1418409188_dist", "/nobackup/beegfs/home/ISAD/sre206/hpcbatch_29_08_2021_172728/sim_migration_30_8_2021_075227_1191646591_dist", "/nobackup/beegfs/home/ISAD/sre206/hpcbatch_29_08_2021_172728/sim_migration_30_8_2021_075227_1140373795_dist", "/nobackup/beegfs/home/ISAD/sre206/hpcbatch_29_08_2021_172948/sim_migration_30_8_2021_075428_1605237909_dist", "/nobackup/beegfs/home/ISAD/sre206/hpcbatch_29_08_2021_172948/sim_migration_30_8_2021_075432_1732123732_dist", "/nobackup/beegfs/home/ISAD/sre206/hpcbatch_29_08_2021_172948/sim_migration_30_8_2021_075431_665834704_dist", "/nobackup/beegfs/home/ISAD/sre206/hpcbatch_29_08_2021_172948/sim_migration_30_8_2021_075434_333892663_dist", "/nobackup/beegfs/home/ISAD/sre206/hpcbatch_29_08_2021_172948/sim_migration_30_8_2021_075429_1503304252_dist", "/nobackup/beegfs/home/ISAD/sre206/hpcbatch_29_08_2021_172948/sim_migration_30_8_2021_075431_660393031_dist", "/nobackup/beegfs/home/ISAD/sre206/hpcbatch_29_08_2021_172948/sim_migration_30_8_2021_075429_1499475050_dist", "/nobackup/beegfs/home/ISAD/sre206/hpcbatch_29_08_2021_172948/sim_migration_30_8_2021_075428_1777764160_dist"]
 costs_sourcefile = ["none"]  # If none, enter "none"
 
-#risks_sourcefile = ["/Users/simonevans/Library/CloudStorage/OneDrive-UniversityofExeter/Research/Modelling\ migration/hpcbatch_30_08_2021_174744/sim_migration_14_9_2021_133518_1302909500_dist"] #["/nobackup/beegfs/home/ISAD/sre206/hpcbatch_29_08_2021_172728/sim_migration_30_8_2021_075422_139529932_dist", "/nobackup/beegfs/home/ISAD/sre206/hpcbatch_29_08_2021_172728/sim_migration_30_8_2021_075227_1496541961_dist", "/nobackup/beegfs/home/ISAD/sre206/hpcbatch_29_08_2021_172728/sim_migration_30_8_2021_075428_1418409188_dist", "/nobackup/beegfs/home/ISAD/sre206/hpcbatch_29_08_2021_172728/sim_migration_30_8_2021_075227_1191646591_dist", "/nobackup/beegfs/home/ISAD/sre206/hpcbatch_29_08_2021_172728/sim_migration_30_8_2021_075227_1140373795_dist", "/nobackup/beegfs/home/ISAD/sre206/hpcbatch_29_08_2021_172948/sim_migration_30_8_2021_075428_1605237909_dist", "/nobackup/beegfs/home/ISAD/sre206/hpcbatch_29_08_2021_172948/sim_migration_30_8_2021_075432_1732123732_dist", "/nobackup/beegfs/home/ISAD/sre206/hpcbatch_29_08_2021_172948/sim_migration_30_8_2021_075431_665834704_dist", "/nobackup/beegfs/home/ISAD/sre206/hpcbatch_29_08_2021_172948/sim_migration_30_8_2021_075434_333892663_dist", "/nobackup/beegfs/home/ISAD/sre206/hpcbatch_29_08_2021_172948/sim_migration_30_8_2021_075429_1503304252_dist", "/nobackup/beegfs/home/ISAD/sre206/hpcbatch_29_08_2021_172948/sim_migration_30_8_2021_075431_660393031_dist", "/nobackup/beegfs/home/ISAD/sre206/hpcbatch_29_08_2021_172948/sim_migration_30_8_2021_075429_1499475050_dist", "/nobackup/beegfs/home/ISAD/sre206/hpcbatch_29_08_2021_172948/sim_migration_30_8_2021_075428_1777764160_dist"]
-risks_sourcefile = ["none"]  # If none, enter "none"
+#risks_sourcefile = ["/Users/simonevans/Library/CloudStorage/OneDrive-UniversityofExeter/Research/Modelling\ migration/hpcbatch_29_08_2021_172728/sim_migration_30_8_2021_075422_139529932_dist"] 
+risks_sourcefile = ["/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104936/sim_migration_22_11_2023_104929_11",
+"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104936/sim_migration_22_11_2023_104929_22",
+"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104936/sim_migration_22_11_2023_104929_33",
+"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104936/sim_migration_22_11_2023_104929_44",
+"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104936/sim_migration_22_11_2023_104929_55",
+"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104936/sim_migration_22_11_2023_104929_66",
+"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104936/sim_migration_22_11_2023_104929_77",
+"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104936/sim_migration_22_11_2023_104929_88"]
+#risks_sourcefile = ["none"]  # If none, enter "none"
+
 number_replicates = 1
 
 executable = "./xmigration"
@@ -85,7 +94,7 @@ for rep_i in range(0, number_replicates):
                                     for K_decline_factor_i in K_decline_factor:
                                         for autumn_harvest_i in autumn_harvest:
                                             for costs_sourcefile_i in costs_sourcefile:
-                                                for costs_sourcefile_i in costs_sourcefile:
+                                                for risks_sourcefile_i in risks_sourcefile:
                                                     for init_phi_a_i in init_phi_a:
                                                         for init_phi_b_i in init_phi_b:
                                                             for init_theta_a_i in init_theta_a:
