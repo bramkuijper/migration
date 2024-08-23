@@ -207,6 +207,7 @@ Individual SummerPop[N];
 std::vector<int> flock_size_distribution; 
 
 std::string filename_costs;
+std::string filename_risks;
 std::string filename_output;
 
 // bounds value val between (min and max)
@@ -320,7 +321,8 @@ void init_arguments(int argc, char **argv)
 	K_decline_factor = atof(argv[30]);
 	autumn_harvest = atof(argv[31]);
     filename_costs = argv[32];
-    filename_output = argv[33];
+	filename_risks = argv[33];
+    filename_output = argv[34];
 
     // some bounds checking on parameters
     // probability of encountering a good environment
@@ -346,6 +348,9 @@ void init_arguments(int argc, char **argv)
 	if (filename_costs != "none"){
 		initialize_flock_size_distribution(filename_costs);
 	}
+	if (filename_risks != "none"){
+		initialize_flock_size_distribution(filename_risks);
+	}
 	
 } // end init_arguments
 
@@ -360,6 +365,7 @@ void write_parameters(std::ofstream &DataFile)  // at top of outputted file
             << "pmort;" << pmort << std::endl
             << "pgood;" << pgood << std::endl
             << "filename_costs;" << filename_costs << std::endl
+			<< "filename_risks;" << filename_risks << std::endl
             << "rgood_init;" << rgood_init << std::endl
             << "rbad_init;" << rbad_init << std::endl
 			<< "patch_consistency_factor;" << patch_consistency_factor << std::endl
@@ -953,12 +959,22 @@ void spring_mortality()
     }
 	
 	// MIGRANTS
-	
 	for (int i = 0; i < summer_pop;++i)
     {
 		// mortality of migrants, weighted (according to socially_sensitive_mortality) to being negatively flock-size-dependent
 		//double intercept = (1 - pmort) * socially_sensitive_mortality + pmort;	// The hypothetical annual mortality for an individual in a flock size of zero for both spring and autumn migrations	 
-		int functional_flock_size = std::min(capacity, SummerPop[i].flock_size);
+		int functional_flock_size = 0;
+		
+		if (filename_risks == "none"){
+			functional_flock_size = std::min(capacity, SummerPop[i].flock_size);  // Update with real flock size, or minimum flock size that offers maximal benefit, whichever is smaller
+		}
+		else {
+			assert(flock_size_distribution.size() > 0);
+			std::uniform_int_distribution <> flock_size_sample(0, flock_size_distribution.size() - 1);
+			int sampled_flock_size = flock_size_sample(rng_r);
+			functional_flock_size = std::min(capacity, flock_size_distribution[sampled_flock_size]);  // Assign a dummy flock size, or minimum flock size that offers maximal benefit, whichever is smaller
+		}
+		assert(functional_flock_size > 0);  // Check that a non-zero flock size has been assigned (real or dummy)
 		double psurv = 1 - pmort;
 		if (uniform(rng_r) < 1 - sqrt(psurv - pow(socially_sensitive_mortality * ((capacity - (functional_flock_size-0.5))/ capacity), cost_power)))
 			{
@@ -1293,8 +1309,7 @@ void spring_dynamics(int t)
 		// Resource cost of migration to the individual
 		SummerPop[i].flock_size = NFlock;
 		
-		//if (filename_costs.length() == 0){
-		if (filename_costs == "none"){
+		if (filename_risks == "none"){
 			SummerPop[i].cost = migration_cost(NFlock);
 		}
 		
@@ -1710,9 +1725,8 @@ void postbreeding_dynamics(int t)
     {	
         WinterPop[i].flock_size = NFlock;
 		
-		//if (filename_costs.length() == 0){
 		if (filename_costs == "none"){
-			WinterPop[i].cost = migration_cost(NFlock);  // Flcok size-depedent cost of migration
+			WinterPop[i].cost = migration_cost(NFlock);  // Flock size-depedent cost of migration
 		}
 		
 		else{
