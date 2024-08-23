@@ -1008,9 +1008,18 @@ void autumn_mortality()
 	// MIGRANTS
 	for (int i = remainer_pop; i < winter_pop; ++i)
     {
+		int functional_flock_size = 0;
 		
-		//  flock-size dependent mortality
-		int functional_flock_size = std::min(capacity, WinterPop[i].flock_size);
+		if (filename_risks == "none"){
+			functional_flock_size = std::min(capacity, WinterPop[i].flock_size);  // Update with real flock size, or minimum flock size that offers maximal benefit, whichever is smaller
+		}
+		else {
+			assert(flock_size_distribution.size() > 0);
+			std::uniform_int_distribution <> flock_size_sample(0, flock_size_distribution.size() - 1);
+			int sampled_flock_size = flock_size_sample(rng_r);
+			functional_flock_size = std::min(capacity, flock_size_distribution[sampled_flock_size]);  // Assign a dummy flock size, or minimum flock size that offers maximal benefit, whichever is smaller
+		}
+		assert(functional_flock_size > 0);  // Check that a non-zero flock size has been assigned (real or dummy)
 		double psurv = 1 - pmort;
 		if (uniform(rng_r) < 1 - sqrt(psurv - pow(socially_sensitive_mortality * ((capacity - (functional_flock_size-0.5))/ capacity), cost_power)))
 			{
