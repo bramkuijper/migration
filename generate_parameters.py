@@ -48,14 +48,14 @@ carryover_proportion = 0 # carryover of resources from one year to the next
 costs_sourcefile = ["none"]  # If none, enter "none"
 
 #risks_sourcefile = ["/Users/simonevans/Library/CloudStorage/OneDrive-UniversityofExeter/Research/Modelling\ migration/hpcbatch_29_08_2021_172728/sim_migration_30_8_2021_075422_139529932_dist"] 
-risks_sourcefile = ["/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104936/sim_migration_22_11_2023_104929_11",
-"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104936/sim_migration_22_11_2023_104929_22",
-"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104936/sim_migration_22_11_2023_104929_33",
-"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104936/sim_migration_22_11_2023_104929_44",
-"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104936/sim_migration_22_11_2023_104929_55",
-"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104936/sim_migration_22_11_2023_104929_66",
-"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104936/sim_migration_22_11_2023_104929_77",
-"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104936/sim_migration_22_11_2023_104929_88"]
+risks_sourcefile = ["/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104936/sim_migration_22_11_2023_104929_11_dist",
+"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104936/sim_migration_22_11_2023_104929_22_dist",
+"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104936/sim_migration_22_11_2023_104929_33_dist",
+"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104936/sim_migration_22_11_2023_104929_44_dist",
+"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104936/sim_migration_22_11_2023_104929_55_dist",
+"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104936/sim_migration_22_11_2023_104929_66_dist",
+"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104936/sim_migration_22_11_2023_104929_77_dist",
+"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104936/sim_migration_22_11_2023_104929_88_dist"]
 #risks_sourcefile = ["none"]  # If none, enter "none"
 
 number_replicates = 1
