@@ -62,26 +62,26 @@ costs_sourcefile = ["none"]  # If none, enter "none"
 #"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104936/sim_migration_22_11_2023_104929_88_dist"]
 
 ## Control simulations for autumnal cull (taking distributions from the 25 simulations with 100% social sensitivity)
-risks_sourcefile = ["/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104936/sim_migration_24_11_2023_104801_42_dist",
-"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104936/sim_migration_24_11_2023_104801_10_dist",
-"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104936/sim_migration_24_11_2023_104801_16_dist",
-"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104936/sim_migration_24_11_2023_104801_12_dist",
-"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104936/sim_migration_24_11_2023_104801_48_dist",
-"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104936/sim_migration_24_11_2023_104801_44_dist",
-"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104936/sim_migration_24_11_2023_104801_30_dist",
-"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104936/sim_migration_24_11_2023_104801_40_dist",
-"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104936/sim_migration_24_11_2023_104801_26_dist",
-"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104936/sim_migration_24_11_2023_104801_32_dist",
-"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104936/sim_migration_24_11_2023_104801_34_dist",
-"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104936/sim_migration_24_11_2023_104801_46_dist",
-"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104936/sim_migration_24_11_2023_104801_50_dist",
-"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104936/sim_migration_24_11_2023_104801_18_dist",
-"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104936/sim_migration_24_11_2023_104801_2_dist",
-"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104936/sim_migration_24_11_2023_104801_20_dist",
-"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104936/sim_migration_24_11_2023_104801_24_dist",
-"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104936/sim_migration_24_11_2023_104801_28_dist",
-"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104936/sim_migration_24_11_2023_104801_36_dist",
-"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104936/sim_migration_24_11_2023_104801_4_dist"]
+risks_sourcefile = ["/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104810/sim_migration_24_11_2023_104801_42_dist",
+"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104810/sim_migration_24_11_2023_104801_10_dist",
+"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104810/sim_migration_24_11_2023_104801_16_dist",
+"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104810/sim_migration_24_11_2023_104801_12_dist",
+"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104810/sim_migration_24_11_2023_104801_48_dist",
+"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104810/sim_migration_24_11_2023_104801_44_dist",
+"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104810/sim_migration_24_11_2023_104801_30_dist",
+"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104810/sim_migration_24_11_2023_104801_40_dist",
+"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104810/sim_migration_24_11_2023_104801_26_dist",
+"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104810/sim_migration_24_11_2023_104801_32_dist",
+"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104810/sim_migration_24_11_2023_104801_34_dist",
+"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104810/sim_migration_24_11_2023_104801_46_dist",
+"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104810/sim_migration_24_11_2023_104801_50_dist",
+"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104810/sim_migration_24_11_2023_104801_18_dist",
+"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104810/sim_migration_24_11_2023_104801_2_dist",
+"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104810/sim_migration_24_11_2023_104801_20_dist",
+"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104810/sim_migration_24_11_2023_104801_24_dist",
+"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104810/sim_migration_24_11_2023_104801_28_dist",
+"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104810/sim_migration_24_11_2023_104801_36_dist",
+"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104810/sim_migration_24_11_2023_104801_4_dist"]
 
 number_replicates = 1
 
