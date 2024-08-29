@@ -47,16 +47,46 @@ carryover_proportion = 0 # carryover of resources from one year to the next
 #costs_sourcefile = ["/Users/simonevans/Library/CloudStorage/OneDrive-UniversityofExeter/Research/Modelling\ migration/hpcbatch_30_08_2021_174744/sim_migration_14_9_2021_133518_1302909500_dist"] #["/nobackup/beegfs/home/ISAD/sre206/hpcbatch_29_08_2021_172728/sim_migration_30_8_2021_075422_139529932_dist", "/nobackup/beegfs/home/ISAD/sre206/hpcbatch_29_08_2021_172728/sim_migration_30_8_2021_075227_1496541961_dist", "/nobackup/beegfs/home/ISAD/sre206/hpcbatch_29_08_2021_172728/sim_migration_30_8_2021_075428_1418409188_dist", "/nobackup/beegfs/home/ISAD/sre206/hpcbatch_29_08_2021_172728/sim_migration_30_8_2021_075227_1191646591_dist", "/nobackup/beegfs/home/ISAD/sre206/hpcbatch_29_08_2021_172728/sim_migration_30_8_2021_075227_1140373795_dist", "/nobackup/beegfs/home/ISAD/sre206/hpcbatch_29_08_2021_172948/sim_migration_30_8_2021_075428_1605237909_dist", "/nobackup/beegfs/home/ISAD/sre206/hpcbatch_29_08_2021_172948/sim_migration_30_8_2021_075432_1732123732_dist", "/nobackup/beegfs/home/ISAD/sre206/hpcbatch_29_08_2021_172948/sim_migration_30_8_2021_075431_665834704_dist", "/nobackup/beegfs/home/ISAD/sre206/hpcbatch_29_08_2021_172948/sim_migration_30_8_2021_075434_333892663_dist", "/nobackup/beegfs/home/ISAD/sre206/hpcbatch_29_08_2021_172948/sim_migration_30_8_2021_075429_1503304252_dist", "/nobackup/beegfs/home/ISAD/sre206/hpcbatch_29_08_2021_172948/sim_migration_30_8_2021_075431_660393031_dist", "/nobackup/beegfs/home/ISAD/sre206/hpcbatch_29_08_2021_172948/sim_migration_30_8_2021_075429_1499475050_dist", "/nobackup/beegfs/home/ISAD/sre206/hpcbatch_29_08_2021_172948/sim_migration_30_8_2021_075428_1777764160_dist"]
 costs_sourcefile = ["none"]  # If none, enter "none"
 
-#risks_sourcefile = ["/Users/simonevans/Library/CloudStorage/OneDrive-UniversityofExeter/Research/Modelling\ migration/hpcbatch_29_08_2021_172728/sim_migration_30_8_2021_075422_139529932_dist"] 
-risks_sourcefile = ["/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104936/sim_migration_22_11_2023_104929_11_dist",
-"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104936/sim_migration_22_11_2023_104929_22_dist",
-"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104936/sim_migration_22_11_2023_104929_33_dist",
-"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104936/sim_migration_22_11_2023_104929_44_dist",
-"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104936/sim_migration_22_11_2023_104929_55_dist",
-"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104936/sim_migration_22_11_2023_104929_66_dist",
-"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104936/sim_migration_22_11_2023_104929_77_dist",
-"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104936/sim_migration_22_11_2023_104929_88_dist"]
 #risks_sourcefile = ["none"]  # If none, enter "none"
+
+#risks_sourcefile = ["/Users/simonevans/Library/CloudStorage/OneDrive-UniversityofExeter/Research/Modelling\ migration/hpcbatch_29_08_2021_172728/sim_migration_30_8_2021_075422_139529932_dist"] 
+
+## Control simulations for main results:
+#risks_sourcefile = ["/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104936/sim_migration_22_11_2023_104929_11_dist",
+#"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104936/sim_migration_22_11_2023_104929_22_dist",
+#"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104936/sim_migration_22_11_2023_104929_33_dist",
+#"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104936/sim_migration_22_11_2023_104929_44_dist",
+#"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104936/sim_migration_22_11_2023_104929_55_dist",
+#"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104936/sim_migration_22_11_2023_104929_66_dist",
+#"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104936/sim_migration_22_11_2023_104929_77_dist",
+#"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104936/sim_migration_22_11_2023_104929_88_dist"]
+
+## Control simulations for autumnal cull (taking distributions from the 25 simulations with 100% social sensitivity)
+risks_sourcefile = ["/nobackup/beegfs/home/ISAD/sre206/hpcbatch_24_11_2023_104648/sim_migration_24_11_2023_104637_10_dist,
+"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_24_11_2023_104648/sim_migration_24_11_2023_104637_12_dist,
+"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_24_11_2023_104648/sim_migration_24_11_2023_104637_14_dist,
+"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_24_11_2023_104648/sim_migration_24_11_2023_104637_16_dist,
+"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_24_11_2023_104648/sim_migration_24_11_2023_104637_18_dist,
+"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_24_11_2023_104648/sim_migration_24_11_2023_104637_2_dist,
+"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_24_11_2023_104648/sim_migration_24_11_2023_104637_20_dist,
+"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_24_11_2023_104648/sim_migration_24_11_2023_104637_22_dist,
+"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_24_11_2023_104648/sim_migration_24_11_2023_104637_24_dist,
+"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_24_11_2023_104648/sim_migration_24_11_2023_104637_26_dist,
+"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_24_11_2023_104648/sim_migration_24_11_2023_104637_28_dist,
+"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_24_11_2023_104648/sim_migration_24_11_2023_104637_30_dist,
+"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_24_11_2023_104648/sim_migration_24_11_2023_104637_32_dist,
+"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_24_11_2023_104648/sim_migration_24_11_2023_104637_34_dist,
+"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_24_11_2023_104648/sim_migration_24_11_2023_104637_36_dist,
+"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_24_11_2023_104648/sim_migration_24_11_2023_104637_38_dist,
+"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_24_11_2023_104648/sim_migration_24_11_2023_104637_4_dist,
+"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_24_11_2023_104648/sim_migration_24_11_2023_104637_40_dist,
+"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_24_11_2023_104648/sim_migration_24_11_2023_104637_42_dist,
+"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_24_11_2023_104648/sim_migration_24_11_2023_104637_44_dist,
+"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_24_11_2023_104648/sim_migration_24_11_2023_104637_46_dist,
+"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_24_11_2023_104648/sim_migration_24_11_2023_104637_48_dist,
+"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_24_11_2023_104648/sim_migration_24_11_2023_104637_50_dist,
+"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_24_11_2023_104648/sim_migration_24_11_2023_104637_6_dist,
+"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_24_11_2023_104648/sim_migration_24_11_2023_104637_8_dist]
 
 number_replicates = 1
 
