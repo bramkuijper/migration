@@ -47,12 +47,12 @@ carryover_proportion = 0 # carryover of resources from one year to the next
 #costs_sourcefile = ["/Users/simonevans/Library/CloudStorage/OneDrive-UniversityofExeter/Research/Modelling\ migration/hpcbatch_30_08_2021_174744/sim_migration_14_9_2021_133518_1302909500_dist"] #["/nobackup/beegfs/home/ISAD/sre206/hpcbatch_29_08_2021_172728/sim_migration_30_8_2021_075422_139529932_dist", "/nobackup/beegfs/home/ISAD/sre206/hpcbatch_29_08_2021_172728/sim_migration_30_8_2021_075227_1496541961_dist", "/nobackup/beegfs/home/ISAD/sre206/hpcbatch_29_08_2021_172728/sim_migration_30_8_2021_075428_1418409188_dist", "/nobackup/beegfs/home/ISAD/sre206/hpcbatch_29_08_2021_172728/sim_migration_30_8_2021_075227_1191646591_dist", "/nobackup/beegfs/home/ISAD/sre206/hpcbatch_29_08_2021_172728/sim_migration_30_8_2021_075227_1140373795_dist", "/nobackup/beegfs/home/ISAD/sre206/hpcbatch_29_08_2021_172948/sim_migration_30_8_2021_075428_1605237909_dist", "/nobackup/beegfs/home/ISAD/sre206/hpcbatch_29_08_2021_172948/sim_migration_30_8_2021_075432_1732123732_dist", "/nobackup/beegfs/home/ISAD/sre206/hpcbatch_29_08_2021_172948/sim_migration_30_8_2021_075431_665834704_dist", "/nobackup/beegfs/home/ISAD/sre206/hpcbatch_29_08_2021_172948/sim_migration_30_8_2021_075434_333892663_dist", "/nobackup/beegfs/home/ISAD/sre206/hpcbatch_29_08_2021_172948/sim_migration_30_8_2021_075429_1503304252_dist", "/nobackup/beegfs/home/ISAD/sre206/hpcbatch_29_08_2021_172948/sim_migration_30_8_2021_075431_660393031_dist", "/nobackup/beegfs/home/ISAD/sre206/hpcbatch_29_08_2021_172948/sim_migration_30_8_2021_075429_1499475050_dist", "/nobackup/beegfs/home/ISAD/sre206/hpcbatch_29_08_2021_172948/sim_migration_30_8_2021_075428_1777764160_dist"]
 costs_sourcefile = ["none"]  # If none, enter "none"
 
-#risks_sourcefile = ["none"]  # If none, enter "none"
+risks_sourcefile = ["none"]  # If none, enter "none"
 
 #risks_sourcefile = ["/Users/simonevans/Library/CloudStorage/OneDrive-UniversityofExeter/Research/Modelling\ migration/hpcbatch_29_08_2021_172728/sim_migration_30_8_2021_075422_139529932_dist"] 
 
 ## Control simulations for main results:
-risks_sourcefile = ["/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104936/sim_migration_22_11_2023_104929_11_dist",
+#risks_sourcefile = ["/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104936/sim_migration_22_11_2023_104929_11_dist",
 "/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104936/sim_migration_22_11_2023_104929_22_dist",
 "/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104936/sim_migration_22_11_2023_104929_33_dist",
 "/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_104936/sim_migration_22_11_2023_104929_44_dist",
@@ -83,7 +83,7 @@ risks_sourcefile = ["/nobackup/beegfs/home/ISAD/sre206/hpcbatch_22_11_2023_10493
 #"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_24_11_2023_104810/sim_migration_24_11_2023_104801_36_dist",
 #"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_24_11_2023_104810/sim_migration_24_11_2023_104801_4_dist"]
 
-number_replicates = 8
+number_replicates = 50
 
 executable = "./xmigration"
 
