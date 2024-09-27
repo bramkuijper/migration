@@ -1031,23 +1031,14 @@ void autumn_mortality()
 	        } 
 			
 		// User-controlled autumn cull/harvest
-		//else if (uniform(rng_r) < cull_rate)
-		//	{
-	    //        WinterPop[i] = WinterPop[winter_pop - 1];
-	    //        --winter_pop;
-	    //        --i;
-		//		
-		//		++autumn_migrant_deaths;
-		//	}
-		
-		else if (i % int(1 / (1 - cull_rate)) != 0)
-			{
-				WinterPop[i] = WinterPop[winter_pop - 1];
-				--winter_pop;
-				--i;
-				
-				++autumn_migrant_deaths;
-			}
+		else if (uniform(rng_r) < cull_rate)
+				{
+			        WinterPop[i] = WinterPop[winter_pop - 1];
+			        --winter_pop;
+			        --i;
+					
+					++autumn_migrant_deaths;
+				}
 			
 		// mortality to resource exhaustion
 		else if (WinterPop[i].resources < resource_starvation_threshold)        
