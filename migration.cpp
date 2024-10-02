@@ -34,7 +34,7 @@ long int number_years = 500000;
 // sampling interval
 int skip = std::ceil((double)number_years / 500);
 
-long int postequilibrialisation_experimental_runtime = 100;
+long int postequilibrialisation_experimental_runtime = 0;
 
 // initial values for phi (social dependency) and theta (resource dependency)
 // a is an intercept, b is a gradient
