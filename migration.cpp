@@ -1345,7 +1345,8 @@ void spring_dynamics(int t)
 				WinterPop[i].timing += 1;  // Increment its timing score
 			}
 		
-    } // ENDS ACTUAL SPRING DISPERSAL and making of flocks
+    }
+} // ENDS ACTUAL SPRING DISPERSAL and making of flocks
 
     // keep track of mean and variance in flock sizes
 	mean_spring_staging_size += staging_pop_start;
@@ -1817,6 +1818,7 @@ void postbreeding_dynamics(int t)
 			{
 				SummerPop[i].timing += 1;  // Ditto
 			}
+		}
 	    
     } // ENDS: Autumn dispersal at time t
 	
