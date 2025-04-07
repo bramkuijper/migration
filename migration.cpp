@@ -26,10 +26,10 @@ std::uniform_real_distribution<> uniform(0.0,1.0);
 // values of the most of these are overridden in the init_arguments() function
 
 // number of individuals in population
-const int N = 1000;
+const int N = 100;
 
 // number of years simulation will run for
-long int number_years = 500000;
+long int number_years = 500;
 
 // sampling interval
 int skip = std::ceil((double)number_years / 500);
@@ -462,7 +462,7 @@ void write_data_headers(std::ofstream &DataFile)
         << "spring_migrant_pop;"  // 5
 		<< "spring_migrants_resource_cap;"  // 6
 		<< "spring_nonmigrant_pop;"  // 7
-	    << "spring_signal_pop;"  // 8
+	    << "spring_signal_pop;"  // 8 
 		<< "mean_spring_signal_resources;"  // 9
 		<< "var_spring_signal_resources;"  // 10
 		<< "mean_spring_signal_timing;"  // 11
@@ -761,23 +761,24 @@ void write_spring_stats(std::ofstream &DataFile, int year)
 		<< spring_migrant_pop << ";"  // 5
 		<< spring_migrants_resource_cap << ";"
 		<< spring_nonmigrant_pop << ";"  // 7
-		<< mean_signal_resources << ";"
-		<< (ss_signal_resources - mean_signal_resources * mean_signal_resources) << ";"  // 9
+		<< spring_signal_pop << ";"
+		<< mean_signal_resources << ";"  // 9
+		<< (ss_signal_resources - mean_signal_resources * mean_signal_resources) << ";"  // 10
 		<< mean_signal_timing << ";"
-		<< (ss_signal_timing - mean_signal_timing * mean_signal_timing) << ";"  // 11
+		<< (ss_signal_timing - mean_signal_timing * mean_signal_timing) << ";"  // 12
 		<< mean_latency << ";"
-		<< (ss_latency - mean_latency * mean_latency) << ";"  // 13
+		<< (ss_latency - mean_latency * mean_latency) << ";"  // 14
 		<< mean_departure_timing << ";"
-		<< (ss_departure_timing - mean_departure_timing * mean_departure_timing) << ";"  // 15
+		<< (ss_departure_timing - mean_departure_timing * mean_departure_timing) << ";"  // 16
 		<< mean_resources << ";"
-		<< (ss_resources - mean_resources * mean_resources) << ";"  // 17
+		<< (ss_resources - mean_resources * mean_resources) << ";"  // 18
 		<< n_spring_flocks << ";"
-		<< population_mean_spring_flock_size << ";"  // 19
+		<< population_mean_spring_flock_size << ";"  // 20
 		<< population_var_spring_flock_size << ";"
-		<< individual_mean_spring_flock_size << ";"  // 21
+		<< individual_mean_spring_flock_size << ";"  // 22
 		<< (individual_ss_spring_flock_size - individual_mean_spring_flock_size * individual_mean_spring_flock_size) << ";"	
-		<< mean_spring_cost << ";"  // 23
-		<< (ss_spring_cost - mean_spring_cost * mean_spring_cost) << ";";  // 24
+		<< mean_spring_cost << ";"  // 24
+		<< (ss_spring_cost - mean_spring_cost * mean_spring_cost) << ";";  // 25
 
 }  // ENDS: write data for spring migrants
 
@@ -854,6 +855,7 @@ void write_autumn_stats(std::ofstream &DataFile)
         << autumn_migrant_pop << ";"
 		<< autumn_migrants_resource_cap << ";"
 		<< autumn_nonmigrant_pop << ";"
+		<< autumn_signal_pop << ";"
 		<< mean_signal_resources << ";"
 		<< (ss_signal_resources - mean_signal_resources * mean_signal_resources) << ";"
 		<< mean_signal_timing << ";"

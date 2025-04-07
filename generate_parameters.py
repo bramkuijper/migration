@@ -38,8 +38,8 @@ capacity = [8]
 min_offspring_cost = 5
 offspring_cost_magnifier = [1] # The relative difference in resource cost per offspring having migrated at the earliest opportunity versus the last. 1 represents seasonal invariability
 relative_mortality_risk_of_migration = 5
-socially_sensitive_mortality = [0.1, 0.3, 0.5, 0.7, 0.9] # [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]  # Default would be 0, where the mortality rate is indepdendent of flock size
-postequilibrialisation_experimental_runtime = 100
+socially_sensitive_mortality = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]  # Default would be 0, where the mortality rate is indepdendent of flock size
+postequilibrialisation_experimental_runtime = 0
 K_decline_factor = [1] # 1 represents no decline in carrying capacity
 autumn_harvest = [0.75] # Proportion of the population to be harvested: 0 represents no harvest
 carryover_proportion = 0 # carryover of resources from one year to the next
@@ -84,7 +84,7 @@ risks_sourcefile = ["none"]  # If none, enter "none"
 #"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_24_11_2023_104810/sim_migration_24_11_2023_104801_36_dist",
 #"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_24_11_2023_104810/sim_migration_24_11_2023_104801_4_dist"]
 
-number_replicates = 15
+number_replicates = 1
 
 executable = "./xmigration"
 
