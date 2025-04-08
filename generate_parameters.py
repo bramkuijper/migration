@@ -9,14 +9,14 @@ init_phi_a = [0.3]  # Default is 0.3
 init_phi_b = [25]  # Default is 25
 
 twinter = 0
-tspring = 10000  # twinter in manuscript
+tspring = 2000  # twinter in manuscript
 
 pmort = 0.1
 pgood = 0.5
 patch_consistency_factor = [0.30103] #[0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3] # Varies from 0 (switching patch type EVERY timestep, so uniformity in resource value) and upwards. Above 3 (equating to a switch probability of 0.001) the distribution of resource values starts to become bimodal. log(2) gives the previous behaviour, which was a 50:50 likelihood of switching.
 
-rgood = 0.04
-rbad = 0.02
+rgood = 0.2 #0.04
+rbad = 0.1 #0.02
 preparation_penalty = [0.5] # [1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1, 0] # The reduction in resource acquisition, relative to the normal feeding phase. Default is 0.5
 
 resource_reproduction_threshold = 30
@@ -38,7 +38,7 @@ capacity = [8]
 min_offspring_cost = 5
 offspring_cost_magnifier = [1] # The relative difference in resource cost per offspring having migrated at the earliest opportunity versus the last. 1 represents seasonal invariability
 relative_mortality_risk_of_migration = 5
-socially_sensitive_mortality =[0, 0.2, 0.4, 0.6, 0.8, 1]  # [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]  # Default would be 0, where the mortality rate is indepdendent of flock size
+socially_sensitive_mortality =[0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]  # Default would be 0, where the mortality rate is indepdendent of flock size
 postequilibrialisation_experimental_runtime = 0
 K_decline_factor = [1] # 1 represents no decline in carrying capacity
 autumn_harvest = [0.75] # Proportion of the population to be harvested: 0 represents no harvest
