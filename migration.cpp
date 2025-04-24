@@ -3,7 +3,6 @@
 // 2019
 
 #define DEBUG
-
 #include <iostream>
 #include <cstdlib>
 #include <fstream>
@@ -34,14 +33,16 @@ long int number_years = 500000;
 // sampling interval
 int skip = std::ceil((double)number_years / 500);
 
-long int postequilibrialisation_experimental_runtime = 100;
+long int postequilibrialisation_experimental_runtime = 0;
 
-// initial values for phi (social dependency) and theta (resource dependency)
+// initial values for alleles
 // a is an intercept, b is a gradient
 double init_theta_a = 0.0; 
 double init_theta_b = 0.0;
 double init_phi_a = 0.0;
 double init_phi_b = 0.0;
+double init_psi_a = 0.0;
+double init_psi_b = 0.0;
 
 // mortality probability 
 double pmort = 0.0;
@@ -70,8 +71,10 @@ double individual_offspring_increment = 0.0;
 // mutation rates
 double mu_theta = 0.0;
 double mu_phi = 0.0;
+double mu_psi = 0.0;
 double sdmu_theta = 0.0;
 double sdmu_phi = 0.0;
+double sdmu_psi = 0.0;
 
 // migration cost function
 double cost_power = 0.0;
@@ -176,13 +179,17 @@ struct Individual
 {
     double resources;
 
-    // RESOURCE SENSITIVITY reaction norm (determines entry into staging pool)
-    double theta_a[2];  // elevation (baseline leaving rate)
-    double theta_b[2];  // reaction norm, dependency on the amount of resources
+    // RESOURCE SENSITIVE SIGNALLING reaction norm (determines entry into staging pool)
+    double theta_a[2];
+    double theta_b[2];
 
-    // COLLECTIVE DISPERSAL reaction norm (determines migration dependent on number of individuals)
-    double phi_a[2];  // collective dispersal elevation
-    double phi_b[2];  // collective dispersal slope, dependency on number of individuals
+    // COLLECTIVE DISPERSAL reaction norm
+    double phi_a[2];
+    double phi_b[2];
+	
+    // RESOURCE SENSITIVE DEPARTURE reaction norm 
+    double psi_a[2];
+    double psi_b[2];
 	
 	int latency;  // individual departure latency
 	int timing;  // individual departure timing
@@ -289,40 +296,42 @@ void initialize_flock_size_distribution(std::string file_name)
 // running the executable file
 void init_arguments(int argc, char **argv)
 {
-    init_phi_a = atof(argv[1]);  // Elevation of the reaction norm for group size-dependent miratory departure
-    init_phi_b = atof(argv[2]);  // Slope of the reaction norm for group size-dependent miratory departure
-    init_theta_a = atof(argv[3]);  // // Elevation of the reaction norm for resource-dependent entry to staging pool
-    init_theta_b = atof(argv[4]);  // Slope of the reaction norm for resource-dependent entry to staging pool
-    pmort = atof(argv[5]);
-    pgood = atof(argv[6]);
-	patch_consistency_factor = atof(argv[7]);
-    rgood_init = atof(argv[8]);
-    rbad_init = atof(argv[9]);
-	preparation_penalty = atof(argv[10]);
-    resource_reproduction_threshold = atof(argv[11]);
-    resource_starvation_threshold = atof(argv[12]);
-    mu_theta = atof(argv[13]);
-    mu_phi = atof(argv[14]);
-    sdmu_theta = atof(argv[15]);
-    sdmu_phi = atof(argv[16]);
-    max_migration_cost = atof(argv[17]);
-	min_migration_cost = atof(argv[18]);
-    cost_power = atof(argv[19]);
-	twinter = atoi(argv[20]);
-    tspring = atoi(argv[21]);
-	resource_max = atof(argv[22]);
-	min_offspring_cost = atof(argv[23]);
-	offspring_cost_magnifier = atof(argv[24]);
-	carryover_proportion = atof(argv[25]);
-	relative_mortality_risk_of_migration = atof(argv[26]);
-	socially_sensitive_mortality = atof(argv[27]);
-	capacity = atoi(argv[28]);
-	postequilibrialisation_experimental_runtime = atoi(argv[29]);
-	K_decline_factor = atof(argv[30]);
-	autumn_harvest = atof(argv[31]);
-    filename_costs = argv[32];
-	filename_risks = argv[33];
-    filename_output = argv[34];
+    init_theta_a = atof(argv[1]);
+    init_theta_b = atof(argv[2]);
+    init_phi_a = atof(argv[3]);
+    init_phi_b = atof(argv[4]);
+    init_phi_a = atof(argv[5]);
+    init_phi_b = atof(argv[6]);
+    pmort = atof(argv[7]);
+    pgood = atof(argv[8]);
+	patch_consistency_factor = atof(argv[9]);
+    rgood_init = atof(argv[10]);
+    rbad_init = atof(argv[11]);
+	preparation_penalty = atof(argv[12]);
+    resource_reproduction_threshold = atof(argv[13]);
+    resource_starvation_threshold = atof(argv[14]);
+    mu_theta = atof(argv[15]);
+    mu_phi = atof(argv[16]);
+    sdmu_theta = atof(argv[17]);
+    sdmu_phi = atof(argv[18]);
+    max_migration_cost = atof(argv[19]);
+	min_migration_cost = atof(argv[20]);
+    cost_power = atof(argv[21]);
+	twinter = atoi(argv[22]);
+    tspring = atoi(argv[23]);
+	resource_max = atof(argv[24]);
+	min_offspring_cost = atof(argv[25]);
+	offspring_cost_magnifier = atof(argv[26]);
+	carryover_proportion = atof(argv[27]);
+	relative_mortality_risk_of_migration = atof(argv[28]);
+	socially_sensitive_mortality = atof(argv[29]);
+	capacity = atoi(argv[30]);
+	postequilibrialisation_experimental_runtime = atoi(argv[31]);
+	K_decline_factor = atof(argv[32]);
+	autumn_harvest = atof(argv[33]);
+    filename_costs = argv[34];
+	filename_risks = argv[35];
+    filename_output = argv[36];
 
     // some bounds checking on parameters
     // probability of encountering a good environment
@@ -362,6 +371,8 @@ void write_parameters(std::ofstream &DataFile)  // at top of outputted file
             << "init_theta_b;" << init_theta_b << std::endl
             << "init_phi_a;" << init_phi_a << std::endl
             << "init_phi_b;" << init_phi_b << std::endl
+	        << "init_psi_a;" << init_phi_a << std::endl
+	        << "init_psi_b;" << init_phi_b << std::endl
             << "pmort;" << pmort << std::endl
             << "pgood;" << pgood << std::endl
             << "filename_costs;" << filename_costs << std::endl
@@ -375,8 +386,10 @@ void write_parameters(std::ofstream &DataFile)  // at top of outputted file
             << "resource_starvation_threshold;" << resource_starvation_threshold << std::endl
             << "mu_theta;" << mu_theta << std::endl
             << "mu_phi;" << mu_phi << std::endl
+			<< "mu_psi;" << mu_psi << std::endl
             << "sdmu_theta;" << sdmu_theta << std::endl
             << "sdmu_phi;" << sdmu_phi << std::endl
+			<< "sdmu_psi;" << sdmu_psi << std::endl
             << "tspring;" << tspring << std::endl
 			<< "twinter;" << twinter << std::endl
             << "N;" << N << std::endl
@@ -423,6 +436,8 @@ void write_dist(std::ofstream &DataFile,
 	        << SummerPop[summer_idx].theta_b[0]*0.5 + SummerPop[summer_idx].theta_b[1]*0.5 << ";"
 	        << SummerPop[summer_idx].phi_a[0]*0.5 + SummerPop[summer_idx].phi_a[1]*0.5 << ";"
 	        << SummerPop[summer_idx].phi_b[0]*0.5 + SummerPop[summer_idx].phi_b[1]*0.5 << ";"
+		    << SummerPop[summer_idx].psi_a[0]*0.5 + SummerPop[summer_idx].psi_a[1]*0.5 << ";"
+		    << SummerPop[summer_idx].psi_b[0]*0.5 + SummerPop[summer_idx].psi_b[1]*0.5 << ";"
             << SummerPop[summer_idx].age << ";"
 			<< SummerPop[summer_idx].patch_quality << ";" << std::endl;
 	    }
@@ -445,6 +460,8 @@ void write_dist_data_headers(std::ofstream &DataFile)
         << "theta_b;"
         << "phi_a;"
         << "phi_b;"
+		<< "psi_a;"
+		<< "psi_b;"
         << "age;"
 		<< "patch_quality;" << std::endl;
 } // end write_dist_data_headers
@@ -531,6 +548,10 @@ void write_data_headers(std::ofstream &DataFile)
 	    << "var_phi_a_winter;"
 	    << "mean_phi_b_winter;"
 	    << "var_phi_b_winter;"
+		<< "mean_psi_a_winter;"
+		<< "var_psi_a_winter;"
+		<< "mean_psi_b_winter;"
+		<< "var_psi_b_winter;"
 		<< "mean_age;"
 		<< "var_age;"
 		<< std::endl;
@@ -549,6 +570,11 @@ void write_winter_stats(std::ofstream &DataFile)
     double ss_phi_a = 0.0;
     double mean_phi_b = 0.0;
     double ss_phi_b = 0.0;
+	
+    double mean_psi_a = 0.0;
+    double ss_psi_a = 0.0;
+    double mean_psi_b = 0.0;
+    double ss_psi_b = 0.0;
 
     double mean_resources = 0.0;
     double ss_resources = 0.0;
@@ -580,6 +606,14 @@ void write_winter_stats(std::ofstream &DataFile)
         val = 0.5 * (WinterPop[i].phi_b[0] + WinterPop[i].phi_b[1]);
         mean_phi_b += val;
         ss_phi_b += val * val;
+		
+        val = 0.5 * (WinterPop[i].psi_a[0] + WinterPop[i].psi_a[1]);
+        mean_psi_a += val;
+        ss_psi_a += val * val;
+
+        val = 0.5 * (WinterPop[i].psi_b[0] + WinterPop[i].psi_b[1]);
+        mean_psi_b += val;
+        ss_psi_b += val * val;
         
         val = WinterPop[i].resources;  // the resource level of individual i  // 18 Feb 2020: I've changed this from StagingPool[i].resources
         mean_resources += val;
@@ -598,6 +632,8 @@ void write_winter_stats(std::ofstream &DataFile)
         mean_theta_b /=  winter_pop;
         mean_phi_a /=  winter_pop;
         mean_phi_b /=  winter_pop;
+        mean_psi_a /=  winter_pop;
+        mean_psi_b /=  winter_pop;
         mean_resources /=  winter_pop;
 		mean_age /= winter_pop;
          
@@ -605,6 +641,8 @@ void write_winter_stats(std::ofstream &DataFile)
         ss_theta_b /= winter_pop; 
         ss_phi_a /= winter_pop; 
         ss_phi_b /= winter_pop;
+        ss_psi_a /= winter_pop; 
+        ss_psi_b /= winter_pop;
         ss_resources /= winter_pop; 
 		ss_age /= winter_pop;
     }
@@ -626,6 +664,10 @@ void write_winter_stats(std::ofstream &DataFile)
         << (ss_phi_a - mean_phi_a * mean_phi_a) << ";"
         << mean_phi_b << ";"
         << (ss_phi_b - mean_phi_b * mean_phi_b) << ";"
+	    << mean_phi_a << ";"
+	    << (ss_phi_a - mean_phi_a * mean_phi_a) << ";"
+	    << mean_phi_b << ";"
+	    << (ss_phi_b - mean_phi_b * mean_phi_b) << ";"
 		<< mean_age << ";"
 		<< (ss_age - mean_age * mean_age) << ";"
 		<< std::endl;
@@ -895,13 +937,17 @@ void init_population()
 		
         for (int j = 0; j < 2; ++j)
         {
-            // initialize allelic values for theta elevation and slope
+            // initialize allelic values for theta
             WinterPop[i].theta_a[j] = init_theta_a;
             WinterPop[i].theta_b[j] = init_theta_b;
             
-            // initialize allelic values for phi elevation and slope
+            // initialize allelic values for phi
             WinterPop[i].phi_a[j] = init_phi_a;
             WinterPop[i].phi_b[j] = init_phi_b;
+			
+            // initialize allelic values for psi
+            WinterPop[i].psi_a[j] = init_psi_a;
+            WinterPop[i].psi_b[j] = init_psi_b;
 			
         }
 		
@@ -1127,8 +1173,7 @@ void spring_dynamics(int t)
     // individuals make dispersal decisions
     // setting up a sampling function to sample from flock_size_distribution   
 	
-	// foraging of individuals who are just at the wintering site
-    // and who have yet to decide to go to the staging site
+	// foraging of individuals who are at the wintering site but not signalling
     for (int i = 0; i < winter_pop; ++i)
     {		
 		if (WinterPop[i].patch_quality == 1)
@@ -1151,11 +1196,10 @@ void spring_dynamics(int t)
     } // ok, resource dynamic done
 
 
-    // foraging of individuals who are already at the staging site
+    // foraging of individuals who are signalling
     for (int i = 0; i < staging_pop; ++i)
     { 
-        // indivuals who are already at the staging site
-        // continue to forage at the staging site
+        // indivuals who are signalling continue to forage at the staging site
 		if (StagingPool[i].patch_quality == 1)
 		{
 			StagingPool[i].resources += rgood * preparation_penalty;
@@ -1181,9 +1225,7 @@ void spring_dynamics(int t)
 	assert(winter_pop + staging_pop + summer_pop <= N);  
     double psignal = 0.0;
 
-    // individuals decide whether to go to staging site
-    // i.e., prepare for dispersal
-    // signal to disperse
+    // individuals decide whether to signal
     for (int i = 0; i < winter_pop; ++i) 
     {	
 		// reaction norm dependent on resources
@@ -1196,15 +1238,15 @@ void spring_dynamics(int t)
         // bound the probability
         psignal = clamp(psignal, 0, 1);
 
-        // does individual want to signal to others to be ready for departure?
+        // does individual start signalling?
         if (uniform(rng_r) < psignal)
         {
-            // add individual to the staging pool
+            // add individual to the signalling pool
             StagingPool[staging_pop] = WinterPop[i];
 			StagingPool[staging_pop].latency = 0;
 			StagingPool[staging_pop].cost = 0.0;  // reset individual's migration cost to zero
 			StagingPool[staging_pop].signal_resources = StagingPool[staging_pop].resources;
-            ++staging_pop; // increment the number of individuals in the staging pool
+            ++staging_pop; // increment the number of individuals in the signalling pool
 
             assert(staging_pop <= N);
             assert(staging_pop > 0);
@@ -1220,7 +1262,7 @@ void spring_dynamics(int t)
 		{
 			WinterPop[i].signal_timing += 1;  // Individual has not signalled readiness to leave (equivalent to not entering 'staging pool')
 			
-			WinterPop[i].timing +=1;  // Individuals that do not enter the staging population will not be departing at time t
+			WinterPop[i].timing +=1;  // Individuals that do not enter the signalling population will not be departing at time t
 		}
     } // end for: move dispersers to staging
 
@@ -1233,9 +1275,11 @@ void spring_dynamics(int t)
     // timestep t
     int NFlock = 0;
 
-    double pdisperse = 0.0;
+    double pready_condition = 0.0;
+	double pready_social = 0.0;
+	double pdisperse = 0.0;
 
-    // remember numbers of individuals in the staging pop at the start
+    // remember numbers of individuals signalling
     int staging_pop_start = staging_pop;
 	
     // actual spring dispersal from winter to summer population
@@ -1243,11 +1287,16 @@ void spring_dynamics(int t)
     {
         assert(staging_pop < N);
         
-		pdisperse = pow(1 + exp(-0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) 
-			* (((double) staging_pop_start / (staging_pop_start + winter_pop)) - 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1]))), -1);
+		pready_condition = pow(1 + exp(-0.5 * (StagingPool[i].psi_b[0] + StagingPool[i].psi_b[1]) 
+			* (StagingPool[i].resources - 0.5 * (StagingPool[i].psi_a[0] + StagingPool[i].psi_a[1]))), -1);
+		pready_condition = clamp(pready_condition, 0, 1);
 		
-		// bound the probability (not really necessary)
-        pdisperse = clamp(pdisperse, 0, 1);
+		pready_social = pow(1 + exp(-0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) 
+			* (((double) staging_pop_start / (staging_pop_start + winter_pop)) - 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1]))), -1);
+		pready_social = clamp(pready_social, 0, 1);
+		
+		pdisperse = pready_condition * pready_social;
+		pdisperse = clamp(pdisperse, 0, 1);
 
         // yes individual goes
         if (uniform(rng_r) < pdisperse)
@@ -1373,6 +1422,12 @@ void create_offspring(
     offspring.phi_a[1] = mutation(father.phi_a[allele_sample(rng_r)], mu_phi, sdmu_phi);
     offspring.phi_b[0] = mutation(mother.phi_b[allele_sample(rng_r)], mu_phi, sdmu_phi);
     offspring.phi_b[1] = mutation(father.phi_b[allele_sample(rng_r)], mu_phi, sdmu_phi);
+	
+    // inherit psi loci
+    offspring.psi_a[0] = mutation(mother.psi_a[allele_sample(rng_r)], mu_psi, sdmu_psi);
+    offspring.psi_a[1] = mutation(father.psi_a[allele_sample(rng_r)], mu_psi, sdmu_psi);
+    offspring.psi_b[0] = mutation(mother.psi_b[allele_sample(rng_r)], mu_psi, sdmu_psi);
+    offspring.psi_b[1] = mutation(father.psi_b[allele_sample(rng_r)], mu_psi, sdmu_psi);
 	
 }  // ENDS OFFSPRING PRODUCTION
 
@@ -1611,15 +1666,15 @@ void postbreeding_dynamics(int t)
 		// bound the probability
         psignal = clamp(psignal, 0.0, 1.0);
 
-        // does individual want to signal to others to be ready for departure?
+        // does individual start signalling to others?
         if (uniform(rng_r) < psignal)
         {
-            // add individual to the staging pool
+            // add individual to the signalling pool
             StagingPool[staging_pop] = SummerPop[i];
 			StagingPool[staging_pop].latency = 0.0;
 			StagingPool[staging_pop].cost = 0.0;  // reset individual's migration cost to zero
 			StagingPool[staging_pop].signal_resources = StagingPool[staging_pop].resources;
-            ++staging_pop; // increment the number of individuals in the staging pool
+            ++staging_pop; // increment the number of signalling individuals
 
             // delete this individual from the summer population and replace with the individual from the end of the summer_pop stack
             SummerPop[i] = SummerPop[summer_pop - 1];
@@ -1635,7 +1690,7 @@ void postbreeding_dynamics(int t)
 		else
 		{
 			SummerPop[i].signal_timing +=1;  // Individual did not signal at time t
-			SummerPop[i].timing +=1;  // Individuals that do not enter the staging population will not be departing at time t
+			SummerPop[i].timing +=1;  // Individuals that do not start signalling will not be departing at time t
 		}
     } // end for (int i = 0; i < summer_pop; ++i)
 
@@ -1647,7 +1702,9 @@ void postbreeding_dynamics(int t)
 
     int NFlock = 0;
 
-    double pdisperse = 0.0;
+    double pready_condition = 0.0;
+	double pready_social = 0.0;
+	double pdisperse = 0.0;
 	mean_latency = 0.0;
 	ss_latency = 0.0;
 	int lat = 0;
@@ -1657,8 +1714,17 @@ void postbreeding_dynamics(int t)
     // actual autumn dispersal at time t
     for (int i = 0; i < staging_pop; ++i)
     {
-		pdisperse = pow(1 + exp(-0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) 
+		
+		pready_condition = pow(1 + exp(-0.5 * (StagingPool[i].psi_b[0] + StagingPool[i].psi_b[1]) 
+			* (StagingPool[i].resources - 0.5 * (StagingPool[i].psi_a[0] + StagingPool[i].psi_a[1]))), -1);
+		pready_condition = clamp(pready_condition, 0, 1);
+		
+		pready_social = pow(1 + exp(-0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) 
 			* (((double) staging_pop_start / (staging_pop_start + summer_pop)) - 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1]))), -1);
+		pready_social = clamp(pready_social, 0, 1);
+		
+		pdisperse = pready_condition * pready_social;
+		pdisperse = clamp(pdisperse, 0, 1);
 		
 		pdisperse = clamp(pdisperse, 0, 1);
 		
