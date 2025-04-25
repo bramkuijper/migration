@@ -25,10 +25,10 @@ std::uniform_real_distribution<> uniform(0.0,1.0);
 // values of the most of these are overridden in the init_arguments() function
 
 // number of individuals in population
-const int N = 1000;
+const int N = 100;
 
 // number of years simulation will run for
-long int number_years = 500000;
+long int number_years = 500;
 
 // sampling interval
 int skip = std::ceil((double)number_years / 500);
@@ -300,8 +300,8 @@ void init_arguments(int argc, char **argv)
     init_theta_b = atof(argv[2]);
     init_phi_a = atof(argv[3]);
     init_phi_b = atof(argv[4]);
-    init_phi_a = atof(argv[5]);
-    init_phi_b = atof(argv[6]);
+    init_psi_a = atof(argv[5]);
+    init_psi_b = atof(argv[6]);
     pmort = atof(argv[7]);
     pgood = atof(argv[8]);
 	patch_consistency_factor = atof(argv[9]);
@@ -311,27 +311,29 @@ void init_arguments(int argc, char **argv)
     resource_reproduction_threshold = atof(argv[13]);
     resource_starvation_threshold = atof(argv[14]);
     mu_theta = atof(argv[15]);
-    mu_phi = atof(argv[16]);
-    sdmu_theta = atof(argv[17]);
-    sdmu_phi = atof(argv[18]);
-    max_migration_cost = atof(argv[19]);
-	min_migration_cost = atof(argv[20]);
-    cost_power = atof(argv[21]);
-	twinter = atoi(argv[22]);
-    tspring = atoi(argv[23]);
-	resource_max = atof(argv[24]);
-	min_offspring_cost = atof(argv[25]);
-	offspring_cost_magnifier = atof(argv[26]);
-	carryover_proportion = atof(argv[27]);
-	relative_mortality_risk_of_migration = atof(argv[28]);
-	socially_sensitive_mortality = atof(argv[29]);
-	capacity = atoi(argv[30]);
-	postequilibrialisation_experimental_runtime = atoi(argv[31]);
-	K_decline_factor = atof(argv[32]);
-	autumn_harvest = atof(argv[33]);
-    filename_costs = argv[34];
-	filename_risks = argv[35];
-    filename_output = argv[36];
+    mu_phi = atof(argv[15]);
+	mu_psi = atof(argv[15]);
+    sdmu_theta = atof(argv[16]);
+    sdmu_phi = atof(argv[16]);
+	sdmu_psi = atof(argv[16]);
+    max_migration_cost = atof(argv[17]);
+	min_migration_cost = atof(argv[18]);
+    cost_power = atof(argv[19]);
+	twinter = atoi(argv[20]);
+    tspring = atoi(argv[21]);
+	resource_max = atof(argv[22]);
+	min_offspring_cost = atof(argv[23]);
+	offspring_cost_magnifier = atof(argv[24]);
+	carryover_proportion = atof(argv[25]);
+	relative_mortality_risk_of_migration = atof(argv[26]);
+	socially_sensitive_mortality = atof(argv[27]);
+	capacity = atoi(argv[28]);
+	postequilibrialisation_experimental_runtime = atoi(argv[29]);
+	K_decline_factor = atof(argv[30]);
+	autumn_harvest = atof(argv[31]);
+    filename_costs = argv[32];
+	filename_risks = argv[33];
+    filename_output = argv[34];
 
     // some bounds checking on parameters
     // probability of encountering a good environment
@@ -371,8 +373,8 @@ void write_parameters(std::ofstream &DataFile)  // at top of outputted file
             << "init_theta_b;" << init_theta_b << std::endl
             << "init_phi_a;" << init_phi_a << std::endl
             << "init_phi_b;" << init_phi_b << std::endl
-	        << "init_psi_a;" << init_phi_a << std::endl
-	        << "init_psi_b;" << init_phi_b << std::endl
+	        << "init_psi_a;" << init_psi_a << std::endl
+	        << "init_psi_b;" << init_psi_b << std::endl
             << "pmort;" << pmort << std::endl
             << "pgood;" << pgood << std::endl
             << "filename_costs;" << filename_costs << std::endl
@@ -664,10 +666,10 @@ void write_winter_stats(std::ofstream &DataFile)
         << (ss_phi_a - mean_phi_a * mean_phi_a) << ";"
         << mean_phi_b << ";"
         << (ss_phi_b - mean_phi_b * mean_phi_b) << ";"
-	    << mean_phi_a << ";"
-	    << (ss_phi_a - mean_phi_a * mean_phi_a) << ";"
-	    << mean_phi_b << ";"
-	    << (ss_phi_b - mean_phi_b * mean_phi_b) << ";"
+	    << mean_psi_a << ";"
+	    << (ss_psi_a - mean_psi_a * mean_psi_a) << ";"
+	    << mean_psi_b << ";"
+	    << (ss_psi_b - mean_psi_b * mean_psi_b) << ";"
 		<< mean_age << ";"
 		<< (ss_age - mean_age * mean_age) << ";"
 		<< std::endl;
@@ -1285,7 +1287,7 @@ void spring_dynamics(int t)
     // actual spring dispersal from winter to summer population
     for (int i = 0; i < staging_pop; ++i)
     {
-        assert(staging_pop < N);
+        assert(staging_pop <= N);
         
 		pready_condition = pow(1 + exp(-0.5 * (StagingPool[i].psi_b[0] + StagingPool[i].psi_b[1]) 
 			* (StagingPool[i].resources - 0.5 * (StagingPool[i].psi_a[0] + StagingPool[i].psi_a[1]))), -1);
@@ -1295,8 +1297,7 @@ void spring_dynamics(int t)
 			* (((double) staging_pop_start / (staging_pop_start + winter_pop)) - 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1]))), -1);
 		pready_social = clamp(pready_social, 0, 1);
 		
-		pdisperse = pready_condition * pready_social;
-		pdisperse = clamp(pdisperse, 0, 1);
+		pdisperse = pready_condition + pready_social;
 
         // yes individual goes
         if (uniform(rng_r) < pdisperse)
