@@ -1232,7 +1232,6 @@ void spring_dynamics(int t)
     {	
 		// reaction norm dependent on resources
         // resulting in signaling a willingness to disperse
-        // => go to the staging level
 
 		psignal = pow(1 + exp(-0.5 * (WinterPop[i].theta_b[0] + WinterPop[i].theta_b[1]) 
 			* (WinterPop[i].resources - 0.5 * (WinterPop[i].theta_a[0] + WinterPop[i].theta_a[1]))), -1);
