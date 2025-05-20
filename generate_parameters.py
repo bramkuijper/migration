@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
 import datetime
-# TESTING TO SEE IF THIS FILE COMMITS TO GITHUB
 # generate all parameter combinations to run the migration simulation
 
-init_theta_a = [60]  # Default is 60
+init_theta_a = [1]  # Default is 60
 init_theta_b = [1]  # Default is 1
-init_phi_a = [0.3]  # Default is 0.3
-init_phi_b = [25]  # Default is 25
-psi_a = 60
-psi_b = 1
+init_phi_a   = [0.3]  # Default is 0.3
+init_phi_b   = [0.01]  # Default is 25
+init_psi_a   = 60
+init_psi_b   = 1
 
 twinter = 0
 tspring = 10000  # twinter in manuscript (default is 10K)
@@ -21,7 +20,7 @@ rgood = 0.04
 rbad = 0.02
 preparation_penalty = [0.5] # [1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1, 0] # The reduction in resource acquisition, relative to the normal feeding phase. Default is 0.5
 
-resource_reproduction_threshold = 30
+resource_reproduction_threshold = 25
 resource_starvation_threshold = 0
 resource_max = 60
 
@@ -39,7 +38,7 @@ min_offspring_cost = 5
 offspring_cost_magnifier = [1] # The relative difference in resource cost per offspring having migrated at the earliest opportunity versus the last. 1 represents seasonal invariability
 relative_mortality_risk_of_migration = 5
 
-socially_sensitive_mortality = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]  # Default would be 0, where the mortality rate is indepdendent of flock size
+socially_sensitive_mortality = [0]#[0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]  # Default would be 0, where the mortality rate is indepdendent of flock size
 postequilibrialisation_experimental_runtime = 0
 K_decline_factor = [1] # 1 represents no decline in carrying capacity
 autumn_harvest = [0.75] # Proportion of the population to be harvested: 0 represents no harvest
@@ -85,7 +84,7 @@ risks_sourcefile = ["none"]  # If none, enter "none"
 #"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_24_11_2023_104810/sim_migration_24_11_2023_104801_36_dist",
 #"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_24_11_2023_104810/sim_migration_24_11_2023_104801_4_dist"]
 
-number_replicates = 8
+number_replicates = 1
 executable = "./xmigration"
 
 counter = 1
@@ -131,8 +130,8 @@ for rep_i in range(0, number_replicates):
                                                                         + str(init_theta_b_i) + " "
                                                                         + str(init_phi_a_i) + " "
                                                                         + str(init_phi_b_i) + " "
-                                                                        + str(psi_a) + " "  #5
-                                                                        + str(psi_b) + " "
+                                                                        + str(init_psi_a) + " "  #5
+                                                                        + str(init_psi_b) + " "
                                                                         + str(pmort) + " "
                                                                         + str(pgood) + " "
                                                                         + str(patch_consistency_factor_i) + " "
