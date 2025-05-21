@@ -25,10 +25,10 @@ std::uniform_real_distribution<> uniform(0.0,1.0);
 // values of the most of these are overridden in the init_arguments() function
 
 // number of individuals in population
-const int N = 1000;
+const int N = 200;
 
 // number of years simulation will run for
-long int number_years = 500000;
+long int number_years = 500;
 
 // sampling interval
 int skip = std::ceil((double)number_years / 500);
@@ -664,10 +664,10 @@ void write_winter_stats(std::ofstream &DataFile)
         << (ss_phi_a - mean_phi_a * mean_phi_a) << ";"
         << mean_phi_b << ";"
         << (ss_phi_b - mean_phi_b * mean_phi_b) << ";"
-	    << mean_phi_a << ";"
-	    << (ss_phi_a - mean_phi_a * mean_phi_a) << ";"
+	    << mean_psi_a << ";"
+	    << (ss_psi_a - mean_psi_a * mean_psi_a) << ";"
 	    << mean_phi_b << ";"
-	    << (ss_phi_b - mean_phi_b * mean_phi_b) << ";"
+	    << (ss_psi_b - mean_psi_b * mean_psi_b) << ";"
 		<< mean_age << ";"
 		<< (ss_age - mean_age * mean_age) << ";"
 		<< std::endl;
@@ -1275,8 +1275,6 @@ void spring_dynamics(int t)
     // timestep t
     int NFlock = 0;
 
-    double pready_condition = 0.0;
-	double pready_social = 0.0;
 	double pdisperse = 0.0;
 
     // remember numbers of individuals signalling
@@ -1285,17 +1283,10 @@ void spring_dynamics(int t)
     // actual spring dispersal from winter to summer population
     for (int i = 0; i < staging_pop; ++i)
     {
-        assert(staging_pop < N);
-        
-		pready_condition = pow(1 + exp(-0.5 * (StagingPool[i].psi_b[0] + StagingPool[i].psi_b[1]) 
-			* (StagingPool[i].resources - 0.5 * (StagingPool[i].psi_a[0] + StagingPool[i].psi_a[1]))), -1);
-		pready_condition = clamp(pready_condition, 0, 1);
+        assert(staging_pop <= N);
 		
-		pready_social = pow(1 + exp(-0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) 
+		pdisperse = pow(1 + exp(-0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) 
 			* (((double) staging_pop_start / (staging_pop_start + winter_pop)) - 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1]))), -1);
-		pready_social = clamp(pready_social, 0, 1);
-		
-		pdisperse = pready_condition * pready_social;
 		pdisperse = clamp(pdisperse, 0, 1);
 
         // yes individual goes
@@ -1702,8 +1693,6 @@ void postbreeding_dynamics(int t)
 
     int NFlock = 0;
 
-    double pready_condition = 0.0;
-	double pready_social = 0.0;
 	double pdisperse = 0.0;
 	mean_latency = 0.0;
 	ss_latency = 0.0;
@@ -1714,18 +1703,9 @@ void postbreeding_dynamics(int t)
     // actual autumn dispersal at time t
     for (int i = 0; i < staging_pop; ++i)
     {
-		
-		pready_condition = pow(1 + exp(-0.5 * (StagingPool[i].psi_b[0] + StagingPool[i].psi_b[1]) 
-			* (StagingPool[i].resources - 0.5 * (StagingPool[i].psi_a[0] + StagingPool[i].psi_a[1]))), -1);
-		pready_condition = clamp(pready_condition, 0, 1);
-		
-		pready_social = pow(1 + exp(-0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) 
+		pdisperse = pow(1 + exp(-0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) 
 			* (((double) staging_pop_start / (staging_pop_start + summer_pop)) - 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1]))), -1);
-		pready_social = clamp(pready_social, 0, 1);
-		
-		pdisperse = pready_condition * pready_social;
-		pdisperse = clamp(pdisperse, 0, 1);
-		
+
 		pdisperse = clamp(pdisperse, 0, 1);
 		
 		// yes individual goes
