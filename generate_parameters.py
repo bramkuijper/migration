@@ -7,7 +7,7 @@ init_theta_b = [1]  # Default is 1
 init_phi_a = [0.3]  # Default is 0.3
 init_phi_b = [25]  # Default is 25
 init_psi_a = 60
-init_psi_b = 1
+init_psi_b = 0
 
 twinter = 0
 tspring = 10000  # twinter in manuscript (default is 10K)
