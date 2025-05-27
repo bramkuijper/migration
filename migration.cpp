@@ -28,11 +28,7 @@ std::uniform_real_distribution<> uniform(0.0,1.0);
 const int N = 200;
 
 // number of years simulation will run for
-<<<<<<< HEAD
-long int number_years = 500;
-=======
 long int number_years = 250000;
->>>>>>> cc8c5f0f71099828742e8bfc839c40b0d4b6bb5a
 
 // sampling interval
 int skip = std::ceil((double)number_years / 500);
