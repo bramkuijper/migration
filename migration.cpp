@@ -1290,23 +1290,9 @@ void spring_dynamics(int t)
     for (int i = 0; i < staging_pop; ++i)
     {
         assert(staging_pop <= N);
-<<<<<<< HEAD
-=======
-        
-		pready_condition = pow(1 + exp(-0.5 * (StagingPool[i].psi_b[0] + StagingPool[i].psi_b[1]) 
-			* (StagingPool[i].resources - 0.5 * (StagingPool[i].psi_a[0] + StagingPool[i].psi_a[1]))), -1);
-		pready_condition = clamp(pready_condition, 0, 1);
->>>>>>> cc8c5f0f71099828742e8bfc839c40b0d4b6bb5a
-		
 		pdisperse = pow(1 + exp(-0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) 
 			* (((double) staging_pop_start / (staging_pop_start + winter_pop)) - 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1]))), -1);
-<<<<<<< HEAD
 		pdisperse = clamp(pdisperse, 0, 1);
-=======
-		pready_social = clamp(pready_social, 0, 1);
-		
-		pdisperse = pready_condition + pready_social;
->>>>>>> cc8c5f0f71099828742e8bfc839c40b0d4b6bb5a
 
         // yes individual goes
         if (uniform(rng_r) < pdisperse)
