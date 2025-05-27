@@ -25,14 +25,10 @@ std::uniform_real_distribution<> uniform(0.0,1.0);
 // values of the most of these are overridden in the init_arguments() function
 
 // number of individuals in population
-const int N = 200;
+const int N = 100;
 
 // number of years simulation will run for
-<<<<<<< HEAD
 long int number_years = 500;
-=======
-long int number_years = 250000;
->>>>>>> cc8c5f0f71099828742e8bfc839c40b0d4b6bb5a
 
 // sampling interval
 int skip = std::ceil((double)number_years / 500);
@@ -101,21 +97,21 @@ double autumn_harvest = 0.0;  // proportion of the autumn population culled to a
 int twinter = 0;
 int tspring = 0;
 
-// stats of flock size and staging
+// stats of flock size and signalling
 double population_mean_spring_flock_size = 0.0;
 double individual_mean_spring_flock_size = 0.0;
-double mean_spring_staging_size = 0.0;
+double mean_spring_signalpop_size = 0.0;
 double population_mean_autumn_flock_size = 0.0;
 double individual_mean_autumn_flock_size = 0.0;
-double mean_autumn_staging_size = 0.0;
+double mean_autumn_signalpop_size = 0.0;
 double population_var_spring_flock_size = 0.0;
 double individual_var_spring_flock_size = 0.0;
-double var_spring_staging_size = 0.0;
+double var_spring_signalpop_size = 0.0;
 double mean_spring_cost = 0.0;
 double ss_spring_cost = 0.0;
 double population_var_autumn_flock_size = 0.0;
 double individual_var_autumn_flock_size = 0.0;
-double var_autumn_staging_size = 0.0;
+double var_autumn_signalpop_size = 0.0;
 double population_ss_spring_flock_size = 0.0;
 double individual_ss_spring_flock_size = 0.0;
 double population_ss_autumn_flock_size = 0.0;
@@ -149,7 +145,7 @@ double rv =0.0;
 
 // keep track of the current number of 
 // individuals in various seasons/demographics
-int staging_pop = 0;
+int signal_pop = 0;
 int winter_pop = 0;
 int spring_pop_start = 0;
 int spring_nonmigrant_pop = 0;
@@ -176,8 +172,8 @@ int remainer_pop = 0;
 
 double ss_spring_migrant_pop = 0.0;
 double ss_autumn_migrant_pop = 0.0;
-double ss_spring_staging_size = 0.0;
-double ss_autumn_staging_size = 0.0;
+double ss_spring_signalpop_size = 0.0;
+double ss_autumn_signalpop_size = 0.0;
 
 struct Individual 
 {
@@ -199,6 +195,7 @@ struct Individual
 	int timing;  // individual departure timing
 	int flock_size;  // size of flock individual was in
 	double cost;  // resource cost of migration for individual
+	int signalling;  // is the individual signalling?
 	int signal_timing;  // phenology of signalling
 	double signal_resources;  // resource value when signalling begins
 	double signalling_proportion;
@@ -210,7 +207,6 @@ struct Individual
 
 // wintering ground
 Individual WinterPop[N];
-Individual StagingPool[N];
 Individual SummerPop[N];
 
 // allocate vector to deal with the distribution of
@@ -445,6 +441,7 @@ void write_dist(std::ofstream &DataFile,
 		    << SummerPop[summer_idx].psi_a[0]*0.5 + SummerPop[summer_idx].psi_a[1]*0.5 << ";"
 		    << SummerPop[summer_idx].psi_b[0]*0.5 + SummerPop[summer_idx].psi_b[1]*0.5 << ";"
             << SummerPop[summer_idx].age << ";"
+			<< SummerPop[summer_idx].signalling << ";"
 			<< SummerPop[summer_idx].patch_quality << ";" << std::endl;
 	    }
 } // end write_dist()
@@ -469,6 +466,7 @@ void write_dist_data_headers(std::ofstream &DataFile)
 		<< "psi_a;"
 		<< "psi_b;"
         << "age;"
+		<< "signalling;"
 		<< "patch_quality;" << std::endl;
 } // end write_dist_data_headers
 
@@ -478,8 +476,8 @@ void write_data_headers(std::ofstream &DataFile)
     // SPRING MIGRATION STATS (n = 24):
 	DataFile << "year;"  // 1		
 		<< "spring_pop;"  // 2
-		<< "mean_spring_staging_size;"  // 3
-        << "var_spring_staging_size;"  // 4
+		<< "mean_spring_signalling_size;"  // 3
+        << "var_spring_signalling_size;"  // 4
         << "spring_migrant_pop;"  // 5
 		<< "spring_migrants_resource_cap;"  // 6
 		<< "spring_nonmigrant_pop;"  // 7
@@ -515,8 +513,8 @@ void write_data_headers(std::ofstream &DataFile)
 		<< "postbreeding_pop;"
 		
 		// AUTUMN MIGRATION STATS (22)
-        << "mean_autumn_staging_size;"
-        << "var_autumn_staging_size;"
+        << "mean_autumn_signalpop_size;"
+        << "var_autumn_signalpop_size;"
         << "autumn_migrant_pop;"
 		<< "autumn_migrants_resource_cap;"
 		<< "autumn_nonmigrant_pop;"
@@ -672,11 +670,7 @@ void write_winter_stats(std::ofstream &DataFile)
         << (ss_phi_b - mean_phi_b * mean_phi_b) << ";"
 	    << mean_psi_a << ";"
 	    << (ss_psi_a - mean_psi_a * mean_psi_a) << ";"
-<<<<<<< HEAD
-	    << mean_phi_b << ";"
-=======
 	    << mean_psi_b << ";"
->>>>>>> cc8c5f0f71099828742e8bfc839c40b0d4b6bb5a
 	    << (ss_psi_b - mean_psi_b * mean_psi_b) << ";"
 		<< mean_age << ";"
 		<< (ss_age - mean_age * mean_age) << ";"
@@ -802,8 +796,8 @@ void write_spring_stats(std::ofstream &DataFile, int year)
     DataFile
         << year << ";"
 		<< spring_pop_start << ";"
-		<< mean_spring_staging_size << ";"  // 3
-		<< var_spring_staging_size << ";"
+		<< mean_spring_signalpop_size << ";"  // 3
+		<< var_spring_signalpop_size << ";"
 		<< spring_migrant_pop << ";"  // 5
 		<< spring_migrants_resource_cap << ";"
 		<< spring_nonmigrant_pop << ";"  // 7
@@ -895,8 +889,8 @@ void write_autumn_stats(std::ofstream &DataFile)
 	
     // write statistics to a file
     DataFile 
-        << mean_autumn_staging_size << ";"
-		<< var_autumn_staging_size << ";"			
+        << mean_autumn_signalpop_size << ";"
+		<< var_autumn_signalpop_size << ";"			
         << autumn_migrant_pop << ";"
 		<< autumn_migrants_resource_cap << ";"
 		<< autumn_nonmigrant_pop << ";"
@@ -929,6 +923,8 @@ void init_population()
     for (int i = 0; i < N; ++i)
     {
         WinterPop[i].resources = 0.0;  // at start of simulation, initial resource level for all individuals is 0
+		
+		WinterPop[i].signalling = 0.0;
 		
 		WinterPop[i].signal_resources = 0.0;
 		
@@ -1120,26 +1116,6 @@ void autumn_mortality()
     }
 }
 
-// remove individuals from the staging pool and put them
-// back in the original population
-void clear_staging_pool()
-{
-	// put individuals still in the staging pool (i.e., those that signalled but didn't depart) back in the original population
-    for (int i = 0; i < staging_pop; ++i)
-    {
-        WinterPop[winter_pop] = StagingPool[i];
-		winter_pop++;
-    }
-
-    // just double check that winter_pop does not exceed max population size
-	assert(winter_pop <= N);
-	assert(winter_pop >= staging_pop);
-	
-    staging_pop = 0;
-	spring_nonmigrant_pop = winter_pop;
-	
-}  // ENDS STAGING POOL CLEARANCE
-
 // the foraging dynamics of the population during winter
 void winter_dynamics(int t)
 {
@@ -1202,37 +1178,12 @@ void spring_dynamics(int t)
         }
 		
 	WinterPop[i].resources = std::min(WinterPop[i].resources, resource_max);
-		 
     } // ok, resource dynamic done
-
-
-    // foraging of individuals who are signalling
-    for (int i = 0; i < staging_pop; ++i)
-    { 
-        // indivuals who are signalling continue to forage at the staging site
-		if (StagingPool[i].patch_quality == 1)
-		{
-			StagingPool[i].resources += rgood * preparation_penalty;
-		}
-		else
-		{
-			StagingPool[i].resources += rbad * preparation_penalty;
-		}
-		
-		// possible change of foraging success in next timestep:	
-		if (uniform(rng_r) < 1/pow(10, patch_consistency_factor))
-        {
-            StagingPool[i].patch_quality = 1 - StagingPool[i].patch_quality;  // switch of patch quality (good to poor; poor to good)
-        }
-	
-	StagingPool[i].resources = std::min(StagingPool[i].resources, resource_max);	
-		
-    } // ENDS staging site foraging loop
 
     assert(winter_pop <= N);
     assert(winter_pop >= 0);  
-    assert(winter_pop > 0 || staging_pop > 0 || summer_pop > 0);  
-	assert(winter_pop + staging_pop + summer_pop <= N);  
+    assert(winter_pop > 0 || summer_pop > 0);  
+	assert(winter_pop + summer_pop <= N);  
     double psignal = 0.0;
 
     // individuals decide whether to signal
@@ -1240,7 +1191,6 @@ void spring_dynamics(int t)
     {	
 		// reaction norm dependent on resources
         // resulting in signaling a willingness to disperse
-        // => go to the staging level
 
 		psignal = pow(1 + exp(-0.5 * (WinterPop[i].theta_b[0] + WinterPop[i].theta_b[1]) 
 			* (WinterPop[i].resources - 0.5 * (WinterPop[i].theta_a[0] + WinterPop[i].theta_a[1]))), -1);
@@ -1251,30 +1201,19 @@ void spring_dynamics(int t)
         // does individual start signalling?
         if (uniform(rng_r) < psignal)
         {
-            // add individual to the signalling pool
-            StagingPool[staging_pop] = WinterPop[i];
-			StagingPool[staging_pop].latency = 0;
-			StagingPool[staging_pop].cost = 0.0;  // reset individual's migration cost to zero
-			StagingPool[staging_pop].signal_resources = StagingPool[staging_pop].resources;
-            ++staging_pop; // increment the number of individuals in the signalling pool
+			WinterPop[i].signalling = 1;
+			WinterPop[i].latency = 0;
+			WinterPop[i].signal_resources = WinterPop[i].resources;
+            ++signal_pop; // increment the number of individuals that are signalling
 
-            assert(staging_pop <= N);
-            assert(staging_pop > 0);
-
-            // delete this individual from the winter population
-            WinterPop[i] = WinterPop[winter_pop - 1];
-
-            // decrement the number of individuals in the winter population
-            --winter_pop;
-            --i;
+            assert(signal_pop <= N);
+            assert(signal_pop > 0);
         }
 		else
 		{
 			WinterPop[i].signal_timing += 1;  // Individual has not signalled readiness to leave (equivalent to not entering 'staging pool')
-			
-			WinterPop[i].timing +=1;  // Individuals that do not enter the signalling population will not be departing at time t
 		}
-    } // end for: move dispersers to staging
+    } // end for: signalling decision
 
     // store current number of individuals at the breeding ground
     // so that we know which individuals have just arrived there
@@ -1285,78 +1224,73 @@ void spring_dynamics(int t)
     // timestep t
     int NFlock = 0;
 
+    double pready_condition = 0.0;
+	double pready_social = 0.0;
 	double pdisperse = 0.0;
 
     // remember numbers of individuals signalling
-    int staging_pop_start = staging_pop;
+    int signal_pop_start = signal_pop;
 	
     // actual spring dispersal from winter to summer population
-    for (int i = 0; i < staging_pop; ++i)
+    assert(winter_pop <= N);
+	
+	for (int i = 0; i < winter_pop; ++i)
     {
-        assert(staging_pop <= N);
-<<<<<<< HEAD
-=======
-        
-		pready_condition = pow(1 + exp(-0.5 * (StagingPool[i].psi_b[0] + StagingPool[i].psi_b[1]) 
-			* (StagingPool[i].resources - 0.5 * (StagingPool[i].psi_a[0] + StagingPool[i].psi_a[1]))), -1);
-		pready_condition = clamp(pready_condition, 0, 1);
->>>>>>> cc8c5f0f71099828742e8bfc839c40b0d4b6bb5a
-		
-		pdisperse = pow(1 + exp(-0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) 
-			* (((double) staging_pop_start / (staging_pop_start + winter_pop)) - 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1]))), -1);
-<<<<<<< HEAD
-		pdisperse = clamp(pdisperse, 0, 1);
-=======
-		pready_social = clamp(pready_social, 0, 1);
-		
-		pdisperse = pready_condition + pready_social;
->>>>>>> cc8c5f0f71099828742e8bfc839c40b0d4b6bb5a
+		// Commitment to depart is potentially sensitive to own condition and/or the social environment
+		pdisperse = pow(1 + exp(- 0.5 * (WinterPop[i].psi_b[0] + WinterPop[i].psi_b[1]) 
+			* (WinterPop[i].resources - 0.5 * (WinterPop[i].psi_a[0] + WinterPop[i].psi_a[1])) - 0.5 * (WinterPop[i].phi_b[0] + WinterPop[i].phi_b[1]) 
+			* (((double) signal_pop_start / (signal_pop_start + winter_pop)) - 0.5 * (WinterPop[i].phi_a[0] + WinterPop[i].phi_a[1]))), -1);
+		pdisperse = clamp(pready_condition, 0, 1);
 
         // yes individual goes
         if (uniform(rng_r) < pdisperse)
         {
-			SummerPop[summer_pop] = StagingPool[i]; // Individual transfers to SummerPop
-			SummerPop[summer_pop].signalling_proportion = (double) staging_pop_start / (staging_pop_start + winter_pop);
+			SummerPop[summer_pop] = WinterPop[i]; // Individual transfers to SummerPop
+			SummerPop[summer_pop].signalling_proportion = (double) signal_pop_start / winter_pop;
+			SummerPop[summer_pop].signalling = 0; // turn off signalling, if on
 			++summer_pop;
             
             assert(summer_pop <= N);
 
-			if (StagingPool[i].resources == resource_max)
+			if (WinterPop[i].resources == resource_max)
 			{
 				++spring_migrants_resource_cap;
 			}
 
-			rv = StagingPool[i].resources;
+			rv = WinterPop[i].resources;
 			mean_resources += rv;
 			ss_resources += rv * rv;
 			
-            // delete this individual from the staging population
-            StagingPool[i] = StagingPool[staging_pop - 1];
-
-            // decrement the number of individuals in the staging population
-            --staging_pop;
-            --i;
-
-            assert(staging_pop >= 0);
+            // Was individual signalling? If so, decrement the number of signallers
+            if (WinterPop[i].signalling == 1)
+			{
+				--signal_pop;
+			}
+			assert(signal_pop >= 0);
+			
+            // delete this individual from the winter population
+            WinterPop[i] = WinterPop[winter_pop - 1];
+			--winter_pop;          
 
             // increase flock size
             ++NFlock;
-            
-            assert(NFlock <= N);			
+            assert(NFlock <= N);
+			
+			--i;
         
 		} 
 		
 		else {
-			StagingPool[i].latency += 1;  // If individual does not depart, increment its latency score
-			StagingPool[i].timing += 1;  // Also increment its timing score
+			WinterPop[i].latency += 1;  // If individual does not depart, increment its latency score
+			WinterPop[i].timing += 1;  // Also increment its timing score
 		}
 		
     } // ENDS ACTUAL SPRING DISPERSAL and making of flocks
 
     // keep track of mean and variance in flock sizes
-	mean_spring_staging_size += staging_pop_start;
+	mean_spring_signalpop_size += signal_pop_start;
 
-	ss_spring_staging_size += staging_pop_start * staging_pop_start;
+	ss_spring_signalpop_size += signal_pop_start * signal_pop_start;
 	
     if (NFlock > 0)
     {
@@ -1388,7 +1322,7 @@ void spring_dynamics(int t)
 		SummerPop[i].fecundity = 0;
 		
     } // ENDS: updating resources of migrants
-
+	
 } // ENDS SPRING DYNAMICS (looping through t)
 
 // mutation of a certain allele with value val
@@ -1558,7 +1492,6 @@ void summer_reproduction(std::ofstream &DataFile)
     // minus the current individuals in the summer population
     Nvacancies = K - summer_pop - winter_pop;
 
-    assert(staging_pop == 0);
     assert(Nvacancies >= 0);
 	assert(Nvacancies <= N);
 
@@ -1638,32 +1571,7 @@ void postbreeding_dynamics(int t)
 	
     } // ok resource dynamic done
 
-
-    // foraging of individuals who are already at the staging site
-    for (int i = 0; i < staging_pop; ++i)
-    { 
-        // indivuals who are already at the staging site
-        // continue to forage at the staging site
-		if (StagingPool[i].patch_quality == 1)
-		{
-			StagingPool[i].resources += rgood * preparation_penalty;
-		}
-		else
-		{
-			StagingPool[i].resources += rbad * preparation_penalty;
-		}
-		
-		// possible change of foraging success in next timestep:	
-		if (uniform(rng_r) < 1/pow(10, patch_consistency_factor))
-        {
-            StagingPool[i].patch_quality = 1 - StagingPool[i].patch_quality;  // switch of patch quality (good to poor; poor to good)
-        }
-    
-	StagingPool[i].resources = std::min(StagingPool[i].resources, resource_max);
-	
-	}
-
-    assert(summer_pop + winter_pop + staging_pop <= N);
+    assert(summer_pop + winter_pop <= N);
     assert(summer_pop >= 0);
 
     double psignal = 0.0;
@@ -1683,23 +1591,13 @@ void postbreeding_dynamics(int t)
         // does individual start signalling to others?
         if (uniform(rng_r) < psignal)
         {
-            // add individual to the signalling pool
-            StagingPool[staging_pop] = SummerPop[i];
-			StagingPool[staging_pop].latency = 0.0;
-			StagingPool[staging_pop].cost = 0.0;  // reset individual's migration cost to zero
-			StagingPool[staging_pop].signal_resources = StagingPool[staging_pop].resources;
-            ++staging_pop; // increment the number of signalling individuals
-
-            // delete this individual from the summer population and replace with the individual from the end of the summer_pop stack
-            SummerPop[i] = SummerPop[summer_pop - 1];
-
-            // decrement the number of individuals in the summer population
-            --summer_pop;
-            --i;
+			SummerPop[i].latency = 0.0;
+			SummerPop[i].cost = 0.0;  // reset individual's migration cost to zero
+			SummerPop[i].signal_resources = SummerPop[i].resources;
+            ++signal_pop; // increment the number of signalling individuals
          
             // bounds checking   
-            assert(staging_pop + winter_pop + summer_pop <= N);
-            assert(staging_pop >= 0);
+            assert(signal_pop >= 0);
         }
 		else
 		{
@@ -1716,73 +1614,91 @@ void postbreeding_dynamics(int t)
 
     int NFlock = 0;
 
+    double pready_condition = 0.0;
+	double pready_social = 0.0;
 	double pdisperse = 0.0;
 	mean_latency = 0.0;
 	ss_latency = 0.0;
 	int lat = 0;
 
-    int staging_pop_start = staging_pop;
+    int signal_pop_start = signal_pop;
 
     // actual autumn dispersal at time t
-    for (int i = 0; i < staging_pop; ++i)
+    for (int i = 0; i < summer_pop; ++i)
     {
-		pdisperse = pow(1 + exp(-0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) 
-			* (((double) staging_pop_start / (staging_pop_start + summer_pop)) - 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1]))), -1);
-
+		
+		pready_condition = pow(1 + exp(-0.5 * (SummerPop[i].psi_b[0] + SummerPop[i].psi_b[1]) 
+			* (SummerPop[i].resources - 0.5 * (SummerPop[i].psi_a[0] + SummerPop[i].psi_a[1]))), -1);
+		pready_condition = clamp(pready_condition, 0, 1);
+		
+		pready_social = pow(1 + exp(-0.5 * (SummerPop[i].phi_b[0] + SummerPop[i].phi_b[1]) 
+			* (((double) signal_pop_start / (signal_pop_start + summer_pop)) - 0.5 * (SummerPop[i].phi_a[0] + SummerPop[i].phi_a[1]))), -1);
+		pready_social = clamp(pready_social, 0, 1);
+		
+		pdisperse = pready_condition * pready_social;
+		pdisperse = clamp(pdisperse, 0, 1);
+		
 		pdisperse = clamp(pdisperse, 0, 1);
 		
 		// yes individual goes
         if (uniform(rng_r) < pdisperse)
         {
-			
-			rv = StagingPool[i].resources;  // Record individual's resource value at departure
+			rv = SummerPop[i].resources;  // Record individual's resource value at departure
 			mean_resources += rv;
 			ss_resources += rv * rv;
 			
-			if (StagingPool[i].resources == resource_max)
+			if (SummerPop[i].resources == resource_max)
 			{
 				++autumn_migrants_resource_cap;
 			}
 			
-			WinterPop[winter_pop] = StagingPool[i];  // Individual moves from staging pool to first empty position in WinterPop
-			WinterPop[winter_pop].signalling_proportion = staging_pop_start / (staging_pop_start + summer_pop);  // record the proportion of the population that was signalling at the point of departure
+			WinterPop[winter_pop] = SummerPop[i];  // Individual moves from staging pool to first empty position in WinterPop
+			WinterPop[winter_pop].signalling_proportion = signal_pop_start / summer_pop;  // record the proportion of the population that was signalling at the point of departure
 			lat = WinterPop[winter_pop].latency;
 			mean_latency += lat;
 			ss_latency += (lat * lat);			
 			++winter_pop;
 			
-            // delete this individual from the staging population
-			// replace with the last individual in the staging_pop stack
-            StagingPool[i] = StagingPool[staging_pop - 1];
-
-            // decrement the number of individuals in the staging population
-            --staging_pop;
-            --i;
+			// turn off signalling
+			WinterPop[winter_pop].signalling = 0;
 			
+            // IF individuals was signalling, decrement the number of signalling individuals
+            if (SummerPop[i].signalling == 1)
+			{
+            	--signal_pop;
+            } 
+			
+            // delete this individual from the summer population
+			// replace with the last individual in the summer_pop stack
+            SummerPop[i] = SummerPop[signal_pop - 1];
+			--summer_pop;   
+          			
 			// increment the number of individuals recorded as autumn migrants
 			++autumn_migrant_pop;
 			
-            assert(staging_pop + summer_pop + winter_pop <= N);
-            assert(staging_pop >= 0);
+            assert(summer_pop + winter_pop <= N);
+            assert(signal_pop >= 0);
 
             // increase flock size
             ++NFlock;
             
             assert(NFlock <= N);
+			
+			--i;
         } // Ends: individual goes
 		
 		else 
 		{
-			StagingPool[i].latency += 1;  // Individual does not depart at time t
-			StagingPool[i].timing += 1;  // Ditto
+			SummerPop[i].latency += 1;  // Individual does not depart at time t
+			SummerPop[i].timing += 1;  // Ditto
 		}
 	    
     } // ENDS: Autumn dispersal at time t
 	
 	population_mean_autumn_flock_size += NFlock;
 	population_ss_autumn_flock_size += NFlock * NFlock;
-	mean_autumn_staging_size += staging_pop_start;
-	ss_autumn_staging_size += staging_pop_start * staging_pop_start;
+	mean_autumn_signalpop_size += signal_pop_start;
+	ss_autumn_signalpop_size += signal_pop_start * signal_pop_start;
 	
     if (winter_pop_old < winter_pop){
 		++n_autumn_flocks;
@@ -1814,8 +1730,6 @@ void postbreeding_dynamics(int t)
 
 
 
-
-
 // THE KEY PART OF THE CODE
 // accepting command line arguments
 int main(int argc, char **argv)
@@ -1841,12 +1755,12 @@ int main(int argc, char **argv)
     for (int year = 0; year < (number_years + postequilibrialisation_experimental_runtime); ++year)
     {
         population_mean_spring_flock_size = 0.0;
-		mean_spring_staging_size = 0.0;
+		mean_spring_signalpop_size = 0.0;
 		population_var_spring_flock_size = 0.0;
-		var_spring_staging_size = 0.0;
+		var_spring_signalpop_size = 0.0;
 		population_ss_spring_flock_size = 0.0;
 		n_spring_flocks = 0;
-		ss_spring_staging_size = 0.0;
+		ss_spring_signalpop_size = 0.0;
 		mean_spring_cost = 0.0;
 		ss_spring_cost = 0.0;
 		mean_signal_resources = 0.0;
@@ -1854,7 +1768,7 @@ int main(int argc, char **argv)
 		ss_signal_resources = 0.0;
 		mean_cost = 0.0;
 		ss_cost = 0.0;
-		staging_pop = 0;
+		signal_pop = 0;
 		spring_pop_start = 0;
 		autumn_pop_start = 0;
 		summer_pop = 0;
@@ -1863,7 +1777,7 @@ int main(int argc, char **argv)
 		offspring_pop = 0;
 		summer_pop_old = 0;
 		postbreeding_pop = 0;
-		staging_pop = 0;  // Set staging population count to zero before winter dynamics
+		signal_pop = 0;  // Set signalling population count to zero before winter dynamics
 		remainer_pop = 0;
 		
 		rgood = rgood_init;
@@ -1897,6 +1811,8 @@ int main(int argc, char **argv)
 		ss_resources = 0.0;
 		rv = 0;
 		
+		assert(signal_pop == 0);
+		
 		for (int t = 0; t < tspring; ++t)
         {
             spring_dynamics(t);
@@ -1911,13 +1827,11 @@ int main(int argc, char **argv)
 			
         // now take averages over all timesteps that individuals did (can) join groups
         population_mean_spring_flock_size = n_spring_flocks > 0 ? population_mean_spring_flock_size / n_spring_flocks : 0;
-		mean_spring_staging_size /= tspring;
+		mean_spring_signalpop_size /= tspring;
 		
 		// now record variance in flock size and staging size over the season
 		population_var_spring_flock_size = n_spring_flocks > 0 ? (population_ss_spring_flock_size / n_spring_flocks) - (population_mean_spring_flock_size * population_mean_spring_flock_size) : 0;
-		var_spring_staging_size = (ss_spring_staging_size / tspring) - (mean_spring_staging_size * mean_spring_staging_size);	
-		
-		clear_staging_pool();
+		var_spring_signalpop_size = (ss_spring_signalpop_size / tspring) - (mean_spring_signalpop_size * mean_spring_signalpop_size);	
 		
 		if (year == 0 || ((year) % skip == 0) || year == number_years-1 || year >= number_years)
 		 {
@@ -1964,15 +1878,15 @@ int main(int argc, char **argv)
 		
 		// set autumn migration stats to 0 before postbreeding_dynamics starts
         population_mean_autumn_flock_size = 0.0;
-        mean_autumn_staging_size = 0.0;
+        mean_autumn_signalpop_size = 0.0;
 		population_var_autumn_flock_size = 0.0;
-		var_autumn_staging_size = 0.0;
+		var_autumn_signalpop_size = 0.0;
 		population_ss_autumn_flock_size = 0.0;
 		n_autumn_flocks = 0.0;
 		autumn_migrant_pop = 0.0;
 		autumn_nonmigrant_pop = 0.0;
 		ss_autumn_migrant_pop = 0.0;
-		ss_autumn_staging_size = 0.0;
+		ss_autumn_signalpop_size = 0.0;
 		mean_autumn_cost = 0.0;
 		ss_autumn_cost = 0.0;
 		mean_autumn_cost = 0.0;
@@ -1984,9 +1898,10 @@ int main(int argc, char **argv)
 		autumn_migrant_mortality_rate = 0.0;
 		
         autumn_pop_start = summer_pop;
+		signal_pop = 0;
 		
 		// time during summer during which individuals forage
-        for (int t = 0; t < tspring; ++t)
+		for (int t = 0; t < tspring; ++t)
         {
             postbreeding_dynamics(t);
 			
@@ -1996,13 +1911,13 @@ int main(int argc, char **argv)
 		
         // now take averages over all timesteps that individuals did (can) join groups
         population_mean_autumn_flock_size = n_autumn_flocks > 0 ?  population_mean_autumn_flock_size / n_autumn_flocks : 0;
-        mean_autumn_staging_size /= tspring;
+        mean_autumn_signalpop_size /= tspring;
 		
 		// now record variance in autumn flock size and staging size over the season
 		population_var_autumn_flock_size = n_autumn_flocks > 0 ? (population_ss_autumn_flock_size / n_autumn_flocks) - (population_mean_autumn_flock_size * population_mean_autumn_flock_size) : 0;
-		var_autumn_staging_size = (ss_autumn_staging_size / tspring) - (mean_autumn_staging_size * mean_autumn_staging_size);
+		var_autumn_signalpop_size = (ss_autumn_signalpop_size / tspring) - (mean_autumn_signalpop_size * mean_autumn_signalpop_size);
 		
-		autumn_nonmigrant_pop = summer_pop + staging_pop;
+		autumn_nonmigrant_pop = summer_pop;
 		
 		if (year == 0 || ((year) % skip == 0) || year == number_years-1 || year >= number_years)
 		{
@@ -2032,7 +1947,7 @@ int main(int argc, char **argv)
 		// all individuals who remain at the summer grounds die
         summer_pop = 0;
         postbreeding_pop = 0;
-		staging_pop = 0;
+		signal_pop = 0;
 		breeder_pop = 0;
 		nonreproductive_pop = 0;
 		offspring_pop = 0;
@@ -2044,5 +1959,5 @@ int main(int argc, char **argv)
 		autumn_nonmigrant_pop = 0;
 		autumn_migrant_pop = 0;
 				
-    } // ENDS: GENERATION
+    } // ENDS YEAR
 }
