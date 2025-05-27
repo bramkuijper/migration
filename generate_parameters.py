@@ -6,8 +6,8 @@ init_theta_a = [60]  # Default is 60
 init_theta_b = [1]  # Default is 1
 init_phi_a = [0.3]  # Default is 0.3
 init_phi_b = [25]  # Default is 25
-psi_a = 60
-psi_b = 1
+init_psi_a = 60
+init_psi_b = 1
 
 twinter = 0
 tspring = 10000  # twinter in manuscript (default is 10K)
@@ -122,45 +122,43 @@ for rep_i in range(0, number_replicates):
                                                         for init_theta_a_i in init_theta_a:
                                                             for init_theta_b_i in init_theta_b:
 
-                #                                                                print("echo " + str(counter))
-                                                                    print(executable + " " 
-                                                                            + str(init_theta_a_i) + " "
-                                                                            + str(init_theta_b_i) + " "
-                                                                            + str(init_phi_a_i) + " "
-                                                                            + str(init_phi_b_i) + " "
-                                                                            + str(init_psi_a) + " "
-                                                                            + str(init_psi_b) + " "
-                                                                            + str(pmort) + " "
-                                                                            + str(pgood) + " "
-                                                                            + str(patch_consistency_factor_i) + " "
-                                                                            + str(rgood) + " "
-                                                                            + str(rbad) + " "
-                                                                            + str(preparation_penalty_i) + " "
-                                                                            + str(resource_reproduction_threshold) + " "
-                                                                            + str(resource_starvation_threshold) + " "
-                                                                            + str(mu_theta) + " "
-                                                                            + str(mu_phi) + " "
-                                                                            + str(sdmu_theta) + " "
-                                                                            + str(sdmu_phi_i) + " "
-                                                                            + str(max_migration_cost) + " "
-                                                                            + str(min_migration_cost_i) + " "
-                                                                            + str(cost_power_i) + " "
-                                                                            + str(twinter) + " "
-                                                                            + str(tspring) + " " 
-                                                                            + str(resource_max) + " "
-                                                                            + str(min_offspring_cost) + " "
-                                                                            + str(offspring_cost_magnifier_i) + " "
-                                                                            + str(carryover_proportion) + " "
-                                                                            + str(relative_mortality_risk_of_migration) + " "
-                                                                            + str(socially_sensitive_mortality_i) + " "
-                                                                            + str(capacity_i) + " "
-                                                                            + str(postequilibrialisation_experimental_runtime) + " "
-                                                                            + str(K_decline_factor_i) + " "
-                                                                            + str(autumn_harvest_i) + " "
-                                                                            + str(costs_sourcefile_i) + " "
-                                                                            + str(risks_sourcefile_i) + " "
-                                                                            + str(base_name) + "_" + str(counter) + " "
-                                                                            + backgroundstr)
+                # print("echo " + str(counter))
+                                                                print(executable + " " 
+                                                                    + str(init_theta_a_i) + " "
+                                                                    + str(init_theta_b_i) + " "
+                                                                    + str(init_phi_a_i) + " "
+                                                                    + str(init_phi_b_i) + " "
+                                                                    + str(init_psi_a) + " "
+                                                                    + str(init_psi_b) + " "  #6
+                                                                    + str(pmort) + " "
+                                                                    + str(pgood) + " "
+                                                                    + str(patch_consistency_factor_i) + " "
+                                                                    + str(rgood) + " "
+                                                                    + str(rbad) + " "
+                                                                    + str(preparation_penalty_i) + " "         #12
+                                                                    + str(resource_reproduction_threshold) + " "
+                                                                    + str(resource_starvation_threshold) + " "
+                                                                    + str(mu) + " "
+                                                                    + str(sdmu) + " "                          #16
+                                                                    + str(max_migration_cost) + " "
+                                                                    + str(min_migration_cost_i) + " "
+                                                                    + str(cost_power_i) + " "
+                                                                    + str(twinter) + " "
+                                                                    + str(tspring) + " " 
+                                                                    + str(resource_max) + " "
+                                                                    + str(min_offspring_cost) + " "
+                                                                    + str(offspring_cost_magnifier_i) + " "    #24
+                                                                    + str(carryover_proportion) + " "
+                                                                    + str(relative_mortality_risk_of_migration) + " "
+                                                                    + str(socially_sensitive_mortality_i) + " "
+                                                                    + str(capacity_i) + " "
+                                                                    + str(postequilibrialisation_experimental_runtime) + " "
+                                                                    + str(K_decline_factor_i) + " "             #30
+                                                                    + str(autumn_harvest_i) + " "
+                                                                    + str(costs_sourcefile_i) + " "
+                                                                    + str(risks_sourcefile_i) + " "
+                                                                    + str(base_name) + "_" + str(counter) + " "
+                                                                    + backgroundstr)
                                                                 # increment the counter for the number of 
                                                                 # runs
                                                                 counter += 1
