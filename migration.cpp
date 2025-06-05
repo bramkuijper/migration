@@ -25,10 +25,10 @@ std::uniform_real_distribution<> uniform(0.0,1.0);
 // values of the most of these are overridden in the init_arguments() function
 
 // number of individuals in population
-const int N = 1000;
+const int N = 120;
 
 // number of years simulation will run for
-long int number_years = 250000;
+long int number_years = 250; //250000;
 
 // sampling interval
 int skip = std::ceil((double)number_years / 500);
@@ -204,7 +204,6 @@ struct Individual
 };
 
 
-// wintering ground
 Individual WinterPop[N];
 Individual StagingPool[N];
 Individual SummerPop[N];
@@ -1283,13 +1282,14 @@ void spring_dynamics(int t)
     int staging_pop_start = staging_pop;
 	
     // actual spring dispersal from winter to summer population
-    for (int i = 0; i < staging_pop; ++i)
     {
+    for (int i = 0; i < staging_pop; ++i)
         assert(staging_pop <= N);
-		pdisperse = pow(1 + exp(-0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) * (((double) staging_pop_start / (staging_pop_start + winter_pop)) 	- 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1]))
-								-0.5 * (StagingPool[i].psi_b[0] + StagingPool[i].psi_b[1]) * (StagingPool[i].resources - 0.5 * (StagingPool[i].psi_a[0] + StagingPool[i].psi_a[1]))
-							),
-			 		-1);
+		pdisperse = pow(1.0 + exp(-0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) * (((double) staging_pop_start / (staging_pop_start + winter_pop)) 	- 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1]))
+								  -0.5 * (StagingPool[i].psi_b[0] + StagingPool[i].psi_b[1]) * (StagingPool[i].resources - 0.5 * (StagingPool[i].psi_a[0] + StagingPool[i].psi_a[1]))
+								  ),
+						-1.0);
+		
 		pdisperse = clamp(pdisperse, 0, 1);
 
         // yes individual goes
@@ -1706,10 +1706,10 @@ void postbreeding_dynamics(int t)
     // actual autumn dispersal at time t
     for (int i = 0; i < staging_pop; ++i)
     {		
-		pdisperse = pow(1 + exp(-0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) * (((double) staging_pop_start / (staging_pop_start + winter_pop)) 	- 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1]))
+		pdisperse = pow(1.0 + exp(-0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) * (((double) staging_pop_start / (staging_pop_start + winter_pop)) 	- 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1]))
 								-0.5 * (StagingPool[i].psi_b[0] + StagingPool[i].psi_b[1]) * (StagingPool[i].resources - 0.5 * (StagingPool[i].psi_a[0] + StagingPool[i].psi_a[1]))
 							),
-			 		-1);
+			 		-1.0);
 
 		pdisperse = clamp(pdisperse, 0, 1);
 		
