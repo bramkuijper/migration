@@ -1282,8 +1282,7 @@ void spring_dynamics(int t)
     int staging_pop_start = staging_pop;
 	
     // actual spring dispersal from winter to summer population
-    {
-    for (int i = 0; i < staging_pop; ++i)
+    for (int i = 0; i < staging_pop; ++i){
         assert(staging_pop <= N);
 		pdisperse = pow(1.0 + exp(-0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) * (((double) staging_pop_start / (staging_pop_start + winter_pop)) 	- 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1]))
 								  -0.5 * (StagingPool[i].psi_b[0] + StagingPool[i].psi_b[1]) * (StagingPool[i].resources - 0.5 * (StagingPool[i].psi_a[0] + StagingPool[i].psi_a[1]))
@@ -1418,10 +1417,10 @@ void create_offspring(
     offspring.phi_b[1] = mutation(father.phi_b[allele_sample(rng_r)], mu_phi, sdmu_phi);
 	
     // inherit psi loci
-    offspring.psi_a[0] = mutation(mother.psi_a[allele_sample(rng_r)], mu_psi, sdmu_psi);
-    offspring.psi_a[1] = mutation(father.psi_a[allele_sample(rng_r)], mu_psi, sdmu_psi);
-    offspring.psi_b[0] = mutation(mother.psi_b[allele_sample(rng_r)], mu_psi, sdmu_psi);
-    offspring.psi_b[1] = mutation(father.psi_b[allele_sample(rng_r)], mu_psi, sdmu_psi);
+    offspring.psi_a[0] = mutation(mother.psi_a[allele_sample(rng_r)], 0, sdmu_psi);
+    offspring.psi_a[1] = mutation(father.psi_a[allele_sample(rng_r)], 0, sdmu_psi);
+    offspring.psi_b[0] = mutation(mother.psi_b[allele_sample(rng_r)], 0, sdmu_psi);
+    offspring.psi_b[1] = mutation(father.psi_b[allele_sample(rng_r)], 0, sdmu_psi);
 	
 }  // ENDS OFFSPRING PRODUCTION
 
