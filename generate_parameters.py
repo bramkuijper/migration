@@ -5,7 +5,7 @@ import datetime
 init_theta_a = [60]  # Default is 60
 init_theta_b = [1]  # Default is 1
 init_phi_a = [0.3]  # Default is 0.3
-init_phi_b = [0]  # Default is 25
+init_phi_b = [25]  # Default is 25
 init_psi_a = 60
 init_psi_b = 0
 
