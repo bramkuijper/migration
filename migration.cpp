@@ -28,7 +28,7 @@ std::uniform_real_distribution<> uniform(0.0,1.0);
 const int N = 1000;
 
 // number of years simulation will run for
-long int number_years = 150000;
+long int number_years = 40000;
 
 // sampling interval
 int skip = std::ceil((double)number_years / 500);
@@ -1285,7 +1285,7 @@ void spring_dynamics(int t)
     for (int i = 0; i < staging_pop; ++i){
         assert(staging_pop <= N);
 		pdisperse = pow(1.0 + exp(-0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) * (((double) staging_pop_start / (staging_pop_start + winter_pop)) - 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1]))
-								  -0.5 * (StagingPool[i].psi_b[0] + StagingPool[i].psi_b[1]) * ((StagingPool[i].resources / resource_max) - 0.5 * (StagingPool[i].psi_a[0] + StagingPool[i].psi_a[1]))
+								  //-0.5 * (StagingPool[i].psi_b[0] + StagingPool[i].psi_b[1]) * ((StagingPool[i].resources / resource_max) - 0.5 * (StagingPool[i].psi_a[0] + StagingPool[i].psi_a[1]))
 								  ),
 						-1.0);
 		
@@ -1706,7 +1706,7 @@ void postbreeding_dynamics(int t)
     for (int i = 0; i < staging_pop; ++i)
     {		
 		pdisperse = pow(1.0 + exp(-0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) * (((double) staging_pop_start / (staging_pop_start + summer_pop)) - 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1]))
-								  -0.5 * (StagingPool[i].psi_b[0] + StagingPool[i].psi_b[1]) * ((StagingPool[i].resources / resource_max) - 0.5 * (StagingPool[i].psi_a[0] + StagingPool[i].psi_a[1]))
+								  //-0.5 * (StagingPool[i].psi_b[0] + StagingPool[i].psi_b[1]) * ((StagingPool[i].resources / resource_max) - 0.5 * (StagingPool[i].psi_a[0] + StagingPool[i].psi_a[1]))
 							),
 			 		-1.0);
 
