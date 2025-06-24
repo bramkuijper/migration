@@ -30,14 +30,14 @@ sdmu = 0.1
     
 # migration cost parameters
 max_migration_cost = 20  # Default is 20 
-min_migration_cost = [20] # [20, 18, 16, 14, 12, 10, 8, 6, 4, 2]  # Default is 20
+min_migration_cost = [20, 18, 16, 14, 12, 10, 8, 6, 4, 2]  # Default is 20
 cost_power = [2]  # Default is 2
 capacity = [8]
 # reproductive cost parameters
 min_offspring_cost = 5
 offspring_cost_magnifier = [1] # The relative difference in resource cost per offspring having migrated at the earliest opportunity versus the last. 1 represents seasonal invariability
 relative_mortality_risk_of_migration = 5
-socially_sensitive_mortality = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]  # Default would be 0, where the mortality rate is indepdendent of flock size
+socially_sensitive_mortality = [0] # [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]  # Default would be 0, where the mortality rate is indepdendent of flock size
 postequilibrialisation_experimental_runtime = 0
 K_decline_factor = [1] # 1 represents no decline in carrying capacity
 autumn_harvest = [0.75] # Proportion of the population to be harvested: 0 represents no harvest
