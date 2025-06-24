@@ -28,7 +28,7 @@ std::uniform_real_distribution<> uniform(0.0,1.0);
 const int N = 1000;
 
 // number of years simulation will run for
-long int number_years = 250000;
+long int number_years = 50000;
 
 // sampling interval
 int skip = std::ceil((double)number_years / 500);
@@ -1351,7 +1351,7 @@ void spring_dynamics(int t)
 		// Resource cost of migration to the individual
 		SummerPop[i].flock_size = NFlock;
 		
-		if (filename_risks == "none"){
+		if (filename_costs == "none"){
 			SummerPop[i].cost = migration_cost(NFlock);
 		}
 		
