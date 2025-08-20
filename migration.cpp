@@ -1277,8 +1277,8 @@ void spring_dynamics(int t)
     // timestep t
     int NFlock = 0;
 
-    double pready_condition = 0.0;
-	double pready_social = 0.0;
+    //double pready_condition = 0.0;
+	//double pready_social = 0.0;
 	double pdisperse = 0.0;
 
     // remember numbers of individuals signalling
@@ -1289,15 +1289,18 @@ void spring_dynamics(int t)
     {
         assert(staging_pop <= N);
         
-		pready_condition = pow(1 + exp(-0.5 * (StagingPool[i].psi_b[0] + StagingPool[i].psi_b[1]) 
-			* (StagingPool[i].resources - 0.5 * (StagingPool[i].psi_a[0] + StagingPool[i].psi_a[1]))), -1);
-		pready_condition = clamp(pready_condition, 0, 1);
+		//pready_condition = pow(1 + exp(-0.5 * (StagingPool[i].psi_b[0] + StagingPool[i].psi_b[1]) 
+		//	* (StagingPool[i].resources - 0.5 * (StagingPool[i].psi_a[0] + StagingPool[i].psi_a[1]))), -1);
+		//pready_condition = clamp(pready_condition, 0, 1);
 		
-		pready_social = pow(1 + exp(-0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) 
-			* (((double) staging_pop_start / (staging_pop_start + winter_pop)) - 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1]))), -1);
-		pready_social = clamp(pready_social, 0, 1);
+		//pready_social = pow(1 + exp(-0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) 
+		//	* (((double) staging_pop_start / (staging_pop_start + winter_pop)) - 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1]))), -1);
+		//pready_social = clamp(pready_social, 0, 1);
 		
-		pdisperse = pready_condition + pready_social;
+		//pdisperse = pready_condition + pready_social;
+		pdisperse = pow(1 + exp(-0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) * (((double) staging_pop_start / (staging_pop_start + winter_pop)) - 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1]))
+								-0.5 * (StagingPool[i].psi_b[0] + StagingPool[i].psi_b[1]) * (StagingPool[i].resources - 0.5 * (StagingPool[i].psi_a[0] + StagingPool[i].psi_a[1]))
+								), -1);
 		pdisperse = clamp(pdisperse, 0, 1);
 
         // yes individual goes
@@ -1703,8 +1706,8 @@ void postbreeding_dynamics(int t)
 
     int NFlock = 0;
 
-    double pready_condition = 0.0;
-	double pready_social = 0.0;
+    //double pready_condition = 0.0;
+	//double pready_social = 0.0;
 	double pdisperse = 0.0;
 	mean_latency = 0.0;
 	ss_latency = 0.0;
@@ -1716,15 +1719,18 @@ void postbreeding_dynamics(int t)
     for (int i = 0; i < staging_pop; ++i)
     {
 		
-		pready_condition = pow(1 + exp(-0.5 * (StagingPool[i].psi_b[0] + StagingPool[i].psi_b[1]) 
-			* (StagingPool[i].resources - 0.5 * (StagingPool[i].psi_a[0] + StagingPool[i].psi_a[1]))), -1);
-		pready_condition = clamp(pready_condition, 0, 1);
+		//pready_condition = pow(1 + exp(-0.5 * (StagingPool[i].psi_b[0] + StagingPool[i].psi_b[1]) 
+		//	* (StagingPool[i].resources - 0.5 * (StagingPool[i].psi_a[0] + StagingPool[i].psi_a[1]))), -1);
+		//pready_condition = clamp(pready_condition, 0, 1);
 		
-		pready_social = pow(1 + exp(-0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) 
-			* (((double) staging_pop_start / (staging_pop_start + summer_pop)) - 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1]))), -1);
-		pready_social = clamp(pready_social, 0, 1);
+		//pready_social = pow(1 + exp(-0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) 
+		//	* (((double) staging_pop_start / (staging_pop_start + summer_pop)) - 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1]))), -1);
+		//pready_social = clamp(pready_social, 0, 1);
 		
-		pdisperse = pready_condition + pready_social;
+		//pdisperse = pready_condition + pready_social;
+		pdisperse = pow(1 + exp(-0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) * (((double) staging_pop_start / (staging_pop_start + winter_pop)) - 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1]))
+								-0.5 * (StagingPool[i].psi_b[0] + StagingPool[i].psi_b[1]) * (StagingPool[i].resources - 0.5 * (StagingPool[i].psi_a[0] + StagingPool[i].psi_a[1]))
+								), -1);
 		pdisperse = clamp(pdisperse, 0, 1);
 		
 		// yes individual goes
