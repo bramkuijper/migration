@@ -7,8 +7,8 @@ init_theta_a = [60]  # Default is 60
 init_theta_b = [1]  # Default is 1
 init_phi_a = [0.3]  # Default is 0.3
 init_phi_b = [25]  # Default is 25
-psi_a = 1000
-psi_b = 1000
+init_psi_a = 1000
+init_psi_b = 10
 
 twinter = 0
 tspring = 10000  # twinter in manuscript
@@ -131,8 +131,8 @@ for rep_i in range(0, number_replicates):
                                                                         + str(init_theta_b_i) + " "
                                                                         + str(init_phi_a_i) + " "
                                                                         + str(init_phi_b_i) + " "
-                                                                        + str(psi_a) + " "
-                                                                        + str(psi_b) + " "
+                                                                        + str(init_psi_a) + " "
+                                                                        + str(init_psi_b) + " "
                                                                         + str(pmort) + " "
                                                                         + str(pgood) + " "
                                                                         + str(patch_consistency_factor_i) + " "

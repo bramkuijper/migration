@@ -28,7 +28,7 @@ std::uniform_real_distribution<> uniform(0.0,1.0);
 const int N = 500;
 
 // number of years simulation will run for
-long int number_years = 200000;
+long int number_years = 500;
 
 // sampling interval
 int skip = std::ceil((double)number_years / 500);
@@ -1298,6 +1298,7 @@ void spring_dynamics(int t)
 		pready_social = clamp(pready_social, 0, 1);
 		
 		pdisperse = pready_condition + pready_social;
+		pdisperse = clamp(pdisperse, 0, 1);
 
         // yes individual goes
         if (uniform(rng_r) < pdisperse)
@@ -1723,9 +1724,7 @@ void postbreeding_dynamics(int t)
 			* (((double) staging_pop_start / (staging_pop_start + summer_pop)) - 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1]))), -1);
 		pready_social = clamp(pready_social, 0, 1);
 		
-		pdisperse = pready_condition * pready_social;
-		pdisperse = clamp(pdisperse, 0, 1);
-		
+		pdisperse = pready_condition + pready_social;
 		pdisperse = clamp(pdisperse, 0, 1);
 		
 		// yes individual goes
@@ -1804,8 +1803,14 @@ void postbreeding_dynamics(int t)
 		WinterPop[i].resources -= WinterPop[i].cost;
 		WinterPop[i].resources = std::min(WinterPop[i].resources, resource_max);  // Individual resource values cannot exceed resource max
 		WinterPop[i].resources *= carryover_proportion;
-
     } // Ends: update resource levels of winter arrivals
+	
+	// Also update resource levels for individuals that remained at the breeding ground,
+	// according to the value of 'carryover_proportion
+	for (int i = 0; i < winter_pop_old; ++i)
+	{
+		WinterPop[i].resources *= carryover_proportion;
+	}
 
 } // ENDS: POST-BREEDING DYNAMICS 
 
