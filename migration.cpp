@@ -25,10 +25,10 @@ std::uniform_real_distribution<> uniform(0.0,1.0);
 // values of the most of these are overridden in the init_arguments() function
 
 // number of individuals in population
-const int N = 100;
+const int N = 500;
 
 // number of years simulation will run for
-long int number_years = 500;
+long int number_years = 200000;
 
 // sampling interval
 int skip = std::ceil((double)number_years / 500);
@@ -68,7 +68,7 @@ double resource_max = 0.0;  // maximum resource value an individual can achieve
 double individual_breeding_threshold = 0.0;
 double individual_offspring_increment = 0.0;
 
-// mutation rates
+// mutation rates and effect size distributions
 double mu_theta = 0.0;
 double mu_phi = 0.0;
 double mu_psi = 0.0;
@@ -1425,13 +1425,12 @@ void create_offspring(
     offspring.phi_b[1] = mutation(father.phi_b[allele_sample(rng_r)], mu_phi, sdmu_phi);
 	
     // inherit psi loci
-    offspring.psi_a[0] = mutation(mother.psi_a[allele_sample(rng_r)], mu_psi, sdmu_psi);
-    offspring.psi_a[1] = mutation(father.psi_a[allele_sample(rng_r)], mu_psi, sdmu_psi);
-    offspring.psi_b[0] = mutation(mother.psi_b[allele_sample(rng_r)], mu_psi, sdmu_psi);
-    offspring.psi_b[1] = mutation(father.psi_b[allele_sample(rng_r)], mu_psi, sdmu_psi);
+    offspring.psi_a[0] = mutation(mother.psi_a[allele_sample(rng_r)], 0, sdmu_psi);
+    offspring.psi_a[1] = mutation(father.psi_a[allele_sample(rng_r)], 0, sdmu_psi);
+    offspring.psi_b[0] = mutation(mother.psi_b[allele_sample(rng_r)], 0, sdmu_psi);
+    offspring.psi_b[1] = mutation(father.psi_b[allele_sample(rng_r)], 0, sdmu_psi);
 	
 }  // ENDS OFFSPRING PRODUCTION
-
 
 
 // in summary, they reproduce dependent on 

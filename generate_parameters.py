@@ -84,7 +84,7 @@ risks_sourcefile = ["none"]  # If none, enter "none"
 #"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_24_11_2023_104810/sim_migration_24_11_2023_104801_36_dist",
 #"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_24_11_2023_104810/sim_migration_24_11_2023_104801_4_dist"]
 
-number_replicates = 5
+number_replicates = 4
 
 executable = "./xmigration"
 
