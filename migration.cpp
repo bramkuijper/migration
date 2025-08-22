@@ -1298,8 +1298,9 @@ void spring_dynamics(int t)
 		//pready_social = clamp(pready_social, 0, 1);
 		
 		//pdisperse = pready_condition + pready_social;
-		pdisperse = pow(1 + exp(-0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) * (((double) staging_pop_start / (staging_pop_start + winter_pop)) - 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1]))
-								-0.5 * (StagingPool[i].psi_b[0] + StagingPool[i].psi_b[1]) * (StagingPool[i].resources - 0.5 * (StagingPool[i].psi_a[0] + StagingPool[i].psi_a[1]))
+		pdisperse = pow(1 + exp(-1 * (0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) * (((double) staging_pop_start / (staging_pop_start + winter_pop)) - 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1]))
+								    + 0.5 * (StagingPool[i].psi_b[0] + StagingPool[i].psi_b[1]) * (StagingPool[i].resources - 0.5 * (StagingPool[i].psi_a[0] + StagingPool[i].psi_a[1]))
+									  )
 								), -1);
 		pdisperse = clamp(pdisperse, 0, 1);
 
