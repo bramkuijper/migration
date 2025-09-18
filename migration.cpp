@@ -26,22 +26,24 @@ std::uniform_real_distribution<> uniform(0.0,1.0);
 // values of the most of these are overridden in the init_arguments() function
 
 // number of individuals in population
-const int N = 1000;
+const int N = 100;
 
 // number of years simulation will run for
-long int number_years = 500000;
+long int number_years = 200; //500000;
 
 // sampling interval
 int skip = std::ceil((double)number_years / 500);
 
 long int postequilibrialisation_experimental_runtime = 100;
 
-// initial values for phi (social dependency) and theta (resource dependency)
+// initial values for phi (social dependency), theta (resource dependent signalling) and psi (resource-dependent departure)
 // a is an intercept, b is a gradient
 double init_theta_a = 0.0; 
 double init_theta_b = 0.0;
 double init_phi_a = 0.0;
 double init_phi_b = 0.0;
+double init_psi_a = 0.0;
+double init_psi_b = 0.0;
 
 // mortality probability 
 double pmort = 0.0;
@@ -70,8 +72,10 @@ double individual_offspring_increment = 0.0;
 // mutation rates
 double mu_theta = 0.0;
 double mu_phi = 0.0;
+double mu_psi = 0.0;
 double sdmu_theta = 0.0;
 double sdmu_phi = 0.0;
+double sdmu_psi = 0.0;
 
 // migration cost function
 double cost_power = 0.0;
@@ -180,9 +184,11 @@ struct Individual
     double theta_a[2];  // elevation (baseline leaving rate)
     double theta_b[2];  // reaction norm, dependency on the amount of resources
 
-    // COLLECTIVE DISPERSAL reaction norm (determines migration dependent on number of individuals)
+    // COLLECTIVE DISPERSAL reaction norm (determines migration dependent on proportion of individuals signalling and on own condition)
     double phi_a[2];  // collective dispersal elevation
     double phi_b[2];  // collective dispersal slope, dependency on number of individuals
+	double psi_a[2];  // condition-depenedent dispersal elevation
+	double psi_b[2];  // condition-dependent dispersal slope
 	
 	int latency;  // individual departure latency
 	int timing;  // individual departure timing
@@ -293,6 +299,8 @@ void init_arguments(int argc, char **argv)
     init_phi_b = atof(argv[2]);  // Slope of the reaction norm for group size-dependent miratory departure
     init_theta_a = atof(argv[3]);  // // Elevation of the reaction norm for resource-dependent entry to staging pool
     init_theta_b = atof(argv[4]);  // Slope of the reaction norm for resource-dependent entry to staging pool
+	init_psi_a = atof(argv[34]);   // Elevation of the reaction norm for resource-dependent migratory departure
+	init_psi_b = atof(argv[35]);   // Slope of the reaction norm for resource-dependent migratory departure
     pmort = atof(argv[5]);
     pgood = atof(argv[6]);
 	patch_consistency_factor = atof(argv[7]);
@@ -303,8 +311,10 @@ void init_arguments(int argc, char **argv)
     resource_starvation_threshold = atof(argv[12]);
     mu_theta = atof(argv[13]);
     mu_phi = atof(argv[14]);
+	mu_psi = atof(argv[34]);
     sdmu_theta = atof(argv[15]);
     sdmu_phi = atof(argv[16]);
+	sdmu_psi = atof(argv[35]);
     max_migration_cost = atof(argv[17]);
 	min_migration_cost = atof(argv[18]);
     cost_power = atof(argv[19]);
@@ -322,7 +332,7 @@ void init_arguments(int argc, char **argv)
 	autumn_harvest = atof(argv[31]);
     filename_costs = argv[32];
 	filename_risks = argv[33];
-    filename_output = argv[34];
+    filename_output = argv[36];
 
     // some bounds checking on parameters
     // probability of encountering a good environment
@@ -362,6 +372,8 @@ void write_parameters(std::ofstream &DataFile)  // at top of outputted file
             << "init_theta_b;" << init_theta_b << std::endl
             << "init_phi_a;" << init_phi_a << std::endl
             << "init_phi_b;" << init_phi_b << std::endl
+			<< "init_psi_a;" << init_psi_a << std::endl
+			<< "init_psi_b;" << init_psi_b << std::endl
             << "pmort;" << pmort << std::endl
             << "pgood;" << pgood << std::endl
             << "filename_costs;" << filename_costs << std::endl
@@ -375,8 +387,10 @@ void write_parameters(std::ofstream &DataFile)  // at top of outputted file
             << "resource_starvation_threshold;" << resource_starvation_threshold << std::endl
             << "mu_theta;" << mu_theta << std::endl
             << "mu_phi;" << mu_phi << std::endl
+			<< "mu_psi" << mu_psi << std::endl
             << "sdmu_theta;" << sdmu_theta << std::endl
             << "sdmu_phi;" << sdmu_phi << std::endl
+			<< "sdmu_psi;" << sdmu_psi << std::endl
             << "tspring;" << tspring << std::endl
 			<< "twinter;" << twinter << std::endl
             << "N;" << N << std::endl
@@ -423,6 +437,8 @@ void write_dist(std::ofstream &DataFile,
 	        << SummerPop[summer_idx].theta_b[0]*0.5 + SummerPop[summer_idx].theta_b[1]*0.5 << ";"
 	        << SummerPop[summer_idx].phi_a[0]*0.5 + SummerPop[summer_idx].phi_a[1]*0.5 << ";"
 	        << SummerPop[summer_idx].phi_b[0]*0.5 + SummerPop[summer_idx].phi_b[1]*0.5 << ";"
+		    << SummerPop[summer_idx].psi_a[0]*0.5 + SummerPop[summer_idx].psi_a[1]*0.5 << ";"
+		    << SummerPop[summer_idx].psi_b[0]*0.5 + SummerPop[summer_idx].psi_b[1]*0.5 << ";"
             << SummerPop[summer_idx].age << ";"
 			<< SummerPop[summer_idx].patch_quality << ";" << std::endl;
 	    }
@@ -445,6 +461,8 @@ void write_dist_data_headers(std::ofstream &DataFile)
         << "theta_b;"
         << "phi_a;"
         << "phi_b;"
+		<< "psi_a;"
+		<< "psi_b;"
         << "age;"
 		<< "patch_quality;" << std::endl;
 } // end write_dist_data_headers
@@ -531,6 +549,10 @@ void write_data_headers(std::ofstream &DataFile)
 	    << "var_phi_a_winter;"
 	    << "mean_phi_b_winter;"
 	    << "var_phi_b_winter;"
+		<< "mean_psi_a_winter;"
+		<< "var_psi_a_winter;"
+		<< "mean_psi_b_winter;"
+		<< "var_psi_b_winter;"
 		<< "mean_age;"
 		<< "var_age;"
 		<< std::endl;
@@ -549,6 +571,11 @@ void write_winter_stats(std::ofstream &DataFile)
     double ss_phi_a = 0.0;
     double mean_phi_b = 0.0;
     double ss_phi_b = 0.0;
+	
+    double mean_psi_a = 0.0;
+    double ss_psi_a = 0.0;
+    double mean_psi_b = 0.0;
+    double ss_psi_b = 0.0;
 
     double mean_resources = 0.0;
     double ss_resources = 0.0;
@@ -580,8 +607,16 @@ void write_winter_stats(std::ofstream &DataFile)
         val = 0.5 * (WinterPop[i].phi_b[0] + WinterPop[i].phi_b[1]);
         mean_phi_b += val;
         ss_phi_b += val * val;
+		
+        val = 0.5 * (WinterPop[i].psi_a[0] + WinterPop[i].psi_a[1]);
+        mean_phi_a += val;
+        ss_phi_a += val * val;
+
+        val = 0.5 * (WinterPop[i].psi_b[0] + WinterPop[i].psi_b[1]);
+        mean_phi_b += val;
+        ss_phi_b += val * val;
         
-        val = WinterPop[i].resources;  // the resource level of individual i  // 18 Feb 2020: I've changed this from StagingPool[i].resources
+        val = WinterPop[i].resources;  // the resource level of individual i 
         mean_resources += val;
         ss_resources += val * val;
 		
@@ -598,6 +633,8 @@ void write_winter_stats(std::ofstream &DataFile)
         mean_theta_b /=  winter_pop;
         mean_phi_a /=  winter_pop;
         mean_phi_b /=  winter_pop;
+        mean_psi_a /=  winter_pop;
+        mean_psi_b /=  winter_pop;
         mean_resources /=  winter_pop;
 		mean_age /= winter_pop;
          
@@ -605,6 +642,8 @@ void write_winter_stats(std::ofstream &DataFile)
         ss_theta_b /= winter_pop; 
         ss_phi_a /= winter_pop; 
         ss_phi_b /= winter_pop;
+        ss_psi_a /= winter_pop; 
+        ss_psi_b /= winter_pop;
         ss_resources /= winter_pop; 
 		ss_age /= winter_pop;
     }
@@ -626,6 +665,10 @@ void write_winter_stats(std::ofstream &DataFile)
         << (ss_phi_a - mean_phi_a * mean_phi_a) << ";"
         << mean_phi_b << ";"
         << (ss_phi_b - mean_phi_b * mean_phi_b) << ";"
+	    << mean_psi_a << ";"
+	    << (ss_psi_a - mean_psi_a * mean_psi_a) << ";"
+	    << mean_psi_b << ";"
+	    << (ss_psi_b - mean_psi_b * mean_psi_b) << ";"
 		<< mean_age << ";"
 		<< (ss_age - mean_age * mean_age) << ";"
 		<< std::endl;
@@ -902,6 +945,10 @@ void init_population()
             // initialize allelic values for phi elevation and slope
             WinterPop[i].phi_a[j] = init_phi_a;
             WinterPop[i].phi_b[j] = init_phi_b;
+			
+            // initialize allelic values for psi elevation and slope
+            WinterPop[i].psi_a[j] = init_psi_a;
+            WinterPop[i].psi_b[j] = init_psi_b;
 			
         }
 		
@@ -1243,8 +1290,9 @@ void spring_dynamics(int t)
     {
         assert(staging_pop < N);
         
-		pdisperse = pow(1 + exp(-0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) 
-			* (((double) staging_pop_start / (staging_pop_start + winter_pop)) - 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1]))), -1);
+		pdisperse = pow(1 + exp(-0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) * (((double) staging_pop_start / (staging_pop_start + winter_pop)) - 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1]))
+								-0.5 * (StagingPool[i].psi_b[0] + StagingPool[i].psi_b[1]) * (StagingPool[i].resources - 0.5 * (StagingPool[i].psi_a[0] + StagingPool[i].psi_b[1]))
+								), -1);
 		
 		// bound the probability (not really necessary)
         pdisperse = clamp(pdisperse, 0, 1);
@@ -1373,6 +1421,12 @@ void create_offspring(
     offspring.phi_a[1] = mutation(father.phi_a[allele_sample(rng_r)], mu_phi, sdmu_phi);
     offspring.phi_b[0] = mutation(mother.phi_b[allele_sample(rng_r)], mu_phi, sdmu_phi);
     offspring.phi_b[1] = mutation(father.phi_b[allele_sample(rng_r)], mu_phi, sdmu_phi);
+	
+    // inherit psi loci
+    offspring.psi_a[0] = mutation(mother.psi_a[allele_sample(rng_r)], mu_psi, sdmu_psi);
+    offspring.psi_a[1] = mutation(father.psi_a[allele_sample(rng_r)], mu_psi, sdmu_psi);
+    offspring.psi_b[0] = mutation(mother.psi_b[allele_sample(rng_r)], mu_psi, sdmu_psi);
+    offspring.psi_b[1] = mutation(father.psi_b[allele_sample(rng_r)], mu_psi, sdmu_psi);
 	
 }  // ENDS OFFSPRING PRODUCTION
 
@@ -1657,8 +1711,9 @@ void postbreeding_dynamics(int t)
     // actual autumn dispersal at time t
     for (int i = 0; i < staging_pop; ++i)
     {
-		pdisperse = pow(1 + exp(-0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) 
-			* (((double) staging_pop_start / (staging_pop_start + summer_pop)) - 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1]))), -1);
+		pdisperse = pow(1 + exp(-0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) * (((double) staging_pop_start / (staging_pop_start + summer_pop)) - 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1]))
+						-0.5 * (StagingPool[i].psi_b[0] + StagingPool[i].psi_b[1]) * (StagingPool[i].resources - 0.5 * (StagingPool[i].psi_a[0] + StagingPool[i].psi_b[1]))
+						), -1);
 		
 		pdisperse = clamp(pdisperse, 0, 1);
 		
