@@ -26,10 +26,10 @@ std::uniform_real_distribution<> uniform(0.0,1.0);
 // values of the most of these are overridden in the init_arguments() function
 
 // number of individuals in population
-const int N = 100;
+const int N = 1000;
 
 // number of years simulation will run for
-long int number_years = 200; //500000;
+long int number_years = 500000;
 
 // sampling interval
 int skip = std::ceil((double)number_years / 500);
@@ -187,7 +187,7 @@ struct Individual
     // COLLECTIVE DISPERSAL reaction norm (determines migration dependent on proportion of individuals signalling and on own condition)
     double phi_a[2];  // collective dispersal elevation
     double phi_b[2];  // collective dispersal slope, dependency on number of individuals
-	double psi_a[2];  // condition-depenedent dispersal elevation
+	double psi_a[2];  // condition-dependent dispersal elevation
 	double psi_b[2];  // condition-dependent dispersal slope
 	
 	int latency;  // individual departure latency
@@ -295,26 +295,26 @@ void initialize_flock_size_distribution(std::string file_name)
 // running the executable file
 void init_arguments(int argc, char **argv)
 {
-    init_phi_a = atof(argv[1]);  // Elevation of the reaction norm for group size-dependent miratory departure
-    init_phi_b = atof(argv[2]);  // Slope of the reaction norm for group size-dependent miratory departure
-    init_theta_a = atof(argv[3]);  // // Elevation of the reaction norm for resource-dependent entry to staging pool
-    init_theta_b = atof(argv[4]);  // Slope of the reaction norm for resource-dependent entry to staging pool
-	init_psi_a = atof(argv[34]);   // Elevation of the reaction norm for resource-dependent migratory departure
-	init_psi_b = atof(argv[35]);   // Slope of the reaction norm for resource-dependent migratory departure
-    pmort = atof(argv[5]);
-    pgood = atof(argv[6]);
-	patch_consistency_factor = atof(argv[7]);
-    rgood_init = atof(argv[8]);
-    rbad_init = atof(argv[9]);
-	preparation_penalty = atof(argv[10]);
-    resource_reproduction_threshold = atof(argv[11]);
-    resource_starvation_threshold = atof(argv[12]);
-    mu_theta = atof(argv[13]);
-    mu_phi = atof(argv[14]);
-	mu_psi = atof(argv[34]);
-    sdmu_theta = atof(argv[15]);
+    init_theta_a = atof(argv[1]);  // // Elevation of the reaction norm for resource-dependent entry to staging pool
+    init_theta_b = atof(argv[2]);  // Slope of the reaction norm for resource-dependent entry to staging pool
+    init_phi_a = atof(argv[3]);  // Elevation of the reaction norm for group size-dependent migratory departure
+    init_phi_b = atof(argv[4]);  // Slope of the reaction norm for group size-dependent miratory departure
+	init_psi_a = atof(argv[5]);   // Elevation of the reaction norm for resource-dependent migratory departure
+	init_psi_b = atof(argv[6]);   // Slope of the reaction norm for resource-dependent migratory departure
+    pmort = atof(argv[7]);
+    pgood = atof(argv[8]);
+	patch_consistency_factor = atof(argv[9]);
+    rgood_init = atof(argv[10]);
+    rbad_init = atof(argv[11]);
+	preparation_penalty = atof(argv[12]);
+    resource_reproduction_threshold = atof(argv[13]);
+    resource_starvation_threshold = atof(argv[14]);
+    mu_theta = atof(argv[15]);
+    mu_phi = atof(argv[15]);
+	mu_psi = atof(argv[15]);
+    sdmu_theta = atof(argv[16]);
     sdmu_phi = atof(argv[16]);
-	sdmu_psi = atof(argv[35]);
+	sdmu_psi = atof(argv[16]);
     max_migration_cost = atof(argv[17]);
 	min_migration_cost = atof(argv[18]);
     cost_power = atof(argv[19]);
@@ -332,7 +332,7 @@ void init_arguments(int argc, char **argv)
 	autumn_harvest = atof(argv[31]);
     filename_costs = argv[32];
 	filename_risks = argv[33];
-    filename_output = argv[36];
+    filename_output = argv[34];
 
     // some bounds checking on parameters
     // probability of encountering a good environment
@@ -609,12 +609,12 @@ void write_winter_stats(std::ofstream &DataFile)
         ss_phi_b += val * val;
 		
         val = 0.5 * (WinterPop[i].psi_a[0] + WinterPop[i].psi_a[1]);
-        mean_phi_a += val;
-        ss_phi_a += val * val;
+        mean_psi_a += val;
+        ss_psi_a += val * val;
 
         val = 0.5 * (WinterPop[i].psi_b[0] + WinterPop[i].psi_b[1]);
-        mean_phi_b += val;
-        ss_phi_b += val * val;
+        mean_psi_b += val;
+        ss_psi_b += val * val;
         
         val = WinterPop[i].resources;  // the resource level of individual i 
         mean_resources += val;
@@ -793,28 +793,28 @@ void write_spring_stats(std::ofstream &DataFile, int year)
     DataFile
         << year << ";"
 		<< spring_pop_start << ";"
-		<< mean_spring_staging_size << ";"  // 3
+		<< mean_spring_staging_size << ";"  											// 3
 		<< var_spring_staging_size << ";"
-		<< spring_migrant_pop << ";"  // 5
+		<< spring_migrant_pop << ";"  													// 5
 		<< spring_migrants_resource_cap << ";"
-		<< spring_nonmigrant_pop << ";"  // 7
+		<< spring_nonmigrant_pop << ";"  												// 7
 		<< mean_signal_resources << ";"
-		<< (ss_signal_resources - mean_signal_resources * mean_signal_resources) << ";"  // 9
+		<< (ss_signal_resources - mean_signal_resources * mean_signal_resources) << ";" // 9
 		<< mean_signal_timing << ";"
-		<< (ss_signal_timing - mean_signal_timing * mean_signal_timing) << ";"  // 11
+		<< (ss_signal_timing - mean_signal_timing * mean_signal_timing) << ";" 		 	// 11
 		<< mean_latency << ";"
-		<< (ss_latency - mean_latency * mean_latency) << ";"  // 13
+		<< (ss_latency - mean_latency * mean_latency) << ";"  							// 13
 		<< mean_departure_timing << ";"
-		<< (ss_departure_timing - mean_departure_timing * mean_departure_timing) << ";"  // 15
+		<< (ss_departure_timing - mean_departure_timing * mean_departure_timing) << ";" // 15
 		<< mean_resources << ";"
-		<< (ss_resources - mean_resources * mean_resources) << ";"  // 17
+		<< (ss_resources - mean_resources * mean_resources) << ";"  					// 17
 		<< n_spring_flocks << ";"
-		<< population_mean_spring_flock_size << ";"  // 19
+		<< population_mean_spring_flock_size << ";"  									// 19
 		<< population_var_spring_flock_size << ";"
-		<< individual_mean_spring_flock_size << ";"  // 21
+		<< individual_mean_spring_flock_size << ";"  									// 21
 		<< (individual_ss_spring_flock_size - individual_mean_spring_flock_size * individual_mean_spring_flock_size) << ";"	
-		<< mean_spring_cost << ";"  // 23
-		<< (ss_spring_cost - mean_spring_cost * mean_spring_cost) << ";";  // 24
+		<< mean_spring_cost << ";"  													// 23
+		<< (ss_spring_cost - mean_spring_cost * mean_spring_cost) << ";";  				// 24
 
 }  // ENDS: write data for spring migrants
 
@@ -1411,18 +1411,19 @@ void create_offspring(
     // inherit theta loci
 
     // each parental allele has probability 0.5 to make it into offspring
+	// inherit theta loci (socially-dependent signalling)
     offspring.theta_a[0] = mutation(mother.theta_a[allele_sample(rng_r)], mu_theta, sdmu_theta);
     offspring.theta_a[1] = mutation(father.theta_a[allele_sample(rng_r)], mu_theta, sdmu_theta);
     offspring.theta_b[0] = mutation(mother.theta_b[allele_sample(rng_r)], mu_theta, sdmu_theta);
     offspring.theta_b[1] = mutation(father.theta_b[allele_sample(rng_r)], mu_theta, sdmu_theta);
 	
-    // inherit phi loci
-    offspring.phi_a[0] = mutation(mother.phi_a[allele_sample(rng_r)], mu_phi, sdmu_phi);
-    offspring.phi_a[1] = mutation(father.phi_a[allele_sample(rng_r)], mu_phi, sdmu_phi);
-    offspring.phi_b[0] = mutation(mother.phi_b[allele_sample(rng_r)], mu_phi, sdmu_phi);
-    offspring.phi_b[1] = mutation(father.phi_b[allele_sample(rng_r)], mu_phi, sdmu_phi);
+    // inherit phi loci (socially-dependent departure)
+    offspring.phi_a[0] = mutation(mother.phi_a[allele_sample(rng_r)], 0, 0);
+    offspring.phi_a[1] = mutation(father.phi_a[allele_sample(rng_r)], 0, 0);
+    offspring.phi_b[0] = mutation(mother.phi_b[allele_sample(rng_r)], 0, 0);
+    offspring.phi_b[1] = mutation(father.phi_b[allele_sample(rng_r)], 0, 0);
 	
-    // inherit psi loci
+    // inherit psi loci (condition-dependent departure)
     offspring.psi_a[0] = mutation(mother.psi_a[allele_sample(rng_r)], mu_psi, sdmu_psi);
     offspring.psi_a[1] = mutation(father.psi_a[allele_sample(rng_r)], mu_psi, sdmu_psi);
     offspring.psi_b[0] = mutation(mother.psi_b[allele_sample(rng_r)], mu_psi, sdmu_psi);
