@@ -1418,10 +1418,10 @@ void create_offspring(
     offspring.theta_b[1] = mutation(father.theta_b[allele_sample(rng_r)], mu_theta, sdmu_theta);
 	
     // inherit phi loci (socially-dependent departure)
-    offspring.phi_a[0] = mutation(mother.phi_a[allele_sample(rng_r)], 0, 0);
-    offspring.phi_a[1] = mutation(father.phi_a[allele_sample(rng_r)], 0, 0);
-    offspring.phi_b[0] = mutation(mother.phi_b[allele_sample(rng_r)], 0, 0);
-    offspring.phi_b[1] = mutation(father.phi_b[allele_sample(rng_r)], 0, 0);
+    offspring.phi_a[0] = mutation(mother.phi_a[allele_sample(rng_r)], mu_phi, sdmu_phi);
+    offspring.phi_a[1] = mutation(father.phi_a[allele_sample(rng_r)], mu_phi, sdmu_phi);
+    offspring.phi_b[0] = mutation(mother.phi_b[allele_sample(rng_r)], mu_phi, sdmu_phi);
+    offspring.phi_b[1] = mutation(father.phi_b[allele_sample(rng_r)], mu_phi, sdmu_phi);
 	
     // inherit psi loci (condition-dependent departure)
     offspring.psi_a[0] = mutation(mother.psi_a[allele_sample(rng_r)], mu_psi, sdmu_psi);
