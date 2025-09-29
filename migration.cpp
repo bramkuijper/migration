@@ -26,10 +26,10 @@ std::uniform_real_distribution<> uniform(0.0,1.0);
 // values of the most of these are overridden in the init_arguments() function
 
 // number of individuals in population
-const int N = 200;
+const int N = 1000;
 
 // number of years simulation will run for
-long int number_years = 100;
+long int number_years = 100000;
 
 // sampling interval
 int skip = std::ceil((double)number_years / 500);
