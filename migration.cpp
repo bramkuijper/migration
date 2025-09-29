@@ -1182,8 +1182,7 @@ void spring_dynamics(int t)
     double psignal = 0.0;
 
     // individuals decide whether to go to staging site
-    // i.e., prepare for dispersal
-    // signal to disperse
+    // i.e., signal
     for (int i = 0; i < winter_pop; ++i) 
     {	
 		// reaction norm dependent on resources
@@ -1219,8 +1218,6 @@ void spring_dynamics(int t)
 		else
 		{
 			WinterPop[i].signal_timing += 1;  // Individual has not signalled readiness to leave (equivalent to not entering 'staging pool')
-			
-			WinterPop[i].timing +=1;  // Individuals that do not enter the staging population will not be departing at time t
 		}
     } // end for: move dispersers to staging
 
@@ -1239,6 +1236,7 @@ void spring_dynamics(int t)
     int staging_pop_start = staging_pop;
 	
     // actual spring dispersal from winter to summer population
+	// First, departure of signallers
     for (int i = 0; i < staging_pop; ++i)
     {
         assert(staging_pop < N);
@@ -1288,7 +1286,56 @@ void spring_dynamics(int t)
 			StagingPool[i].timing += 1;  // Also increment its timing score
 		}
 		
-    } // ENDS ACTUAL SPRING DISPERSAL and making of flocks
+    } // Ends departure of signallers at time t
+	
+	// Second, departure of non-signallers direct from winter_pop
+    for (int i = 0; i < winter_pop; ++i)
+    {
+        pdisperse = pow(1 + exp(-0.5 * (WinterPop[i].phi_b[0] + WinterPop[i].phi_b[1]) 
+			* (((double) staging_pop_start / (staging_pop_start + winter_pop)) - 0.5 * (WinterPop[i].phi_a[0] + WinterPop[i].phi_a[1]))), -1);
+		
+		// bound the probability (not really necessary)
+        pdisperse = clamp(pdisperse, 0, 1);
+
+        // yes individual goes
+        if (uniform(rng_r) < pdisperse)
+        {
+			SummerPop[summer_pop] = WinterPop[i]; // Individual transfers to SummerPop
+			SummerPop[summer_pop].signalling_proportion = (double) staging_pop_start / (staging_pop_start + winter_pop);
+			++summer_pop;
+            
+            assert(summer_pop <= N);
+
+			if (WinterPop[i].resources == resource_max)
+			{
+				++spring_migrants_resource_cap;
+			}
+
+			rv = WinterPop[i].resources;
+			mean_resources += rv;
+			ss_resources += rv * rv;
+			
+            // delete this individual from the winter population
+            WinterPop[i] = WinterPop[winter_pop - 1];
+
+            // decrement the number of individuals in the staging population
+            --winter_pop;
+            --i;
+
+            assert(winter_pop >= 0);
+
+            // increase flock size
+            ++NFlock;
+            
+            assert(NFlock <= N);			
+        
+		} 
+		
+		else {
+			WinterPop[i].timing += 1;  // Increment the timing score of non-signalling individuals that do not depart 
+		}
+		
+    } // Ends departure of non-signallers at time t
 
     // keep track of mean and variance in flock sizes
 	mean_spring_staging_size += staging_pop_start;
@@ -1635,7 +1682,6 @@ void postbreeding_dynamics(int t)
 		else
 		{
 			SummerPop[i].signal_timing +=1;  // Individual did not signal at time t
-			SummerPop[i].timing +=1;  // Individuals that do not enter the staging population will not be departing at time t
 		}
     } // end for (int i = 0; i < summer_pop; ++i)
 
@@ -1655,6 +1701,7 @@ void postbreeding_dynamics(int t)
     int staging_pop_start = staging_pop;
 
     // actual autumn dispersal at time t
+	// Firstly, departure of signallers:
     for (int i = 0; i < staging_pop; ++i)
     {
 		pdisperse = pow(1 + exp(-0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) 
@@ -1688,6 +1735,61 @@ void postbreeding_dynamics(int t)
 
             // decrement the number of individuals in the staging population
             --staging_pop;
+            --i;
+			
+			// increment the number of individuals recorded as autumn migrants
+			++autumn_migrant_pop;
+			
+            assert(staging_pop + summer_pop + winter_pop <= N);
+            assert(staging_pop >= 0);
+
+            // increase flock size
+            ++NFlock;
+            
+            assert(NFlock <= N);
+        } // Ends: individual goes
+		
+		else 
+		{
+			StagingPool[i].latency += 1;  // Individual does not depart at time t
+			StagingPool[i].timing += 1;  // Ditto
+		}
+	    
+    } // ENDS: Autumn departure of signallers at time t
+	
+    for (int i = 0; i < summer_pop; ++i)
+    {
+		pdisperse = pow(1 + exp(-0.5 * (SummerPop[i].phi_b[0] + SummerPop[i].phi_b[1]) 
+			* (((double) staging_pop_start / (staging_pop_start + summer_pop)) - 0.5 * (SummerPop[i].phi_a[0] + SummerPop[i].phi_a[1]))), -1);
+		
+		pdisperse = clamp(pdisperse, 0, 1);
+		
+		// yes individual goes
+        if (uniform(rng_r) < pdisperse)
+        {
+			
+			rv = StagingPool[i].resources;  // Record individual's resource value at departure
+			mean_resources += rv;
+			ss_resources += rv * rv;
+			
+			if (StagingPool[i].resources == resource_max)
+			{
+				++autumn_migrants_resource_cap;
+			}
+			
+			WinterPop[winter_pop] = SummerPop[i];  // Individual moves from staging pool to first empty position in WinterPop
+			WinterPop[winter_pop].signalling_proportion = staging_pop_start / (staging_pop_start + summer_pop);  // record the proportion of the population that was signalling at the point of departure
+			lat = WinterPop[winter_pop].latency;
+			mean_latency += lat;
+			ss_latency += (lat * lat);			
+			++winter_pop;
+			
+            // delete this individual from the summer population
+			// replace with the last individual in the summer_pop stack
+            SummerPop[i] = SummerPop[summer_pop - 1];
+
+            // decrement the number of individuals in the staging population
+            --summer_pop;
             --i;
 			
 			// increment the number of individuals recorded as autumn migrants
