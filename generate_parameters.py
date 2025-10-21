@@ -12,8 +12,8 @@ init_phi_a = [0.3]  # Default is 0.3
 init_phi_b = [25]  # Default is 25
 
 # Resource-depedent departure
-init_psi_a = 60
-init_psi_b = 1.0
+init_psi_a = 0
+init_psi_b = 0
 
 
 twinter = 10000  # twinter in manuscript

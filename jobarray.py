@@ -23,7 +23,7 @@ class JobArray:
     # list with executables
     executables = []
 
-    email = "a.l.w.kuijper@exeter.ac.uk"
+    email = "s.r.evans@exeter.ac.uk"
 
     parent_dir_prefix = "hpcbatch"
     jobfile_prefix = "hpcjob"
