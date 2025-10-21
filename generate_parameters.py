@@ -5,11 +5,11 @@ import datetime
 
 # Resource-dependent signalling
 init_theta_a = [1]
-init_theta_b = [1]  # Default is 1
+init_theta_b = [50]  # Default is 1
 
 # Socially-dependent departure
-init_phi_a = [0.3]  # Default is 0.3
-init_phi_b = [25]  # Default is 25
+init_phi_a = [0.5]  # Default is 0.3
+init_phi_b = [50]  # Default is 25
 
 # Resource-depedent departure
 init_psi_a = 0
