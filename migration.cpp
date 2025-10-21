@@ -491,9 +491,8 @@ void write_data_headers(std::ofstream &DataFile)
 		<< "mean_spring_cost;"  // 23
 		<< "var_spring_cost;"  // 24
 		
-		// SUMMER STATS (11):	
+		// SUMMER STATS (10):	
 		<< "spring_migrant_deaths;"
-		<< "spring_migrant_mortality_rate;"
 		<< "summer_pop;"
 	    << "breeder_pop;"
 		<< "nonreproductive_pop;"
@@ -528,9 +527,8 @@ void write_data_headers(std::ofstream &DataFile)
 		<< "mean_autumn_cost;"
 		<< "var_autumn_cost;"
 	
-		// WINTER STATS (17):
+		// WINTER STATS:
 		<< "autumn_migrant_deaths;"	
-		<< "autumn_migrant_mortality_rate;"
 		<< "total_autumn_mortality_rate;"	
 		<< "remainer_pop;"
 		<< "winter_pop;"
@@ -646,7 +644,6 @@ void write_winter_stats(std::ofstream &DataFile)
     // write statistics to a file
     DataFile 
 		<< autumn_migrant_deaths << ";"
-		<< (autumn_migrant_deaths / autumn_migrant_pop) << ";"
 		<< (autumn_nonmigrant_pop + autumn_migrant_deaths) / (autumn_nonmigrant_pop + autumn_migrant_pop ) << ";"
 		<< remainer_pop << ";"
 		<< winter_pop << ";"
@@ -703,8 +700,7 @@ void write_summer_stats(std::ofstream &DataFile)
 	
     // write statistics to a file
     DataFile 
-        << spring_migrant_deaths << ";"
-		<< (spring_migrant_deaths / spring_migrant_pop) << ";"		
+        << spring_migrant_deaths << ";"	
 		<< (breeder_pop + nonreproductive_pop) << ";"
 	    << breeder_pop << ";"
 		<< nonreproductive_pop << ";"
@@ -1985,6 +1981,12 @@ int main(int argc, char **argv)
 		autumn_migrants_resource_cap = 0;
 		autumn_nonmigrant_pop = 0;
 		autumn_migrant_pop = 0;
+        
+        // Depreciate all individuals' resource value at end of the annual cycle, according to the specified carryover proportion
+        for (int i = 0; i < winter_pop; ++i)
+        {
+        	WinterPop[i].resources *= carryover_proportion;
+        }
 				
-    } // ENDS: GENERATION
+    } // ENDS: YEAR
 }
