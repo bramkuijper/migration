@@ -8,8 +8,7 @@ init_theta_b = [1]  # Default is 1
 init_phi_a = [0.3]  # Default is 0.3
 init_phi_b = [25]  # Default is 25
 
-twinter = 0
-tspring = 10000  # twinter in manuscript
+twinter = 10000
 
 pmort = 0.1
 pgood = 0.5
@@ -138,28 +137,27 @@ for rep_i in range(0, number_replicates):
                                                                             + str(patch_consistency_factor_i) + " "
                                                                             + str(rgood) + " "
                                                                             + str(rbad) + " "  #9
-                                                                            + str(preparation_penalty_i) + " "  #10
+                                                                            + str(preparation_penalty_i) + " "      #10
                                                                             + str(resource_reproduction_threshold) + " "
                                                                             + str(resource_starvation_threshold) + " "
-                                                                            + str(mu_theta) + " "
-                                                                            + str(mu_phi) + " "  #14
-                                                                            + str(sdmu_theta) + " "  #15
-                                                                            + str(sdmu_phi_i) + " "  #16
+                                                                            + str(mu_theta) + " 
+                                                                            + str(mu_phi) + " "                     #14
+                                                                            + str(sdmu_theta) + " "                 #15
+                                                                            + str(sdmu_phi_i) + " "                 #16
                                                                             + str(max_migration_cost) + " "
                                                                             + str(min_migration_cost_i) + " "
-                                                                            + str(cost_power_i) + " "  #19
-                                                                            + str(twinter) + " "  #20
-                                                                            + str(tspring) + " " 
+                                                                            + str(cost_power_i) + " "               #19
+                                                                            + str(twinter) + " "                    #20
                                                                             + str(resource_max) + " "
                                                                             + str(min_offspring_cost) + " "
-                                                                            + str(offspring_cost_magnifier_i) + " "  #24
-                                                                            + str(carryover_proportion) + " "  #25
+                                                                            + str(offspring_cost_magnifier_i) + " " #23
+                                                                            + str(carryover_proportion) + " "       #24
                                                                             + str(relative_mortality_risk_of_migration) + " "
                                                                             + str(socially_sensitive_mortality_i) + " "
-                                                                            + str(capacity_i) + " " #28
+                                                                            + str(capacity_i) + " "                  #27
                                                                             + str(postequilibrialisation_experimental_runtime) + " "
-                                                                            + str(K_decline_factor_i) + " "  #30
-                                                                            + str(autumn_harvest_i) + " "  #31
+                                                                            + str(K_decline_factor_i) + " "          #29
+                                                                            + str(autumn_harvest_i) + " "            #30
                                                                             + str(costs_sourcefile_i) + " "
                                                                             + str(risks_sourcefile_i) + " "
                                                                             + str(base_name) + "_" + str(counter) + " "

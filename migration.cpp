@@ -93,7 +93,6 @@ double autumn_harvest = 0.0;  // proportion of the autumn population culled to a
 
 // max number of intervals per season (two seasons: summer, winter)
 int twinter = 0;
-int tspring = 0;
 
 // stats of flock size and staging
 double population_mean_spring_flock_size = 0.0;
@@ -158,7 +157,7 @@ int autumn_signaller_pop = 0;
 int autumn_nonmigrant_pop = 0;
 int autumn_migrant_pop = 0;
 int autumn_migrants_resource_cap = 0;
-int n_spring_flocks = 0;  // recording the number of spring flocks (tspring - n(unusued departure intervals))
+int n_spring_flocks = 0;  // recording the number of spring flocks (twinter - n(unusued departure intervals))
 int n_autumn_flocks = 0;
 int summer_pop_old = 0;
 int Nvacancies = 0;
@@ -308,20 +307,19 @@ void init_arguments(int argc, char **argv)
 	min_migration_cost = atof(argv[18]);
     cost_power = atof(argv[19]);
 	twinter = atoi(argv[20]);
-    tspring = atoi(argv[21]);
-	resource_max = atof(argv[22]);
-	min_offspring_cost = atof(argv[23]);
-	offspring_cost_magnifier = atof(argv[24]);
-	carryover_proportion = atof(argv[25]);
-	relative_mortality_risk_of_migration = atof(argv[26]);
-	socially_sensitive_mortality = atof(argv[27]);
-	capacity = atoi(argv[28]);
-	postequilibrialisation_experimental_runtime = atoi(argv[29]);
-	K_decline_factor = atof(argv[30]);
-	autumn_harvest = atof(argv[31]);
-    filename_costs = argv[32];
-	filename_risks = argv[33];
-    filename_output = argv[34];
+	resource_max = atof(argv[21]);
+	min_offspring_cost = atof(argv[22]);
+	offspring_cost_magnifier = atof(argv[23]);
+	carryover_proportion = atof(argv[24]);
+	relative_mortality_risk_of_migration = atof(argv[25]);
+	socially_sensitive_mortality = atof(argv[26]);
+	capacity = atoi(argv[27]);
+	postequilibrialisation_experimental_runtime = atoi(argv[28]);
+	K_decline_factor = atof(argv[29]);
+	autumn_harvest = atof(argv[30]);
+    filename_costs = argv[31];
+	filename_risks = argv[32];
+    filename_output = argv[33];
 
     // some bounds checking on parameters
     // probability of encountering a good environment
@@ -330,8 +328,7 @@ void init_arguments(int argc, char **argv)
     assert(pgood <= 1.0);
     
     //max number of days per season > 0
-    assert(tspring > 0);
-	assert(twinter >= 0);
+	assert(twinter > 0);
 
     // resource increments
     assert(rgood_init > 0);
@@ -376,7 +373,6 @@ void write_parameters(std::ofstream &DataFile)  // at top of outputted file
             << "mu_phi;" << mu_phi << std::endl
             << "sdmu_theta;" << sdmu_theta << std::endl
             << "sdmu_phi;" << sdmu_phi << std::endl
-            << "tspring;" << tspring << std::endl
 			<< "twinter;" << twinter << std::endl
             << "N;" << N << std::endl
 			<< "number_years;" << number_years << std::endl
@@ -1314,10 +1310,6 @@ void spring_dynamics(int t)
 
         }
 
-        else {
-            WinterPop[i].timing += 1;  // Increment the timing score of non-signalling individuals that do not depart
-        }
-
     } // Ends departure of non-signallers at time t
 
     // keep track of mean and variance in flock sizes
@@ -1355,6 +1347,12 @@ void spring_dynamics(int t)
 		SummerPop[i].fecundity = 0;
 		
     } // ENDS: updating resources of migrants
+    
+    // Increment the timing score of non-signalling remainers for this timestep
+    for (int i = 0; i < winter_pop; ++i)
+    {
+        WinterPop[i].timing += 1;
+    }
 
 } // ENDS SPRING DYNAMICS (looping through t)
 
@@ -1440,7 +1438,7 @@ void summer_reproduction(std::ofstream &DataFile)
 
         // if individual does not meet minimum standards then no reproduction through female function
 		// these minimum standards can be seasonally variable:
-		individual_breeding_threshold = resource_reproduction_threshold + resource_reproduction_threshold * ((offspring_cost_magnifier - 1) * (SummerPop[i].timing / tspring));
+		individual_breeding_threshold = resource_reproduction_threshold + resource_reproduction_threshold * ((offspring_cost_magnifier - 1) * (SummerPop[i].timing / twinter));
 		
 		if (SummerPop[i].resources < individual_breeding_threshold)  // Cost of clutch size of one. Further offspring incur a smaller, incremental cost
         {
@@ -1473,7 +1471,7 @@ void summer_reproduction(std::ofstream &DataFile)
 
 	        father = SummerPop[father_id];
 			
-			individual_offspring_increment = min_offspring_cost + min_offspring_cost * ((offspring_cost_magnifier - 1) * (SummerPop[i].timing / tspring));
+			individual_offspring_increment = min_offspring_cost + min_offspring_cost * ((offspring_cost_magnifier - 1) * (SummerPop[i].timing / twinter));
 
 	        offspring_equivalence = 1 + ((SummerPop[i].resources - individual_breeding_threshold) / individual_offspring_increment);
 	
@@ -1761,6 +1759,7 @@ void postbreeding_dynamics(int t)
             WinterPop[winter_pop].signal_timing = 0;    // Individual departed without signalling
             WinterPop[winter_pop].signal_resources = 0; // Ditto
             WinterPop[winter_pop].cost = 0.0;  // reset individual's migration cost to zero (was done at the point of signalling initiation for signallers)
+            WinterPop[i].resources *= carryover_proportion; // Depreciate individual's resource value at end of the annual cycle, according to the specified carryover proportion
             ++winter_pop;
 
                 // delete this individual from the summer population
@@ -1782,12 +1781,7 @@ void postbreeding_dynamics(int t)
 
                 assert(NFlock <= N);
             } // Ends: individual goes
-
-        else
-        {
-            StagingPool[i].timing += 1;  // Ditto
-        }
-
+            
         } // ENDS: Autumn dispersal of non-signallers at time t
 	
 	population_mean_autumn_flock_size += NFlock;
@@ -1819,11 +1813,10 @@ void postbreeding_dynamics(int t)
 		WinterPop[i].resources = std::min(WinterPop[i].resources, resource_max);  // Individual resource values cannot exceed resource max
     } // Ends: update resource levels of winter arrivals
     
-    // Depreciate all individuals' resource value at end of the annual cycle,
-    // according to the specified carryover proportion
-    for (int i = 0; i < winter_pop; ++i)
+    // Increment the timing score of non-signalling remainers for this timestep
+    for (int i = 0; i < summer_pop; ++i)
     {
-    	WinterPop[i].resources *= carryover_proportion;
+        SummerPop[i].timing += 1;
     }
 
 } // ENDS: POST-BREEDING DYNAMICS 
@@ -1901,36 +1894,30 @@ int main(int argc, char **argv)
 	        exit(1);
 	    }
 		
-		// Winter foraging (migration is not an option)
-		for (int t = 0; t < twinter; ++t)
-		{
-			winter_dynamics(t);
-		}
-		
-		// time during spring during which individuals can migrate (or carry on foraging)
 		mean_resources = 0.0;
 		ss_resources = 0.0;
 		rv = 0;
-		
-		for (int t = 0; t < tspring; ++t)
-        {
-            spring_dynamics(t);
+        
+		// Wintering grounds
+		for (int t = 0; t < twinter; ++t)
+		{
+			winter_dynamics(t);
 			
-			if (year == number_years - 1 && t >= tspring - 1)
+            if (year == number_years - 1 && t >= twinter - 1)
 				{
-					write_dist(DistFile, year, tspring);
+					write_dist(DistFile, year, twinter);
 				}
-        }
+		}
 				
 		spring_migrant_pop = population_mean_spring_flock_size;
 			
         // now take averages over all timesteps that individuals did (can) join groups
         population_mean_spring_flock_size = n_spring_flocks > 0 ? population_mean_spring_flock_size / n_spring_flocks : 0;
-		mean_spring_staging_size /= tspring;
+		mean_spring_staging_size /= twinter;
 		
 		// now record variance in flock size and staging size over the season
 		population_var_spring_flock_size = n_spring_flocks > 0 ? (population_ss_spring_flock_size / n_spring_flocks) - (population_mean_spring_flock_size * population_mean_spring_flock_size) : 0;
-		var_spring_staging_size = (ss_spring_staging_size / tspring) - (mean_spring_staging_size * mean_spring_staging_size);	
+		var_spring_staging_size = (ss_spring_staging_size / twinter) - (mean_spring_staging_size * mean_spring_staging_size);	
 		
 		clear_staging_pool();
 		
@@ -2002,7 +1989,7 @@ int main(int argc, char **argv)
         autumn_pop_start = summer_pop;
 		
 		// time during summer during which individuals forage
-        for (int t = 0; t < tspring; ++t)
+        for (int t = 0; t < twinter; ++t)
         {
             postbreeding_dynamics(t);
 			
@@ -2012,11 +1999,11 @@ int main(int argc, char **argv)
 		
         // now take averages over all timesteps that individuals did (can) join groups
         population_mean_autumn_flock_size = n_autumn_flocks > 0 ?  population_mean_autumn_flock_size / n_autumn_flocks : 0;
-        mean_autumn_staging_size /= tspring;
+        mean_autumn_staging_size /= twinter;
 		
 		// now record variance in autumn flock size and staging size over the season
 		population_var_autumn_flock_size = n_autumn_flocks > 0 ? (population_ss_autumn_flock_size / n_autumn_flocks) - (population_mean_autumn_flock_size * population_mean_autumn_flock_size) : 0;
-		var_autumn_staging_size = (ss_autumn_staging_size / tspring) - (mean_autumn_staging_size * mean_autumn_staging_size);
+		var_autumn_staging_size = (ss_autumn_staging_size / twinter) - (mean_autumn_staging_size * mean_autumn_staging_size);
 		
 		autumn_nonmigrant_pop = summer_pop + staging_pop;
 		
@@ -2061,5 +2048,5 @@ int main(int argc, char **argv)
 		autumn_nonmigrant_pop = 0;
 		autumn_migrant_pop = 0;
 				
-    } // ENDS: GENERATION
+    } // ENDS: YEAR
 }
