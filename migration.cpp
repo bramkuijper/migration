@@ -1196,7 +1196,7 @@ void winter_dynamics(int t)
         // => go to the staging level
 
 		psignal = pow(1 + exp(-0.5 * (WinterPop[i].theta_b[0] + WinterPop[i].theta_b[1]) 
-			* (WinterPop[i].resources - 0.5 * (WinterPop[i].theta_a[0] + WinterPop[i].theta_a[1]))), -1);
+			* ((WinterPop[i].resources / resource_max) - 0.5 * (WinterPop[i].theta_a[0] + WinterPop[i].theta_a[1]))), -1);
 
         // bound the probability
         psignal = clamp(psignal, 0, 1);
@@ -1619,7 +1619,7 @@ void summer_dynamics(int t)
         // resulting in signaling a willingness to disperse
         // => go to the staging level
 		psignal = pow(1 + exp(-0.5 * (SummerPop[i].theta_b[0] + SummerPop[i].theta_b[1]) 
-			* (SummerPop[i].resources - 0.5 * (SummerPop[i].theta_a[0] + SummerPop[i].theta_a[1]))), -1);
+			* ((SummerPop[i].resources / resource_max) - 0.5 * (SummerPop[i].theta_a[0] + SummerPop[i].theta_a[1]))), -1);
 		
 		// bound the probability
         psignal = clamp(psignal, 0.0, 1.0);
