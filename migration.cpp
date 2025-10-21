@@ -1392,7 +1392,7 @@ void create_offspring(
 
 // in summary, they reproduce dependent on 
 // resources and arrival time
-void summer_reproduction(std::ofstream &DataFile)
+void reproduction(std::ofstream &DataFile)
 {
 	// the next three lines are now duplicated in the main text of the model at the bottom of the script, so I think this is redundant
 	mean_resources = 0.0;
@@ -1556,7 +1556,7 @@ void summer_reproduction(std::ofstream &DataFile)
 
 // gaining resources at breeding ground
 // & fly back
-void postbreeding_dynamics(int t)
+void summer_dynamics(int t)
 {
     // As for spring, setting up a sampling function to sample from flock_size_distribution
     // foraging of individuals who are just at the breeding site and who have yet to decide to signal
@@ -1892,7 +1892,7 @@ int main(int argc, char **argv)
 		
 		if (summer_pop > 1)
 		{
-			summer_reproduction(DataFile);	
+			reproduction(DataFile);	
 		}
 
 		if (year == 0 || ((year) % skip == 0) || year == number_years-1 || year >= number_years)
@@ -1900,7 +1900,7 @@ int main(int argc, char **argv)
 			write_summer_stats(DataFile);
 		}
 		
-		// set autumn migration stats to 0 before postbreeding_dynamics starts
+		// set autumn migration stats to 0 before summer_dynamics starts
         population_mean_autumn_flock_size = 0.0;
         mean_autumn_staging_size = 0.0;
 		population_var_autumn_flock_size = 0.0;
@@ -1926,7 +1926,7 @@ int main(int argc, char **argv)
 		// time during summer during which individuals forage
         for (int t = 0; t < twinter; ++t)
         {
-            postbreeding_dynamics(t);
+            summer_dynamics(t);
 			
         }
 
