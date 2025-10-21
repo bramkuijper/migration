@@ -28,8 +28,7 @@ class JobArray:
     parent_dir_prefix = "hpcbatch"
     jobfile_prefix = "hpcjob"
     core_folder_prefix = "core"
-    runtime_mins = 300 
-    maxprocesses_per_batch = 1000
+    maxprocesses_per_batch = 100
 
     bash_jobarray_varname = "jobarray"
     bash_sge_index = "SLURM_ARRAY_TASK_ID"
@@ -233,9 +232,6 @@ class JobArray:
                     exepath_from
                     ,exepath_to
                     )
-                 
-        # we are not going to specify a walltime anymore
-#        walltime = self.exes_per_core * self.runtime_mins
 
 #        parentdirs = os.getcwd().split("/")
 
