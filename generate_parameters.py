@@ -16,8 +16,7 @@ init_psi_a = 60
 init_psi_b = 1.0
 
 
-twinter = 0
-tspring = 10000  # twinter in manuscript
+twinter = 10000  # twinter in manuscript
 
 pmort = 0.1
 pgood = 0.5
@@ -154,19 +153,18 @@ for rep_i in range(0, number_replicates):
                                                                                 + str(min_migration_cost_i) + " "   #18
                                                                                 + str(cost_power_i) + " "           #19
                                                                                 + str(twinter) + " "                #20
-                                                                                + str(tspring) + " "                #21
-                                                                                + str(resource_max) + " "           #22
-                                                                                + str(min_offspring_cost) + " "     #23
+                                                                                + str(resource_max) + " "           #21
+                                                                                + str(min_offspring_cost) + " "     #22
                                                                                 + str(offspring_cost_magnifier_i) + " "
-                                                                                + str(carryover_proportion) + " "   #25
+                                                                                + str(carryover_proportion) + " "   #24
                                                                                 + str(relative_mortality_risk_of_migration) + " "
                                                                                 + str(socially_sensitive_mortality_i) + " "
-                                                                                + str(capacity_i) + " "             #28
+                                                                                + str(capacity_i) + " "             #27
                                                                                 + str(postequilibrialisation_experimental_runtime) + " "
-                                                                                + str(K_decline_factor_i) + " "     #30
-                                                                                + str(autumn_harvest_i) + " "       #31
-                                                                                + str(costs_sourcefile_i) + " "     #32
-                                                                                + str(risks_sourcefile_i) + " "     #33
+                                                                                + str(K_decline_factor_i) + " "     #29
+                                                                                + str(autumn_harvest_i) + " "       #30
+                                                                                + str(costs_sourcefile_i) + " "     #31
+                                                                                + str(risks_sourcefile_i) + " "     #32
                                                                                 + str(base_name) + "_" + str(counter) + " "
                                                                                 + backgroundstr)
 
