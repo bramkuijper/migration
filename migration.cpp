@@ -385,7 +385,7 @@ void write_parameters(std::ofstream &DataFile)  // at top of outputted file
             << "mu_phi;" << mu_phi << std::endl
 			<< "mu_psi;" << mu_psi << std::endl
             << "sdmu_theta;" << sdmu_theta << std::endl
-            << "sdmu_phi;" << fphi << std::endl
+            << "sdmu_phi;" << sdmu_phi << std::endl
 			<< "sdmu_psi;" << sdmu_psi << std::endl
 			<< "twinter;" << twinter << std::endl
             << "N;" << N << std::endl
@@ -1015,7 +1015,7 @@ void spring_mortality()
 		}
 		assert(functional_flock_size > 0);  // Check that a non-zero flock size has been assigned (real or dummy)
 		double psurv = 1 - pmort;
-		if (uniform(rng_r) < 1 - sqrt(psurv - socially_sensitive_mortality * pow((capacity - (functional_flock_size))/ capacity), cost_power)))
+		if (uniform(rng_r) < 1 - sqrt(psurv - socially_sensitive_mortality * pow((capacity - functional_flock_size)/ capacity, cost_power)))
 			{
             	SummerPop[i] = SummerPop[summer_pop - 1];
             	--summer_pop;
@@ -1060,7 +1060,8 @@ void autumn_mortality()
 		}
 		assert(functional_flock_size > 0);  // Check that a non-zero flock size has been assigned (real or dummy)
 		double psurv = 1 - pmort;
-		if (uniform(rng_r) < 1 - sqrt(psurv - socially_sensitive_mortality * pow((capacity - (functional_flock_size))/ capacity), cost_power)))
+
+        if (uniform(rng_r) < 1 - sqrt(psurv - socially_sensitive_mortality * pow((capacity - functional_flock_size)/ capacity, cost_power)))
 			{
 	            WinterPop[i] = WinterPop[winter_pop - 1];
 	            --winter_pop;
