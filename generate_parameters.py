@@ -4,7 +4,7 @@ import datetime
 # generate all parameter combinations to run the migration simulation
 
 # Resource-dependent signalling
-init_theta_a = [0.8]
+init_theta_a = [1]
 init_theta_b = [50]  # Default is 1
 
 # Socially-dependent departure
@@ -89,7 +89,7 @@ risks_sourcefile = ["none"]  # If none, enter "none"
 #"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_24_11_2023_104810/sim_migration_24_11_2023_104801_36_dist",
 #"/nobackup/beegfs/home/ISAD/sre206/hpcbatch_24_11_2023_104810/sim_migration_24_11_2023_104801_4_dist"]
 
-number_replicates = 1
+number_replicates = 5
 
 executable = "./xmigration"
 
