@@ -383,7 +383,7 @@ void write_parameters(std::ofstream &DataFile)  // at top of outputted file
             << "resource_starvation_threshold;" << resource_starvation_threshold << std::endl
             << "mu_theta;" << mu_theta << std::endl
             << "mu_phi;" << mu_phi << std::endl
-			<< "mu_psi" << mu_psi << std::endl
+			<< "mu_psi;" << mu_psi << std::endl
             << "sdmu_theta;" << sdmu_theta << std::endl
             << "sdmu_phi;" << sdmu_phi << std::endl
 			<< "sdmu_psi;" << sdmu_psi << std::endl
