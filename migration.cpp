@@ -385,7 +385,7 @@ void write_parameters(std::ofstream &DataFile)  // at top of outputted file
             << "mu_phi;" << mu_phi << std::endl
 			<< "mu_psi;" << mu_psi << std::endl
             << "sdmu_theta;" << sdmu_theta << std::endl
-            << "sdmu_phi;" << sdmu_phi << std::endl
+            << "sdmu_phi;" << fphi << std::endl
 			<< "sdmu_psi;" << sdmu_psi << std::endl
 			<< "twinter;" << twinter << std::endl
             << "N;" << N << std::endl
@@ -1015,7 +1015,7 @@ void spring_mortality()
 		}
 		assert(functional_flock_size > 0);  // Check that a non-zero flock size has been assigned (real or dummy)
 		double psurv = 1 - pmort;
-		if (uniform(rng_r) < 1 - sqrt(psurv - pow(socially_sensitive_mortality * ((capacity - (functional_flock_size))/ capacity), cost_power)))
+		if (uniform(rng_r) < 1 - sqrt(psurv - socially_sensitive_mortality * pow((capacity - (functional_flock_size))/ capacity), cost_power)))
 			{
             	SummerPop[i] = SummerPop[summer_pop - 1];
             	--summer_pop;
@@ -1060,7 +1060,7 @@ void autumn_mortality()
 		}
 		assert(functional_flock_size > 0);  // Check that a non-zero flock size has been assigned (real or dummy)
 		double psurv = 1 - pmort;
-		if (uniform(rng_r) < 1 - sqrt(psurv - pow(socially_sensitive_mortality * ((capacity - (functional_flock_size))/ capacity), cost_power)))
+		if (uniform(rng_r) < 1 - sqrt(psurv - socially_sensitive_mortality * pow((capacity - (functional_flock_size))/ capacity), cost_power)))
 			{
 	            WinterPop[i] = WinterPop[winter_pop - 1];
 	            --winter_pop;
@@ -1249,10 +1249,10 @@ void winter_dynamics(int t)
         assert(staging_pop < N);
         
 		pdisperse = pow(1 + exp(-0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) * (((double) staging_pop_start / (staging_pop_start + winter_pop)) - 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1]))
-								-0.5 * (StagingPool[i].psi_b[0] + StagingPool[i].psi_b[1]) * (StagingPool[i].resources - 0.5 * (StagingPool[i].psi_a[0] + StagingPool[i].psi_b[1]))
+								-0.5 * (StagingPool[i].psi_b[0] + StagingPool[i].psi_b[1]) * ((StagingPool[i].resources / resource_max) - 0.5 * (StagingPool[i].psi_a[0] + StagingPool[i].psi_b[1]))
 								), -1);
 		
-		// bound the probability (not really necessary)
+		// Ensure the probability is bound
         pdisperse = clamp(pdisperse, 0, 1);
 
         // yes individual goes
@@ -1671,7 +1671,7 @@ void summer_dynamics(int t)
     for (int i = 0; i < staging_pop; ++i)
     {
 		pdisperse = pow(1 + exp(-0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) * (((double) staging_pop_start / (staging_pop_start + summer_pop)) - 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1]))
-						-0.5 * (StagingPool[i].psi_b[0] + StagingPool[i].psi_b[1]) * (StagingPool[i].resources - 0.5 * (StagingPool[i].psi_a[0] + StagingPool[i].psi_b[1]))
+						-0.5 * (StagingPool[i].psi_b[0] + StagingPool[i].psi_b[1]) * ((StagingPool[i].resources / resource_max) - 0.5 * (StagingPool[i].psi_a[0] + StagingPool[i].psi_b[1]))
 						), -1);
 		
 		pdisperse = clamp(pdisperse, 0, 1);
