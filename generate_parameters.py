@@ -4,8 +4,8 @@ import datetime
 # generate all parameter combinations to run the migration simulation
 
 # Resource-dependent signalling
-init_theta_a = [1]
-init_theta_b = [50]  # Default is 1
+init_theta_a = [60]
+init_theta_b = [1]  # Default is 1
 
 # Socially-dependent departure
 init_phi_a = [0.3]  # Default is 0.3
