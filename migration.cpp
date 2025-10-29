@@ -26,10 +26,10 @@ std::uniform_real_distribution<> uniform(0.0,1.0);
 // values of the most of these are overridden in the init_arguments() function
 
 // number of individuals in population
-const int N = 1000;
+const int N = 500;
 
 // number of years simulation will run for
-long int number_years = 1000; // 250000;
+long int number_years = 50000; // 250000;
 
 // sampling interval
 int skip = std::ceil((double)number_years / 500);
@@ -1196,8 +1196,7 @@ void winter_dynamics(int t)
         // resulting in signaling a willingness to disperse
         // => go to the staging level
 
-		psignal = pow(1 + exp(-0.5 * (WinterPop[i].theta_b[0] + WinterPop[i].theta_b[1]) 
-			* ((WinterPop[i].resources / resource_max) - 0.5 * (WinterPop[i].theta_a[0] + WinterPop[i].theta_a[1]))), -1);
+		psignal = pow(1 + exp(-0.5 * (WinterPop[i].theta_b[0] + WinterPop[i].theta_b[1]) * (((double) WinterPop[i].resources / resource_max) - 0.5 * (WinterPop[i].theta_a[0] + WinterPop[i].theta_a[1]))), -1);
 
         // bound the probability
         psignal = clamp(psignal, 0, 1);
@@ -1250,8 +1249,9 @@ void winter_dynamics(int t)
         assert(staging_pop < N);
         
 		pdisperse = pow(1 + exp(-0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) * (((double) staging_pop_start / (staging_pop_start + winter_pop)) - 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1]))
-								-0.5 * (StagingPool[i].psi_b[0] + StagingPool[i].psi_b[1]) * ((StagingPool[i].resources / resource_max) - 0.5 * (StagingPool[i].psi_a[0] + StagingPool[i].psi_b[1]))
+								-0.5 * (StagingPool[i].psi_b[0] + StagingPool[i].psi_b[1]) * (((double) StagingPool[i].resources / resource_max) - 0.5 * (StagingPool[i].psi_a[0] + StagingPool[i].psi_b[1]))
 								), -1);
+        
 		
 		// Ensure the probability is bound
         pdisperse = clamp(pdisperse, 0, 1);
@@ -1619,8 +1619,7 @@ void summer_dynamics(int t)
         // reaction norm dependent on resources
         // resulting in signaling a willingness to disperse
         // => go to the staging level
-		psignal = pow(1 + exp(-0.5 * (SummerPop[i].theta_b[0] + SummerPop[i].theta_b[1]) 
-			* ((SummerPop[i].resources / resource_max) - 0.5 * (SummerPop[i].theta_a[0] + SummerPop[i].theta_a[1]))), -1);
+		psignal = pow(1 + exp(-0.5 * (SummerPop[i].theta_b[0] + SummerPop[i].theta_b[1]) * (((double) SummerPop[i].resources / resource_max) - 0.5 * (SummerPop[i].theta_a[0] + SummerPop[i].theta_a[1]))), -1);
 		
 		// bound the probability
         psignal = clamp(psignal, 0.0, 1.0);
@@ -1672,7 +1671,7 @@ void summer_dynamics(int t)
     for (int i = 0; i < staging_pop; ++i)
     {
 		pdisperse = pow(1 + exp(-0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) * (((double) staging_pop_start / (staging_pop_start + summer_pop)) - 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1]))
-						-0.5 * (StagingPool[i].psi_b[0] + StagingPool[i].psi_b[1]) * ((StagingPool[i].resources / resource_max) - 0.5 * (StagingPool[i].psi_a[0] + StagingPool[i].psi_b[1]))
+						-0.5 * (StagingPool[i].psi_b[0] + StagingPool[i].psi_b[1]) * (((double) StagingPool[i].resources / resource_max) - 0.5 * (StagingPool[i].psi_a[0] + StagingPool[i].psi_b[1]))
 						), -1);
 		
 		pdisperse = clamp(pdisperse, 0, 1);
