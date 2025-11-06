@@ -1,12 +1,20 @@
 # The evolution of collective migration 
 
+## Running the simulation
+
+i.e.,
+
 ## Model variables 
 
-### Reaction norm loci (TODO: reaction norm on what?, possible values)
-- `theta_a` reaction norm of resources: elevation 
-- `theta_b` reaction norm on resources: slope
-- `phi_a` social reaction norm: elevation
-- `phi_b` social reaction norm: slope
+### Decision rule loci
+- `theta_a` condition-dependent signalling: sigmoidal midpoint
+- `theta_b` condition-dependent signalling: logarithmic growth rate (i.e., sensitivity)
+- `phi_a` socially-dependent departure: sigmoidal midpoint
+- `phi_b` socially-dependent departure: logarithmic growth rate (i.e., sensitivity)
+
+There are an additional two loci facilitating condition-dependent departure that are, by default, fixed to zero
+– `psi_a` condition-dependent departure: sigmoidal midpoint
+- `psi_b` condition-dependent departure: logarithmic growth rate (i.e., sensitivity)
 
 ## Model variables 
 
