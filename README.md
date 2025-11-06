@@ -1,6 +1,4 @@
-# The evolution of collective migration 
-
-## Running the simulation
+# Running the simulation
 
 First, clone this git repository to the computer/server on which you want to run the simulations.
 
