@@ -12,9 +12,9 @@ You can then use another Python file to generate a new folder with a title start
 
 `./jobarray.py -i batch_list`
 
-If you move to this directory (i.e., `cd ~/hpcbatch_`...) it should contain a document (filename starting `hpcjob_`; use, e.g., `ls -lh` to obtain a list of the folder contents). To set these jobs running (or enter them in a queue): 
+If you move to this directory (i.e., `cd ~/hpcbatch_...`) it should contain a document (filename starting `hpcjob_...`; use, e.g., `ls -lh` to obtain a list of the folder contents). To set these jobs running (or enter them in a queue): 
 
-`sbatch hpcjob_`... 
+`sbatch hpcjob_...`
 
 If you have more jobs to run than available cores on your computer then we reccomend using a cluster to run batches of simulations.
 
