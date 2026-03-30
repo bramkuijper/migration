@@ -1,4 +1,7 @@
-# Running the simulation
+# Code for: Coordination with Others Drives Early Action 
+## by Simon R. Evans, Stuart Bearhop, Sasha R. X. Dall & Bram Kuijper
+
+## Running the simulation
 
 First, clone this git repository to the computer/server on which you want to run the simulations.
 
@@ -18,5 +21,5 @@ If you move to this directory (i.e., `cd ~/hpcbatch_...`) it should contain a do
 
 If you have more jobs to run than available cores on your computer then we reccomend using a cluster to run batches of simulations.
 
-## Model details
+### Model details
 The model is detailed in the paper reporting the results of our study of coordinated actions, including a description of its variables.
