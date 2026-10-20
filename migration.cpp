@@ -81,7 +81,7 @@ double sdmu_psi = 0.0;
 double cost_power = 0.0;
 double max_migration_cost = 0.0;
 double min_migration_cost = 0.0;
-int capacity = 0;  // group size at which minimum migration cost is reached. Made this a double rather than an integer so as to avoid problems with division in the migration cost function.
+int capacity = 0;  // group size at which minimum migration cost is reached. 
 double cost = 0.0;
 
 // reproductive cost function
@@ -972,7 +972,7 @@ double migration_cost(int NFlock)
 		cost = min_migration_cost;
 	}
 	else{	
-		cost = min_migration_cost + ((max_migration_cost - min_migration_cost) * pow(1 - ((NFlock-1) / (capacity-1)), exp(cost_power)));
+		cost = min_migration_cost + ((max_migration_cost - min_migration_cost) * pow(1 - ((double)(NFlock-1) / (double)(capacity-1)), exp(cost_power)));
 	}
 	return(cost);
 }  // ENDS: migration cost function
@@ -1015,7 +1015,7 @@ void spring_mortality()
 		}
 		assert(functional_flock_size > 0);  // Check that a non-zero flock size has been assigned (real or dummy)
 		double psurv = 1 - pmort;
-		if (uniform(rng_r) < 1 - sqrt(psurv - socially_sensitive_mortality * pow((capacity - functional_flock_size)/ capacity, cost_power)))
+		if (uniform(rng_r) < 1 - sqrt(psurv - socially_sensitive_mortality * pow((double)(capacity - functional_flock_size)/ (double)capacity, cost_power)))
 			{
             	SummerPop[i] = SummerPop[summer_pop - 1];
             	--summer_pop;
@@ -1061,7 +1061,7 @@ void autumn_mortality()
 		assert(functional_flock_size > 0);  // Check that a non-zero flock size has been assigned (real or dummy)
 		double psurv = 1 - pmort;
 
-        if (uniform(rng_r) < 1 - sqrt(psurv - socially_sensitive_mortality * pow((capacity - functional_flock_size)/ capacity, cost_power)))
+        if (uniform(rng_r) < 1 - sqrt(psurv - socially_sensitive_mortality * pow((double)(capacity - functional_flock_size)/ (double)capacity, cost_power)))
 			{
 	            WinterPop[i] = WinterPop[winter_pop - 1];
 	            --winter_pop;
