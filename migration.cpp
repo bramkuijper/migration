@@ -1252,7 +1252,7 @@ void winter_dynamics(int t)
         assert(staging_pop < N);
         
 		pdisperse = pow(1 + exp(-0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) 
-			* (((double) staging_pop_start / (staging_pop_start + winter_pop)) - 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1]))), -1);
+			* (((double) staging_pop_start / (double)(staging_pop_start + winter_pop)) - 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1]))), -1);
 		
         //pdisperse = pow(1 + exp(-0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) * (((double) staging_pop_start / (staging_pop_start + winter_pop)) - 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1]))
 		//						-0.5 * (StagingPool[i].psi_b[0] + StagingPool[i].psi_b[1]) * (((double) StagingPool[i].resources / resource_max) - 0.5 * (StagingPool[i].psi_a[0] + StagingPool[i].psi_b[1]))
@@ -1680,7 +1680,7 @@ void summer_dynamics(int t)
     for (int i = 0; i < staging_pop; ++i)
     {
 		pdisperse = pow(1 + exp(-0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) 
-			* (((double) staging_pop_start / (staging_pop_start + summer_pop)) - 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1]))), -1);
+			* (((double) staging_pop_start / (double)(staging_pop_start + summer_pop)) - 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1]))), -1);
 		
 		
         //pdisperse = pow(1 + exp(-0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) * (((double) staging_pop_start / (staging_pop_start + summer_pop)) - 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1]))
@@ -1764,13 +1764,10 @@ void summer_dynamics(int t)
 		}
 		WinterPop[i].resources -= WinterPop[i].cost;
 		WinterPop[i].resources = std::min(WinterPop[i].resources, resource_max);  // Individual resource values cannot exceed resource max
-		WinterPop[i].resources *= carryover_proportion;
-
+		
     } // Ends: update resource levels of winter arrivals
 
-} // ENDS: POST-BREEDING DYNAMICS 
-
-
+} // ENDS: SUMMER DYNAMICS 
 
 
 
@@ -1940,8 +1937,7 @@ int main(int argc, char **argv)
 		// time during summer during which individuals forage
         for (int t = 0; t < twinter; ++t)
         {
-            summer_dynamics(t);
-			
+            summer_dynamics(t);	
         }
 
 		autumn_migrant_pop = population_mean_autumn_flock_size;
@@ -2001,6 +1997,6 @@ int main(int argc, char **argv)
         {
         	WinterPop[i].resources *= carryover_proportion;
         }
-				
+
     } // ENDS: YEAR
 }
