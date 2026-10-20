@@ -39,6 +39,7 @@ max_migration_cost = 20  # Default is 20
 min_migration_cost = [20] # [20, 18, 16, 14, 12, 10, 8, 6, 4, 2]  # Default is 20
 cost_power = [2]  # Default is 2
 capacity = [8]
+
 # reproductive cost parameters
 min_offspring_cost = 5
 offspring_cost_magnifier = [1] # The relative difference in resource cost per offspring having migrated at the earliest opportunity versus the last. 1 represents seasonal invariability
