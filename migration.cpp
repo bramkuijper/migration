@@ -1703,7 +1703,7 @@ void summer_dynamics(int t)
 			}
 			
 			WinterPop[winter_pop] = StagingPool[i];  // Individual moves from staging pool to first empty position in WinterPop
-			WinterPop[winter_pop].signalling_proportion = staging_pop_start / (staging_pop_start + summer_pop);  // record the proportion of the population that was signalling at the point of departure
+			WinterPop[winter_pop].signalling_proportion = (double)staging_pop_start / (staging_pop_start + summer_pop);  // record the proportion of the population that was signalling at the point of departure
 			lat = WinterPop[winter_pop].latency;
 			mean_latency += lat;
 			ss_latency += (lat * lat);			
