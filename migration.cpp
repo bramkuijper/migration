@@ -1322,7 +1322,7 @@ void winter_dynamics(int t)
 		// Resource cost of migration to the individual
 		SummerPop[i].flock_size = NFlock;
 		
-		if (filename_risks == "none"){
+		if (filename_costs == "none"){
 			SummerPop[i].cost = migration_cost(NFlock);
 		}
 		
