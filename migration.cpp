@@ -144,6 +144,9 @@ double ss_resources = 0.0;
 double rv =0.0;
 
 int n_sites = 1;
+ 
+int follow_scope = 0;  // follow_scope 0: nobody follows; 1: signallers may follow departures; 2: anyone present may follow.
+double kappa = 0.0;    // kappa is the expected number of others recruited by each departer.
 
 // keep track of the current number of 
 // individuals in various seasons/demographics
@@ -371,6 +374,12 @@ void init_arguments(int argc, char **argv)
 	if (argc > 34) { seed = std::strtoul(argv[34], nullptr, 10); rng_r.seed(seed); }  // Protects against very large seed values, which will be beyond the capacity of atoi
 	if (argc > 35) n_sites = atoi(argv[35]);  // number of sites (defaults to 1)
 		assert(n_sites >= 1);
+		
+	if (argc > 36) follow_scope = atoi(argv[36]);  // who may follow (default 0: nobody; 1: signallers; 2: anybody)
+	assert(follow_scope >= 0 && follow_scope <= 2);
+	
+	if (argc > 37) kappa = atof(argv[37]);  	   // expected recruits per departer
+	assert(kappa >= 0.0);
 	
 } // end init_arguments
 
@@ -1161,6 +1170,102 @@ void assign_sites(Individual *Pop, int const pop_size)
     }
 }
 
+// FOLLOWING. 
+// Each individual that departed this time step may recruit individuals
+// still present with probability kappa divided by the number present at the 
+// start of the time step. Recruits may then recruit in turn, in rounds, until
+//  a round adds nobody. 
+// When follow_scope is 1 only signallers can be recruited; when it is 2, anyone
+// can be recruited.
+void follow(Individual *Origin, int &origin_pop,
+            Individual *Dest, int &dest_pop, int const dest_pop_old,
+            std::vector<int> const &n_all)
+{
+    // departers added in the last round, per site; to begin with,
+    // everyone who left in the departure loop
+    std::vector<int> n_new(n_sites, 0);
+    for (int i = dest_pop_old; i < dest_pop; ++i)
+    {
+        ++n_new[Dest[i].site];
+    }
+
+    bool any_new = true;
+
+    while (any_new)
+    {
+        // probability that a given candidate is recruited this round
+        std::vector<double> p_join(n_sites, 0.0);
+        for (int s = 0; s < n_sites; ++s)
+        {
+            if (n_new[s] > 0)
+            {
+                // If n_new departers left in the last round, the chance that a given candidate is 
+				// recruited by at least one of them is 1 − (1 − kappa/n_present)ⁿ.
+				p_join[s] = 1.0 - pow(1.0 - std::min(1.0, kappa / n_all[s]), n_new[s]);
+            }
+            n_new[s] = 0;  // start counting this round's recruits
+        }
+
+        // signallers that have not yet departed
+        for (int i = 0; i < staging_pop; ++i)
+        {
+            int s = StagingPool[i].site;
+
+            if (p_join[s] > 0.0 && uniform(rng_r) < p_join[s])
+            {
+                Dest[dest_pop] = StagingPool[i];
+                Dest[dest_pop].latency -= 1;  // undo this time step's increments in the departure loop:
+                Dest[dest_pop].timing -= 1;   // as above, because it departed after all
+                ++dest_pop;
+                assert(dest_pop <= N);
+
+                StagingPool[i] = StagingPool[staging_pop - 1];
+                --staging_pop;
+                --i;
+
+                ++n_new[s];
+            }
+        }
+
+        // non-signallers, if they may follow
+        if (follow_scope == 2)
+        {
+            for (int i = 0; i < origin_pop; ++i)
+            {
+                int s = Origin[i].site;
+
+                if (p_join[s] > 0.0 && uniform(rng_r) < p_join[s])
+                {
+                    Dest[dest_pop] = Origin[i];
+                    Dest[dest_pop].timing -= 1;  						   // undo this time step's increments in the signalling loop
+                    Dest[dest_pop].signal_timing = Dest[dest_pop].timing;  // by departing, it has in effect signalled now
+                    Dest[dest_pop].signal_resources = Origin[i].resources;
+                    Dest[dest_pop].latency = 0;
+                    Dest[dest_pop].cost = 0.0;
+                    ++dest_pop;
+                    assert(dest_pop <= N);
+
+                    Origin[i] = Origin[origin_pop - 1];
+                    --origin_pop;
+                    --i;
+
+                    ++n_new[s];
+                }
+            }
+        }
+
+        // carry on only if this round recruited someone
+        any_new = false;
+        for (int s = 0; s < n_sites; ++s)
+        {
+            if (n_new[s] > 0)
+            {
+                any_new = true;
+            }
+        }
+    }
+} // ENDS: follow
+
 // the dynamics of the population at the wintering ground through winter, time t
 void winter_dynamics(int t)
 {	
@@ -1330,8 +1435,14 @@ void winter_dynamics(int t)
 		}
 		
     } // ENDS ACTUAL SPRING DISPERSAL and making of flocks
+	
+	// migratory recruitment (only when switched on)
+    if (follow_scope > 0 && kappa > 0.0)
+    {
+        follow(WinterPop, winter_pop, SummerPop, summer_pop, summer_pop_old, n_all);
+    }
 
-// the flock is everyone who arrived at the breeding ground this time step
+	// the flock is everyone who arrived at the breeding ground this time step
     NFlock = summer_pop - summer_pop_old;
     assert(NFlock <= N);
 	
@@ -1484,7 +1595,7 @@ void reproduction(std::ofstream &DataFile)
 
         // if individual does not meet minimum standards then no reproduction through female function
 		// these minimum standards can be seasonally variable:
-		individual_breeding_threshold = resource_reproduction_threshold + resource_reproduction_threshold * ((offspring_cost_magnifier - 1) * (SummerPop[i].timing / twinter));
+		individual_breeding_threshold = resource_reproduction_threshold + resource_reproduction_threshold * ((offspring_cost_magnifier - 1) * (double) (SummerPop[i].timing / twinter));
 		
 		if (SummerPop[i].resources < individual_breeding_threshold)  // Cost of clutch size of one. Further offspring incur a smaller, incremental cost
         {
@@ -1517,7 +1628,7 @@ void reproduction(std::ofstream &DataFile)
 
 	        father = SummerPop[father_id];
 			
-			individual_offspring_increment = min_offspring_cost + min_offspring_cost * ((offspring_cost_magnifier - 1) * (SummerPop[i].timing / twinter));
+			individual_offspring_increment = min_offspring_cost + min_offspring_cost * ((offspring_cost_magnifier - 1) * (double) (SummerPop[i].timing / twinter));
 
 	        offspring_equivalence = 1 + ((SummerPop[i].resources - individual_breeding_threshold) / individual_offspring_increment);
 	
@@ -1779,6 +1890,12 @@ void summer_dynamics(int t)
 	    
     } // ENDS: Autumn dispersal at time t
 	
+	// migration recruitment (only when switched on)
+    if (follow_scope > 0 && kappa > 0.0)
+    {
+        follow(SummerPop, summer_pop, WinterPop, winter_pop, winter_pop_old, n_all);
+    }
+	
 	// the flock is everyone who arrived at the wintering ground this time step
     NFlock = winter_pop - winter_pop_old;
     assert(NFlock <= N);
@@ -1817,7 +1934,7 @@ void summer_dynamics(int t)
 			++autumn_migrants_resource_cap;
 		}
 		
-		WinterPop[i].signalling_proportion = n_sig[site] / n_all[site];  // NEW: signalling fraction at the individual's site
+		WinterPop[i].signalling_proportion = (double) n_sig[site] / n_all[site];  // NEW: signalling fraction at the individual's site
 		
 		lat = WinterPop[i].latency;
 		mean_latency += lat;
