@@ -143,6 +143,8 @@ double mean_resources = 0.0;
 double ss_resources = 0.0;
 double rv =0.0;
 
+int n_sites = 1;
+
 // keep track of the current number of 
 // individuals in various seasons/demographics
 int staging_pop = 0;
@@ -180,25 +182,26 @@ struct Individual
     double resources;
 
     // RESOURCE SENSITIVITY reaction norm (determines entry into staging pool)
-    double theta_a[2];  // elevation (baseline leaving rate)
-    double theta_b[2];  // reaction norm, dependency on the amount of resources
+    double theta_a[2];  			// elevation (baseline leaving rate)
+    double theta_b[2];  			// reaction norm, dependency on the amount of resources
 
     // COLLECTIVE DISPERSAL reaction norm (determines migration dependent on proportion of individuals signalling and on own condition)
-    double phi_a[2];  // collective dispersal elevation
-    double phi_b[2];  // collective dispersal slope, dependency on number of individuals
-	double psi_a[2];  // condition-dependent dispersal elevation
-	double psi_b[2];  // condition-dependent dispersal slope
+    double phi_a[2]; 			 	// collective dispersal elevation
+    double phi_b[2];  				// collective dispersal slope, dependency on number of individuals
+	double psi_a[2];  				// condition-dependent dispersal elevation
+	double psi_b[2];  				// condition-dependent dispersal slope
 	
-	int latency;  // individual departure latency
-	int timing;  // individual departure timing
-	int flock_size;  // size of flock individual was in
-	double cost;  // resource cost of migration for individual
-	int signal_timing;  // phenology of signalling
-	double signal_resources;  // resource value when signalling begins
+	int latency;  					// individual departure latency
+	int timing;  					// individual departure timing
+	int flock_size;  				// size of flock individual was in
+	double cost;  					// resource cost of migration for individual
+	int signal_timing;  			// phenology of signalling
+	double signal_resources;  		// resource value when signalling begins
 	double signalling_proportion;
-	int age;  // individual age (start out at 1 as they are reproductively mature)
-	int fecundity;  // number of offspring produced
+	int age;  						// individual age (start out at 1 as they are reproductively mature)
+	int fecundity;  				// number of offspring produced
 	int patch_quality;
+	int site;  						// site at which the individual stages for that season
 };
 
 
@@ -366,6 +369,8 @@ void init_arguments(int argc, char **argv)
 	}
 	
 	if (argc > 34) { seed = std::strtoul(argv[34], nullptr, 10); rng_r.seed(seed); }  // Protects against very large seed values, which will be beyond the capacity of atoi
+	if (argc > 35) n_sites = atoi(argv[35]);  // number of sites (defaults to 1)
+		assert(n_sites >= 1);
 	
 } // end init_arguments
 
@@ -937,6 +942,8 @@ void init_population()
 		
 		WinterPop[i].flock_size = 0;
 		
+		WinterPop[i].site = 0;
+		
         for (int j = 0; j < 2; ++j)
         {
             // initialize allelic values for theta elevation and slope
@@ -1136,8 +1143,25 @@ void clear_staging_pool()
 	
 }  // ENDS STAGING POOL CLEARANCE
 
-// the dynamics of the population at the wintering ground through winter, time t
+// give each individual a random site at the start of a season.
+void assign_sites(Individual *Pop, int const pop_size)
+{
+    for (int i = 0; i < pop_size; ++i)
+    {
+        Pop[i].site = 0;
+    }
 
+    if (n_sites > 1)
+    {
+        std::uniform_int_distribution<int> site_dist(0, n_sites - 1);
+        for (int i = 0; i < pop_size; ++i)
+        {
+            Pop[i].site = site_dist(rng_r);
+        }
+    }
+}
+
+// the dynamics of the population at the wintering ground through winter, time t
 void winter_dynamics(int t)
 {	
 	// individuals can continue to forage
@@ -1258,18 +1282,26 @@ void winter_dynamics(int t)
     // remember numbers of individuals in the staging pop at the start
     int staging_pop_start = staging_pop;
 	
+	// numbers signalling and present at each site. 
+    std::vector<int> n_sig(n_sites, 0);
+    std::vector<int> n_all(n_sites, 0);
+    for (int i = 0; i < staging_pop; ++i)
+    {
+        ++n_sig[StagingPool[i].site];
+        ++n_all[StagingPool[i].site];
+    }
+    for (int i = 0; i < winter_pop; ++i)
+    {
+        ++n_all[WinterPop[i].site];
+    }
+	
     // actual spring dispersal from winter to summer population
     for (int i = 0; i < staging_pop; ++i)
     {
         assert(staging_pop < N);
         
 		pdisperse = pow(1 + exp(-0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) 
-			* (((double) staging_pop_start / (double)(staging_pop_start + winter_pop)) - 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1]))), -1);
-		
-        //pdisperse = pow(1 + exp(-0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) * (((double) staging_pop_start / (staging_pop_start + winter_pop)) - 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1]))
-		//						-0.5 * (StagingPool[i].psi_b[0] + StagingPool[i].psi_b[1]) * (((double) StagingPool[i].resources / resource_max) - 0.5 * (StagingPool[i].psi_a[0] + StagingPool[i].psi_b[1]))
-		//						), -1);
-        
+			* (((double) n_sig[StagingPool[i].site] / (double) n_all[StagingPool[i].site]) - 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1]))), -1);        
 		
 		// Ensure the probability is bound
         pdisperse = clamp(pdisperse, 0, 1);
@@ -1308,30 +1340,42 @@ void winter_dynamics(int t)
 
 	ss_spring_staging_size += staging_pop_start * staging_pop_start;
 	
-    if (NFlock > 0)
+	// size of the flock leaving each site
+    std::vector<int> flock(n_sites, 0);
+    for (int i = summer_pop_old; i < summer_pop; ++i)
     {
-		n_spring_flocks = n_spring_flocks+1;
-		population_mean_spring_flock_size += NFlock;
-		population_ss_spring_flock_size += NFlock * NFlock;  // Also serves as sum of squares of spring migrant population size
-	}
+        ++flock[SummerPop[i].site];
+    }
+
+    // flock statistics, one flock per site
+    for (int s = 0; s < n_sites; ++s)
+    {
+        if (flock[s] > 0)
+        {
+            n_spring_flocks = n_spring_flocks+1;
+            population_mean_spring_flock_size += flock[s];
+            population_ss_spring_flock_size += flock[s] * flock[s];  // Also serves as sum of squares of spring migrant population size
+        }
+    }
 	
 	// update resource levels for all new individuals that have just been added to the summer pool dependent on their flock size
     for (int i = summer_pop_old; i < summer_pop; ++i)  // Selecting individuals that have been added to the summer pop this timepoint
     {		
-		SummerPop[i].signalling_proportion = (double) staging_pop_start / (staging_pop_start + winter_pop);
-				if (SummerPop[i].resources == resource_max)
-				{
-					++spring_migrants_resource_cap;
-				}
-				rv = SummerPop[i].resources;
-				mean_resources += rv;
-				ss_resources += rv * rv;
+		int site = SummerPop[i].site;  // shorthand
+		SummerPop[i].signalling_proportion = (double) n_sig[site] / n_all[site];  // signalling fraction at the individual's site
+		if (SummerPop[i].resources == resource_max)
+		{
+			++spring_migrants_resource_cap;
+		}
+		rv = SummerPop[i].resources;
+		mean_resources += rv;
+		ss_resources += rv * rv;
 		
 		// Resource cost of migration to the individual
-		SummerPop[i].flock_size = NFlock;
+		SummerPop[i].flock_size = flock[site];
 		
 		if (filename_costs == "none"){
-			SummerPop[i].cost = migration_cost(NFlock);
+			SummerPop[i].cost = migration_cost(flock[site]);
 		}
 		
 		else
@@ -1380,6 +1424,7 @@ void create_offspring(
 	offspring.fecundity = 0;
 	offspring.signalling_proportion = 0.0;
 	offspring.flock_size = 0;
+	offspring.site = 0;
 
     // inherit theta loci
 
@@ -1684,16 +1729,25 @@ void summer_dynamics(int t)
 
     int staging_pop_start = staging_pop;
 
-    // actual autumn dispersal at time t
+	// numbers signalling and present at each site. 
+    std::vector<int> n_sig(n_sites, 0);
+    std::vector<int> n_all(n_sites, 0);
+    for (int j = 0; j < staging_pop; ++j)
+    {
+        ++n_sig[StagingPool[j].site];
+        ++n_all[StagingPool[j].site];
+    }
+    for (int j = 0; j < summer_pop; ++j)
+    {
+        ++n_all[SummerPop[j].site];
+    }
+	
+	// actual autumn dispersal at time t
     for (int i = 0; i < staging_pop; ++i)
     {
 		pdisperse = pow(1 + exp(-0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) 
-			* (((double) staging_pop_start / (double)(staging_pop_start + summer_pop)) - 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1]))), -1);
-		
-		
-        //pdisperse = pow(1 + exp(-0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) * (((double) staging_pop_start / (staging_pop_start + summer_pop)) - 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1]))
-		//				-0.5 * (StagingPool[i].psi_b[0] + StagingPool[i].psi_b[1]) * (((double) StagingPool[i].resources / resource_max) - 0.5 * (StagingPool[i].psi_a[0] + StagingPool[i].psi_b[1]))
-		//				), -1);
+			* (((double) n_sig[StagingPool[i].site] / (double) n_all[StagingPool[i].site]) - 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1]))), -1);
+
 		
 		pdisperse = clamp(pdisperse, 0, 1);
 		
@@ -1728,20 +1782,33 @@ void summer_dynamics(int t)
 	// the flock is everyone who arrived at the wintering ground this time step
     NFlock = winter_pop - winter_pop_old;
     assert(NFlock <= N);
-	population_mean_autumn_flock_size += NFlock;
-	population_ss_autumn_flock_size += NFlock * NFlock;
+
+	// size of the flock leaving each site
+    std::vector<int> flock(n_sites, 0);
+    for (int i = winter_pop_old; i < winter_pop; ++i)
+    {
+        ++flock[WinterPop[i].site];
+    }
+
+    // flock statistics, one flock per site
+    for (int s = 0; s < n_sites; ++s)
+    {
+        population_mean_autumn_flock_size += flock[s];
+        population_ss_autumn_flock_size += flock[s] * flock[s];
+        if (flock[s] > 0)
+        {
+            ++n_autumn_flocks;
+        }
+    }
 	mean_autumn_staging_size += staging_pop_start;
 	ss_autumn_staging_size += staging_pop_start * staging_pop_start;
-	
-    if (winter_pop_old < winter_pop){
-		++n_autumn_flocks;
-	}
 	
 	// update resource levels for all new individuals that have just
     // been added to the pool dependent on their flock size
     for (int i = winter_pop_old; i < winter_pop; ++i)
     {	
-		WinterPop[i].flock_size = NFlock;
+		int site = WinterPop[i].site;  // abbreviation
+		WinterPop[i].flock_size = flock[site];  // size of the flock at the individual's site
 		rv = WinterPop[i].resources;
 		mean_resources += rv;
 		ss_resources += rv * rv;
@@ -1750,7 +1817,7 @@ void summer_dynamics(int t)
 			++autumn_migrants_resource_cap;
 		}
 		
-		WinterPop[i].signalling_proportion = (double)staging_pop_start / (staging_pop_start + summer_pop);
+		WinterPop[i].signalling_proportion = n_sig[site] / n_all[site];  // NEW: signalling fraction at the individual's site
 		
 		lat = WinterPop[i].latency;
 		mean_latency += lat;
@@ -1759,7 +1826,7 @@ void summer_dynamics(int t)
 		++autumn_migrant_pop;
 		
 		if (filename_costs == "none"){
-			WinterPop[i].cost = migration_cost(NFlock);  // Flock size-depedent cost of migration
+			WinterPop[i].cost = migration_cost(flock[site]);  // Flock size-depedent cost of migration
 		}
 		
 		else{
@@ -1852,6 +1919,9 @@ int main(int argc, char **argv)
 		ss_resources = 0.0;
 		rv = 0;
 		
+		// each individual stages at a random site this spring
+		assign_sites(WinterPop, winter_pop);
+		
 		for (int t = 0; t < twinter; ++t)
         {
             winter_dynamics(t);
@@ -1939,6 +2009,8 @@ int main(int argc, char **argv)
 		autumn_migrant_mortality_rate = 0.0;
 		
         autumn_pop_start = summer_pop;
+		
+		assign_sites(SummerPop, summer_pop);  // each individual stages at a random site this autumn
 		
 		// time during summer during which individuals forage
         for (int t = 0; t < twinter; ++t)
