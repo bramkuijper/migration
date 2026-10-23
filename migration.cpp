@@ -358,6 +358,8 @@ void init_arguments(int argc, char **argv)
 		initialize_flock_size_distribution(filename_risks);
 	}
 	
+	if (argc > 34) { seed = atoi(argv[34]); rng_r.seed(seed); }
+	
 } // end init_arguments
 
 // write down all parameters in the file
