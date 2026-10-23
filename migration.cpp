@@ -29,7 +29,7 @@ std::uniform_real_distribution<> uniform(0.0,1.0);
 const int N = 1000;
 
 // number of years simulation will run for
-long int number_years = 250000;
+long int number_years = 250000; // 250000;
 
 // sampling interval
 int skip = std::ceil((double)number_years / 500);
@@ -81,7 +81,7 @@ double sdmu_psi = 0.0;
 double cost_power = 0.0;
 double max_migration_cost = 0.0;
 double min_migration_cost = 0.0;
-int capacity = 0;  // group size at which minimum migration cost is reached. Made this a double rather than an integer so as to avoid problems with division in the migration cost function.
+int capacity = 0;  // group size at which minimum migration cost is reached. 
 double cost = 0.0;
 
 // reproductive cost function
@@ -357,6 +357,8 @@ void init_arguments(int argc, char **argv)
 	if (filename_risks != "none"){
 		initialize_flock_size_distribution(filename_risks);
 	}
+	
+	if (argc > 34) { seed = atoi(argv[34]); rng_r.seed(seed); }
 	
 } // end init_arguments
 
@@ -972,7 +974,7 @@ double migration_cost(int NFlock)
 		cost = min_migration_cost;
 	}
 	else{	
-		cost = min_migration_cost + ((max_migration_cost - min_migration_cost) * pow(1 - ((NFlock-1) / (capacity-1)), exp(cost_power)));
+		cost = min_migration_cost + ((max_migration_cost - min_migration_cost) * pow(1 - ((double)(NFlock-1) / (double)(capacity-1)), exp(cost_power)));
 	}
 	return(cost);
 }  // ENDS: migration cost function
@@ -1015,7 +1017,14 @@ void spring_mortality()
 		}
 		assert(functional_flock_size > 0);  // Check that a non-zero flock size has been assigned (real or dummy)
 		double psurv = 1 - pmort;
+<<<<<<< HEAD
 		if (uniform(rng_r) < 1 - sqrt(psurv - pow(socially_sensitive_mortality * (capacity - functional_flock_size)/ capacity, cost_power)))
+=======
+		double social_term = socially_sensitive_mortality * pow((double)(capacity - functional_flock_size) / (double)capacity, cost_power);
+		assert(psurv - social_term >= 0.0);
+		if (uniform(rng_r) < 1 - sqrt(psurv - social_term))
+
+>>>>>>> 0391fb4a8a51cf073e6194d2a2449fd47eebd25a
 			{
             	SummerPop[i] = SummerPop[summer_pop - 1];
             	--summer_pop;
@@ -1060,8 +1069,14 @@ void autumn_mortality()
 		}
 		assert(functional_flock_size > 0);  // Check that a non-zero flock size has been assigned (real or dummy)
 		double psurv = 1 - pmort;
+		double social_term = socially_sensitive_mortality * pow((double)(capacity - functional_flock_size) / (double)capacity, cost_power);
+		assert(psurv - social_term >= 0.0);
+		if (uniform(rng_r) < 1 - sqrt(psurv - social_term))
 
+<<<<<<< HEAD
         if (uniform(rng_r) < 1 - sqrt(psurv - pow(socially_sensitive_mortality * (capacity - functional_flock_size)/ capacity, cost_power)))
+=======
+>>>>>>> 0391fb4a8a51cf073e6194d2a2449fd47eebd25a
 			{
 	            WinterPop[i] = WinterPop[winter_pop - 1];
 	            --winter_pop;
@@ -1252,7 +1267,7 @@ void winter_dynamics(int t)
         assert(staging_pop < N);
         
 		pdisperse = pow(1 + exp(-0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) 
-			* (((double) staging_pop_start / (staging_pop_start + winter_pop)) - 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1]))), -1);
+			* (((double) staging_pop_start / (double)(staging_pop_start + winter_pop)) - 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1]))), -1);
 		
         //pdisperse = pow(1 + exp(-0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) * (((double) staging_pop_start / (staging_pop_start + winter_pop)) - 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1]))
 		//						-0.5 * (StagingPool[i].psi_b[0] + StagingPool[i].psi_b[1]) * (((double) StagingPool[i].resources / resource_max) - 0.5 * (StagingPool[i].psi_a[0] + StagingPool[i].psi_b[1]))
@@ -1322,7 +1337,7 @@ void winter_dynamics(int t)
 		// Resource cost of migration to the individual
 		SummerPop[i].flock_size = NFlock;
 		
-		if (filename_risks == "none"){
+		if (filename_costs == "none"){
 			SummerPop[i].cost = migration_cost(NFlock);
 		}
 		
@@ -1680,7 +1695,7 @@ void summer_dynamics(int t)
     for (int i = 0; i < staging_pop; ++i)
     {
 		pdisperse = pow(1 + exp(-0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) 
-			* (((double) staging_pop_start / (staging_pop_start + summer_pop)) - 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1]))), -1);
+			* (((double) staging_pop_start / (double)(staging_pop_start + summer_pop)) - 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1]))), -1);
 		
 		
         //pdisperse = pow(1 + exp(-0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) * (((double) staging_pop_start / (staging_pop_start + summer_pop)) - 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1]))
@@ -1703,7 +1718,7 @@ void summer_dynamics(int t)
 			}
 			
 			WinterPop[winter_pop] = StagingPool[i];  // Individual moves from staging pool to first empty position in WinterPop
-			WinterPop[winter_pop].signalling_proportion = staging_pop_start / (staging_pop_start + summer_pop);  // record the proportion of the population that was signalling at the point of departure
+			WinterPop[winter_pop].signalling_proportion = (double)staging_pop_start / (staging_pop_start + summer_pop);  // record the proportion of the population that was signalling at the point of departure
 			lat = WinterPop[winter_pop].latency;
 			mean_latency += lat;
 			ss_latency += (lat * lat);			
@@ -1764,13 +1779,10 @@ void summer_dynamics(int t)
 		}
 		WinterPop[i].resources -= WinterPop[i].cost;
 		WinterPop[i].resources = std::min(WinterPop[i].resources, resource_max);  // Individual resource values cannot exceed resource max
-		WinterPop[i].resources *= carryover_proportion;
-
+		
     } // Ends: update resource levels of winter arrivals
 
-} // ENDS: POST-BREEDING DYNAMICS 
-
-
+} // ENDS: SUMMER DYNAMICS 
 
 
 
@@ -1940,8 +1952,7 @@ int main(int argc, char **argv)
 		// time during summer during which individuals forage
         for (int t = 0; t < twinter; ++t)
         {
-            summer_dynamics(t);
-			
+            summer_dynamics(t);	
         }
 
 		autumn_migrant_pop = population_mean_autumn_flock_size;
@@ -2001,6 +2012,6 @@ int main(int argc, char **argv)
         {
         	WinterPop[i].resources *= carryover_proportion;
         }
-				
+
     } // ENDS: YEAR
 }
