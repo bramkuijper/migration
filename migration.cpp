@@ -1017,14 +1017,9 @@ void spring_mortality()
 		}
 		assert(functional_flock_size > 0);  // Check that a non-zero flock size has been assigned (real or dummy)
 		double psurv = 1 - pmort;
-<<<<<<< HEAD
-		if (uniform(rng_r) < 1 - sqrt(psurv - pow(socially_sensitive_mortality * (capacity - functional_flock_size)/ capacity, cost_power)))
-=======
 		double social_term = socially_sensitive_mortality * pow((double)(capacity - functional_flock_size) / (double)capacity, cost_power);
 		assert(psurv - social_term >= 0.0);
 		if (uniform(rng_r) < 1 - sqrt(psurv - social_term))
-
->>>>>>> 0391fb4a8a51cf073e6194d2a2449fd47eebd25a
 			{
             	SummerPop[i] = SummerPop[summer_pop - 1];
             	--summer_pop;
@@ -1072,11 +1067,6 @@ void autumn_mortality()
 		double social_term = socially_sensitive_mortality * pow((double)(capacity - functional_flock_size) / (double)capacity, cost_power);
 		assert(psurv - social_term >= 0.0);
 		if (uniform(rng_r) < 1 - sqrt(psurv - social_term))
-
-<<<<<<< HEAD
-        if (uniform(rng_r) < 1 - sqrt(psurv - pow(socially_sensitive_mortality * (capacity - functional_flock_size)/ capacity, cost_power)))
-=======
->>>>>>> 0391fb4a8a51cf073e6194d2a2449fd47eebd25a
 			{
 	            WinterPop[i] = WinterPop[winter_pop - 1];
 	            --winter_pop;
