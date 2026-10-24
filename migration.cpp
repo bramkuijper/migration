@@ -157,6 +157,29 @@ bool turn_back_on = false;
 double turn_back_cost = 0.0;
 bool turn_back_cascade = false;  // If turn_back_cascade is set to true, the looks are repeated until nobody turns back
 
+struct DepartureStats
+{
+    int recruited_signallers = 0;
+    int recruited_nonsignallers = 0;
+    int turned_back = 0;              // number of abandoned departures
+    int flocks_dissolved = 0;         // site-specific flocks in which every departer turned back
+    int looks = 0;                    // looks taken, summed over timesteps
+    int steps_with_looks = 0;         // timesteps in which departers reconsidered
+};
+
+DepartureStats spring_stats;
+DepartureStats autumn_stats;
+
+// average number of looks per timestep featuring such reassessments
+double mean_looks(DepartureStats const &stats)
+{
+    if (stats.steps_with_looks == 0)
+    {
+        return 0.0;
+    }
+    return (double) stats.looks / stats.steps_with_looks;
+}
+
 // keep track of the current number of 
 // individuals in various seasons/demographics
 int staging_pop = 0;
@@ -442,6 +465,12 @@ void write_parameters(std::ofstream &DataFile)  // at top of outputted file
 			<< "K_decline_factor;" << K_decline_factor << std::endl
 			<< "autumn_harvest;" << autumn_harvest << std::endl
 			<< "seed;" << seed << std::endl
+			<< "n_sites;" << n_sites << std::endl  // NEW: settings of the departure mechanisms
+			<< "follow_scope;" << follow_scope << std::endl
+			<< "kappa;" << kappa << std::endl
+			<< "turn_back_on;" << turn_back_on << std::endl
+			<< "turn_back_cost;" << turn_back_cost << std::endl
+			<< "turn_back_cascade;" << turn_back_cascade << std::endl
 			<< std::endl;
 }
 
@@ -588,6 +617,16 @@ void write_data_headers(std::ofstream &DataFile)
 		<< "var_psi_b_winter;"
 		<< "mean_age;"
 		<< "var_age;"
+		<< "spring_recruited_signallers;"
+		<< "spring_recruited_nonsignallers;"
+		<< "spring_turned_back;"
+		<< "spring_flocks_dissolved;"
+		<< "spring_mean_looks;"
+		<< "autumn_recruited_signallers;"
+		<< "autumn_recruited_nonsignallers;"
+		<< "autumn_turned_back;"
+		<< "autumn_flocks_dissolved;"
+		<< "autumn_mean_looks;"
 		<< std::endl;
 } // end write_data_headers
 
@@ -940,6 +979,16 @@ void write_winter_stats(std::ofstream &DataFile)
 	    << (ss_psi_b - mean_psi_b * mean_psi_b) << ";"
 		<< mean_age << ";"
 		<< (ss_age - mean_age * mean_age) << ";"
+		<< spring_stats.recruited_signallers << ";"
+		<< spring_stats.recruited_nonsignallers << ";"
+		<< spring_stats.turned_back << ";"
+		<< spring_stats.flocks_dissolved << ";"
+		<< mean_looks(spring_stats) << ";"
+		<< autumn_stats.recruited_signallers << ";"
+		<< autumn_stats.recruited_nonsignallers << ";"
+		<< autumn_stats.turned_back << ";"
+		<< autumn_stats.flocks_dissolved << ";"
+		<< mean_looks(autumn_stats) << ";"
 		<< std::endl;
 } // ENDS: write_winter_stats
 
@@ -1187,7 +1236,7 @@ void assign_sites(Individual *Pop, int const pop_size)
 // can be recruited.
 void follow(Individual *Origin, int &origin_pop,
             Individual *Dest, int &dest_pop, int const dest_pop_old,
-            std::vector<int> const &n_all)
+            std::vector<int> const &n_all, DepartureStats &stats)
 {
     // departers added in the last round, per site; to begin with,
     // everyone who left in the departure loop
@@ -1219,7 +1268,7 @@ void follow(Individual *Origin, int &origin_pop,
         {
             int s = StagingPool[i].site;
 
-            if (p_join[s] > 0.0 && uniform(rng_r) < p_join[s])
+            if (p_join[s] > 0.0 && uniform(rng_r) < p_join[s])  // yes, takes off!
             {
                 Dest[dest_pop] = StagingPool[i];
                 Dest[dest_pop].latency -= 1;  // undo this time step's increments in the departure loop:
@@ -1232,6 +1281,7 @@ void follow(Individual *Origin, int &origin_pop,
                 --i;
 
                 ++n_new[s];
+				++stats.recruited_signallers;
             }
         }
 
@@ -1259,6 +1309,7 @@ void follow(Individual *Origin, int &origin_pop,
                     --i;
 
                     ++n_new[s];
+					++stats.recruited_nonsignallers;
                 }
             }
         }
@@ -1286,9 +1337,23 @@ void follow(Individual *Origin, int &origin_pop,
 // later look only if the flock has shrunk enough to change its answer.
 void turn_back(Individual *Origin, int &origin_pop,
                Individual *Dest, int &dest_pop, int const dest_pop_old,
-               std::vector<int> const &n_all)
+               std::vector<int> const &n_all, DepartureStats &stats)
 {
     int const n_arrived = dest_pop - dest_pop_old;
+	
+	
+    if (n_arrived == 0)  // nothing to look at if nobody left this time step...
+    {
+        return;			 // ...so can save computational time by exiting
+    }
+    ++stats.steps_with_looks;
+
+    // size of each site's flock before anyone turns back
+    std::vector<int> n_start(n_sites, 0);
+    for (int k = 0; k < n_arrived; ++k)
+    {
+        ++n_start[Dest[dest_pop_old + k].site];
+    }
 
     // one random number per departer, and whether it is still going
     std::vector<double> nerve(n_arrived);
@@ -1302,6 +1367,8 @@ void turn_back(Individual *Origin, int &origin_pop,
     while (changed)
     {
         changed = false;
+		
+		++stats.looks;  // every look is counted, including the final one in which nobody changed their mind
 
         // the flocks as they stand at the start of this look
         std::vector<int> n_left(n_sites, 0);
@@ -1342,6 +1409,23 @@ void turn_back(Individual *Origin, int &origin_pop,
             break;  // ensures each potential departers is offered only a single opporutnity to change its mind
         }
     }
+	
+	// count the site flocks that completely disbanded
+    std::vector<int> n_final(n_sites, 0);
+    for (int k = 0; k < n_arrived; ++k)
+    {
+        if (going[k] == 1)
+        {
+            ++n_final[Dest[dest_pop_old + k].site];
+        }
+    }
+    for (int s = 0; s < n_sites; ++s)
+    {
+        if (n_start[s] > 0 && n_final[s] == 0)
+        {
+            ++stats.flocks_dissolved;
+        }
+    }
 
     // move those that turned back, from the last arrival to the first
     for (int k = n_arrived - 1; k >= 0; --k)
@@ -1359,6 +1443,7 @@ void turn_back(Individual *Origin, int &origin_pop,
         returner.latency += 1;
         returner.timing += 1;
         returner.resources = std::max(0.0, returner.resources - turn_back_cost);
+		++stats.turned_back;  // counts occurrences, not unique individuals
 
         if (returner.followed == 1)
         {
@@ -1554,7 +1639,7 @@ void winter_dynamics(int t)
 	// migratory recruitment (only when switched on)
     if (follow_scope > 0 && kappa > 0.0)
     {
-        follow(WinterPop, winter_pop, SummerPop, summer_pop, summer_pop_old, n_all);
+        follow(WinterPop, winter_pop, SummerPop, summer_pop, summer_pop_old, n_all, spring_stats);
     }
 	
 	// turning back
@@ -1562,7 +1647,7 @@ void winter_dynamics(int t)
 	// comes before the flock size count, so those losing their nerve aren't counted
     if (turn_back_on)
     {
-        turn_back(WinterPop, winter_pop, SummerPop, summer_pop, summer_pop_old, n_all);
+        turn_back(WinterPop, winter_pop, SummerPop, summer_pop, summer_pop_old, n_all, spring_stats);
     }
 
 	// the flock is everyone who arrived at the breeding ground this time step
@@ -2017,13 +2102,13 @@ void summer_dynamics(int t)
 	// migration recruitment (only when switched on)
     if (follow_scope > 0 && kappa > 0.0)
     {
-        follow(SummerPop, summer_pop, WinterPop, winter_pop, winter_pop_old, n_all);
+        follow(SummerPop, summer_pop, WinterPop, winter_pop, winter_pop_old, n_all, autumn_stats);
     }
 	
 	// turning back
 	if (turn_back_on)
     {
-        turn_back(SummerPop, summer_pop, WinterPop, winter_pop, winter_pop_old, n_all);
+        turn_back(SummerPop, summer_pop, WinterPop, winter_pop, winter_pop_old, n_all, autumn_stats);
     }
 	
 	// the flock is everyone who arrived at the wintering ground this time step
@@ -2169,6 +2254,8 @@ int main(int argc, char **argv)
 		// each individual stages at a random site this spring
 		assign_sites(WinterPop, winter_pop);
 		
+		spring_stats = DepartureStats();  // reset this season's departure statistics
+		
 		for (int t = 0; t < twinter; ++t)
         {
             winter_dynamics(t);
@@ -2258,6 +2345,8 @@ int main(int argc, char **argv)
         autumn_pop_start = summer_pop;
 		
 		assign_sites(SummerPop, summer_pop);  // each individual stages at a random site this autumn
+		
+		autumn_stats = DepartureStats();  // reset this season's departure statistics
 		
 		// time during summer during which individuals forage
         for (int t = 0; t < twinter; ++t)
