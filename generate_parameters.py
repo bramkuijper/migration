@@ -175,14 +175,13 @@ for rep_i in range(0, number_replicates):
                                                                                 + str(costs_sourcefile_i) + " "     # 31
                                                                                 + str(risks_sourcefile_i) + " "     # 32
                                                                                 + str(base_name) + "_" + str(counter) + " "
-                                                                                + str(base_name) + "_" + str(counter) + " "
                                                                                 + str(counter) + " "                # 34 a different, reproducible seed for every run
                                                                                 + str(n_sites) + " "                # 35
                                                                                 + str(follow_scope) + " "           # 36
                                                                                 + str(kappa) + " "                  # 37
-                                                                                + str(turn_back_on)                 # 38
-                                                                                + str(turn_back_cost)               # 39
-                                                                                + str(turn_back_cascade)            # 40
+                                                                                + str(turn_back_on) + " "           # 38
+                                                                                + str(turn_back_cost) + " "         # 39
+                                                                                + str(turn_back_cascade) + " "      # 40
                                                                                 + backgroundstr)
 
                                                                         # increment the counter for the number of 
