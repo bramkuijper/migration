@@ -148,6 +148,15 @@ int n_sites = 1;
 int follow_scope = 0;  // follow_scope 0: nobody follows; 1: signallers may follow departures; 2: anyone present may follow.
 double kappa = 0.0;    // kappa is the expected number of others recruited by each departer.
 
+// Changing mind. 
+// If turn_back_on, each departer takes a second look, 
+// re-applying its own departure rule to the fraction of 
+// its site that actually left, and turns back if the 
+// answer is no, losing turn_back_cost resources. 
+bool turn_back_on = false;
+double turn_back_cost = 0.0;
+bool turn_back_cascade = false;  // If turn_back_cascade is set to true, the looks are repeated until nobody turns back
+
 // keep track of the current number of 
 // individuals in various seasons/demographics
 int staging_pop = 0;
@@ -205,6 +214,7 @@ struct Individual
 	int fecundity;  				// number of offspring produced
 	int patch_quality;
 	int site;  						// site at which the individual stages for that season
+	int followed;  					// 1 if individual departed by following without having signalled
 };
 
 
@@ -380,6 +390,13 @@ void init_arguments(int argc, char **argv)
 	
 	if (argc > 37) kappa = atof(argv[37]);  	   // expected recruits per departer
 	assert(kappa >= 0.0);
+	
+	// Changing mind
+	if (argc > 38) turn_back_on = atoi(argv[38]) != 0;  // can departers turn back? (default 0: no)
+	if (argc > 39) turn_back_cost = atof(argv[39]);  // resources lost on turning back (default 0)
+	assert(turn_back_cost >= 0.0);
+	if (argc > 40) turn_back_cascade = atoi(argv[40]) != 0;  // switch: 0 = a single look; 1 = repeated looks
+	
 	
 } // end init_arguments
 
@@ -934,24 +951,15 @@ void init_population()
     // and give them values
     for (int i = 0; i < N; ++i)
     {
-        WinterPop[i].resources = 0.0;  // at start of simulation, initial resource level for all individuals is 0
-		
+        WinterPop[i].resources = 0.0;  			// at start of simulation, initial resource level for all individuals is 0
 		WinterPop[i].signal_resources = 0.0;
-		
-		// set individual latency to 0
-		WinterPop[i].latency = 0;
-		
-		// set individual signal phenology to 1 (Signalling on the first day of the season will give a value of 1)
-		WinterPop[i].signal_timing = 1;
-		
-		// set individual timing value to 1 (Departure on the first day will give a timing value of 1)
-		WinterPop[i].timing = 1;
-		
+		WinterPop[i].latency = 0;  				// set individual latency to 0
+		WinterPop[i].signal_timing = 1;  		// set individual signal phenology to 1 (Signalling on the first day of the season will give a value of 1)
+		WinterPop[i].timing = 1;  				// set individual timing value to 1 (Departure on the first day will give a timing value of 1)
 		WinterPop[i].signalling_proportion = 0.0;
-		
 		WinterPop[i].flock_size = 0;
-		
 		WinterPop[i].site = 0;
+		WinterPop[i].followed = 0;
 		
         for (int j = 0; j < 2; ++j)
         {
@@ -1242,6 +1250,7 @@ void follow(Individual *Origin, int &origin_pop,
                     Dest[dest_pop].signal_resources = Origin[i].resources;
                     Dest[dest_pop].latency = 0;
                     Dest[dest_pop].cost = 0.0;
+					Dest[dest_pop].followed = 1;  // a tag that ensures that if it turns back, it returns to where it came from
                     ++dest_pop;
                     assert(dest_pop <= N);
 
@@ -1265,6 +1274,112 @@ void follow(Individual *Origin, int &origin_pop,
         }
     }
 } // ENDS: follow
+
+// Once the flocks have formed, each departer takes a second look: it re-applies 
+// its own departure rule, this time to the fraction of its site that actually left. 
+// If the answer is "don't go", it turns back: signallers to the staging pool, followers 
+// to the population they came from, and each pays turn_back_cost.
+
+// With turn_back_cascade, the looks are repeated, on the flocks as they
+// now stand, until nobody turns back. Each departer draws one random
+// number (its "nerve") for the whole time step, so it turns back on a
+// later look only if the flock has shrunk enough to change its answer.
+void turn_back(Individual *Origin, int &origin_pop,
+               Individual *Dest, int &dest_pop, int const dest_pop_old,
+               std::vector<int> const &n_all)
+{
+    int const n_arrived = dest_pop - dest_pop_old;
+
+    // one random number per departer, and whether it is still going
+    std::vector<double> nerve(n_arrived);
+    std::vector<int> going(n_arrived, 1);
+    for (int k = 0; k < n_arrived; ++k)
+    {
+        nerve[k] = uniform(rng_r);
+    }
+
+    bool changed = true;
+    while (changed)
+    {
+        changed = false;
+
+        // the flocks as they stand at the start of this look
+        std::vector<int> n_left(n_sites, 0);
+        for (int k = 0; k < n_arrived; ++k)
+        {
+            if (going[k] == 1)
+            {
+                ++n_left[Dest[dest_pop_old + k].site];
+            }
+        }
+
+        // each departer still going takes a look
+        for (int k = 0; k < n_arrived; ++k)
+        {
+            if (going[k] == 0)
+            {
+                continue;
+            }
+
+            int i = dest_pop_old + k;
+            int s = Dest[i].site;
+            double fraction_left = (double) n_left[s] / (double) n_all[s];
+
+            // the individual's own departure rule, applied to the fraction that left
+            double p_go_on = pow(1 + exp(-0.5 * (Dest[i].phi_b[0] + Dest[i].phi_b[1])
+                * (fraction_left - 0.5 * (Dest[i].phi_a[0] + Dest[i].phi_a[1]))), -1);
+            p_go_on = clamp(p_go_on, 0, 1);
+
+            if (nerve[k] >= p_go_on)
+            {
+                going[k] = 0;
+                changed = true;
+            }
+        }
+
+        if (!turn_back_cascade)
+        {
+            break;  // ensures each potential departers is offered only a single opporutnity to change its mind
+        }
+    }
+
+    // move those that turned back, from the last arrival to the first
+    for (int k = n_arrived - 1; k >= 0; --k)
+    {
+        int i = dest_pop_old + k;
+
+        if (going[k] == 1)
+        {
+            Dest[i].followed = 0;  // it carries on; the marker is only needed within a time step
+            continue;
+        }
+
+        // it turns back, and is treated like any individual that did not depart this time step
+        Individual returner = Dest[i];
+        returner.latency += 1;
+        returner.timing += 1;
+        returner.resources = std::max(0.0, returner.resources - turn_back_cost);
+
+        if (returner.followed == 1)
+        {
+            // a follower goes back to the population it came from
+            returner.followed = 0;
+            returner.signal_timing = returner.timing;
+            Origin[origin_pop] = returner;
+            ++origin_pop;
+        }
+        else
+        {
+            // a signaller goes back to the staging pool
+            StagingPool[staging_pop] = returner;
+            ++staging_pop;
+        }
+
+        // remove it from the destination population
+        Dest[i] = Dest[dest_pop - 1];
+        --dest_pop;
+    }
+} // ENDS: TURNING BACK
 
 // the dynamics of the population at the wintering ground through winter, time t
 void winter_dynamics(int t)
@@ -1441,6 +1556,14 @@ void winter_dynamics(int t)
     {
         follow(WinterPop, winter_pop, SummerPop, summer_pop, summer_pop_old, n_all);
     }
+	
+	// turning back
+	// timed after following, so social recruits also can turn back
+	// comes before the flock size count, so those losing their nerve aren't counted
+    if (turn_back_on)
+    {
+        turn_back(WinterPop, winter_pop, SummerPop, summer_pop, summer_pop_old, n_all);
+    }
 
 	// the flock is everyone who arrived at the breeding ground this time step
     NFlock = summer_pop - summer_pop_old;
@@ -1536,6 +1659,7 @@ void create_offspring(
 	offspring.signalling_proportion = 0.0;
 	offspring.flock_size = 0;
 	offspring.site = 0;
+	offspring.followed = 0;
 
     // inherit theta loci
 
@@ -1595,7 +1719,7 @@ void reproduction(std::ofstream &DataFile)
 
         // if individual does not meet minimum standards then no reproduction through female function
 		// these minimum standards can be seasonally variable:
-		individual_breeding_threshold = resource_reproduction_threshold + resource_reproduction_threshold * ((offspring_cost_magnifier - 1) * (double) (SummerPop[i].timing / twinter));
+		individual_breeding_threshold = resource_reproduction_threshold + resource_reproduction_threshold * ((offspring_cost_magnifier - 1) * ((double) SummerPop[i].timing / twinter));
 		
 		if (SummerPop[i].resources < individual_breeding_threshold)  // Cost of clutch size of one. Further offspring incur a smaller, incremental cost
         {
@@ -1628,7 +1752,7 @@ void reproduction(std::ofstream &DataFile)
 
 	        father = SummerPop[father_id];
 			
-			individual_offspring_increment = min_offspring_cost + min_offspring_cost * ((offspring_cost_magnifier - 1) * (double) (SummerPop[i].timing / twinter));
+			individual_offspring_increment = min_offspring_cost + min_offspring_cost * ((offspring_cost_magnifier - 1) * ((double) SummerPop[i].timing / twinter));
 
 	        offspring_equivalence = 1 + ((SummerPop[i].resources - individual_breeding_threshold) / individual_offspring_increment);
 	
@@ -1894,6 +2018,12 @@ void summer_dynamics(int t)
     if (follow_scope > 0 && kappa > 0.0)
     {
         follow(SummerPop, summer_pop, WinterPop, winter_pop, winter_pop_old, n_all);
+    }
+	
+	// turning back
+	if (turn_back_on)
+    {
+        turn_back(SummerPop, summer_pop, WinterPop, winter_pop, winter_pop_old, n_all);
     }
 	
 	// the flock is everyone who arrived at the wintering ground this time step
