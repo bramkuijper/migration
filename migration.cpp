@@ -156,6 +156,8 @@ double kappa = 0.0;
 bool turn_back_on = false;
 double turn_back_cost = 0.0;
 bool turn_back_cascade = false;  // If turn_back_cascade is set to true, the looks are repeated until nobody turns back
+int max_turn_backs = -1;  // departure patience. Each bird can turn back at most max_turn_backs times per season before it departs regardless of what the rest are doing;
+// after that it carries on whatever the others do. -1 means no limit.
 
 struct DepartureStats
 {
@@ -238,6 +240,7 @@ struct Individual
 	int patch_quality;
 	int site;  						// site at which the individual stages for that season
 	int followed;  					// 1 if individual departed by following without having signalled
+	int turned_back_count;  		// departure patience: the number of times it has turned back this season
 };
 
 
@@ -419,7 +422,7 @@ void init_arguments(int argc, char **argv)
 	if (argc > 39) turn_back_cost = atof(argv[39]);  // resources lost on turning back (default 0)
 	assert(turn_back_cost >= 0.0);
 	if (argc > 40) turn_back_cascade = atoi(argv[40]) != 0;  // switch: 0 = a single look; 1 = repeated looks
-	
+	if (argc > 41) max_turn_backs = atoi(argv[41]);  // 'patience': the number of turn-backs allowed per bird per season (default -1: no limit)
 	
 } // end init_arguments
 
@@ -471,6 +474,7 @@ void write_parameters(std::ofstream &DataFile)  // at top of outputted file
 			<< "turn_back_on;" << turn_back_on << std::endl
 			<< "turn_back_cost;" << turn_back_cost << std::endl
 			<< "turn_back_cascade;" << turn_back_cascade << std::endl
+			<< "max_turn_backs;" << max_turn_backs << std::endl
 			<< std::endl;
 }
 
@@ -1009,6 +1013,7 @@ void init_population()
 		WinterPop[i].flock_size = 0;
 		WinterPop[i].site = 0;
 		WinterPop[i].followed = 0;
+		WinterPop[i].turned_back_count = 0;
 		
         for (int j = 0; j < 2; ++j)
         {
@@ -1215,6 +1220,7 @@ void assign_sites(Individual *Pop, int const pop_size)
     for (int i = 0; i < pop_size; ++i)
     {
         Pop[i].site = 0;
+		Pop[i].turned_back_count = 0;
     }
 
     if (n_sites > 1)
@@ -1397,7 +1403,8 @@ void turn_back(Individual *Origin, int &origin_pop,
                 * (fraction_left - 0.5 * (Dest[i].phi_a[0] + Dest[i].phi_a[1]))), -1);
             p_go_on = clamp(p_go_on, 0, 1);
 
-            if (nerve[k] >= p_go_on)
+            // A bird will be able to turn back unless it has exhausted its patience by having already turned back the maximum number of times
+			if (nerve[k] >= p_go_on && (max_turn_backs < 0 || Dest[i].turned_back_count < max_turn_backs))
             {
                 going[k] = 0;
                 changed = true;
@@ -1440,6 +1447,7 @@ void turn_back(Individual *Origin, int &origin_pop,
 
         // it turns back, and is treated like any individual that did not depart this time step
         Individual returner = Dest[i];
+		returner.turned_back_count += 1;
         returner.latency += 1;
         returner.timing += 1;
         returner.resources = std::max(0.0, returner.resources - turn_back_cost);
@@ -1745,6 +1753,7 @@ void create_offspring(
 	offspring.flock_size = 0;
 	offspring.site = 0;
 	offspring.followed = 0;
+	offspring.turned_back_count = 0;
 
     // inherit theta loci
 
