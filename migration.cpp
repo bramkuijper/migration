@@ -146,7 +146,7 @@ double rv =0.0;
 int n_sites = 1;
  
 int follow_scope = 0;  // follow_scope 0: nobody follows; 1: signallers may follow departures; 2: anyone present may follow.
-double kappa = 0.0;    // kappa is the expected number of others recruited by each departer.
+double kappa = 0.0;
 
 // Changing mind. 
 // If turn_back_on, each departer takes a second look, 
@@ -1603,7 +1603,7 @@ void winter_dynamics(int t)
     // actual spring dispersal from winter to summer population
     for (int i = 0; i < staging_pop; ++i)
     {
-        assert(staging_pop < N);
+        assert(staging_pop <= N);
         
 		pdisperse = pow(1 + exp(-0.5 * (StagingPool[i].phi_b[0] + StagingPool[i].phi_b[1]) 
 			* (((double) n_sig[StagingPool[i].site] / (double) n_all[StagingPool[i].site]) - 0.5 * (StagingPool[i].phi_a[0] + StagingPool[i].phi_a[1]))), -1);        
