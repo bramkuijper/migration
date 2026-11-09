@@ -15,6 +15,10 @@ init_phi_b = [25]  # Default is 25
 init_psi_a = 0
 init_psi_b = 0
 
+# Resource-dependent departure reassessment
+init_omega_a = 0
+init_omega_b = 0
+
 
 twinter = 10000  # twinter in manuscript
 
@@ -149,41 +153,43 @@ for rep_i in range(0, number_replicates):
                                                                                 + str(init_phi_b_i) + " "           # 4
                                                                                 + str(init_psi_a) + " "             # 5
                                                                                 + str(init_psi_b) + " "             # 6
-                                                                                + str(pmort) + " "                  # 7
-                                                                                + str(pgood) + " "                  # 8
+                                                                                + str(init_omega_a) + " "           # 7
+                                                                                + str(init_omega_b) + " "           # 8
+                                                                                + str(pmort) + " "                  # 9
+                                                                                + str(pgood) + " "                  # 10
                                                                                 + str(patch_consistency_factor_i) + " "
-                                                                                + str(rgood) + " "                  # 10
-                                                                                + str(rbad) + " "                   # 11
-                                                                                + str(preparation_penalty_i) + " "  # 12
+                                                                                + str(rgood) + " "                  # 12
+                                                                                + str(rbad) + " "                   # 13
+                                                                                + str(preparation_penalty_i) + " "  # 14
                                                                                 + str(resource_reproduction_threshold) + " "
                                                                                 + str(resource_starvation_threshold) + " "
-                                                                                + str(mu) + " "                     # 15
-                                                                                + str(sdmu) + " "                   # 16
-                                                                                + str(max_migration_cost) + " "     # 17
-                                                                                + str(min_migration_cost_i) + " "   # 18
-                                                                                + str(cost_power_i) + " "           # 19
-                                                                                + str(twinter) + " "                # 20
-                                                                                + str(resource_max) + " "           # 21
-                                                                                + str(min_offspring_cost) + " "     # 22
+                                                                                + str(mu) + " "                     # 17
+                                                                                + str(sdmu) + " "                   # 18
+                                                                                + str(max_migration_cost) + " "     # 19
+                                                                                + str(min_migration_cost_i) + " "   # 20
+                                                                                + str(cost_power_i) + " "           # 21
+                                                                                + str(twinter) + " "                # 22
+                                                                                + str(resource_max) + " "           # 23
+                                                                                + str(min_offspring_cost) + " "     # 24
                                                                                 + str(offspring_cost_magnifier_i) + " "
-                                                                                + str(carryover_proportion) + " "   # 24
+                                                                                + str(carryover_proportion) + " "   # 26
                                                                                 + str(relative_mortality_risk_of_migration) + " "
                                                                                 + str(socially_sensitive_mortality_i) + " "
-                                                                                + str(capacity_i) + " "             # 27
+                                                                                + str(capacity_i) + " "             # 29
                                                                                 + str(postequilibrialisation_experimental_runtime) + " "
-                                                                                + str(K_decline_factor_i) + " "     # 29
-                                                                                + str(autumn_harvest_i) + " "       # 30
-                                                                                + str(costs_sourcefile_i) + " "     # 31
-                                                                                + str(risks_sourcefile_i) + " "     # 32
+                                                                                + str(K_decline_factor_i) + " "     # 31
+                                                                                + str(autumn_harvest_i) + " "       # 32
+                                                                                + str(costs_sourcefile_i) + " "     # 33
+                                                                                + str(risks_sourcefile_i) + " "     # 34
                                                                                 + str(base_name) + "_" + str(counter) + " "
-                                                                                + str(counter) + " "                # 34 a different, reproducible seed for every run
-                                                                                + str(n_sites) + " "                # 35
-                                                                                + str(follow_scope) + " "           # 36
-                                                                                + str(kappa) + " "                  # 37
-                                                                                + str(turn_back_on) + " "           # 38
-                                                                                + str(turn_back_cost) + " "         # 39
-                                                                                + str(turn_back_cascade) + " "      # 40
-                                                                                + str(max_turn_backs) + " "         #41
+                                                                                + str(counter) + " "                # 36 a different, reproducible seed for every run
+                                                                                + str(n_sites) + " "                # 37
+                                                                                + str(follow_scope) + " "           # 38
+                                                                                + str(kappa) + " "                  # 39
+                                                                                + str(turn_back_on) + " "           # 40
+                                                                                + str(turn_back_cost) + " "         # 41
+                                                                                + str(turn_back_cascade) + " "      # 42
+                                                                                + str(max_turn_backs) + " "         # 43
                                                                                 + backgroundstr)
 
                                                                         # increment the counter for the number of 

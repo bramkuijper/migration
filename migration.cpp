@@ -44,6 +44,8 @@ double init_phi_a = 0.0;
 double init_phi_b = 0.0;
 double init_psi_a = 0.0;
 double init_psi_b = 0.0;
+double init_omega_a = 0.0;
+double init_omega_b = 0.0;
 
 // mortality probability 
 double pmort = 0.0;
@@ -73,9 +75,11 @@ double individual_offspring_increment = 0.0;
 double mu_theta = 0.0;
 double mu_phi = 0.0;
 double mu_psi = 0.0;
+double mu_omega = 0.0;
 double sdmu_theta = 0.0;
 double sdmu_phi = 0.0;
 double sdmu_psi = 0.0;
+double sdmu_omega = 0.0;
 
 // migration cost function
 double cost_power = 0.0;
@@ -158,6 +162,7 @@ double turn_back_cost = 0.0;
 bool turn_back_cascade = false;  // If turn_back_cascade is set to true, the looks are repeated until nobody turns back
 int max_turn_backs = -1;  // departure patience. Each bird can turn back at most max_turn_backs times per season before it departs regardless of what the rest are doing;
 // after that it carries on whatever the others do. -1 means no limit.
+bool separate_departure_reassessment_rule = false;
 
 struct DepartureStats
 {
@@ -227,7 +232,8 @@ struct Individual
     double phi_b[2];  				// collective dispersal slope, dependency on number of individuals
 	double psi_a[2];  				// condition-dependent dispersal elevation
 	double psi_b[2];  				// condition-dependent dispersal slope
-	
+	double omega_a[2];				// condition-dependent dispersal reassessment elevation
+	double omega_b[2];				// condition-dependent dispersal reassessment slope	
 	int latency;  					// individual departure latency
 	int timing;  					// individual departure timing
 	int flock_size;  				// size of flock individual was in
@@ -349,37 +355,41 @@ void init_arguments(int argc, char **argv)
     init_phi_b = atof(argv[4]);  // Slope of the reaction norm for group size-dependent miratory departure
 	init_psi_a = atof(argv[5]);   // Elevation of the reaction norm for resource-dependent migratory departure
 	init_psi_b = atof(argv[6]);   // Slope of the reaction norm for resource-dependent migratory departure
-    pmort = atof(argv[7]);
-    pgood = atof(argv[8]);
-	patch_consistency_factor = atof(argv[9]);
-    rgood_init = atof(argv[10]);
-    rbad_init = atof(argv[11]);
-	preparation_penalty = atof(argv[12]);
-    resource_reproduction_threshold = atof(argv[13]);
-    resource_starvation_threshold = atof(argv[14]);
-    mu_theta = atof(argv[15]);
-    mu_phi = atof(argv[15]);
-	mu_psi = atof(argv[15]);
-    sdmu_theta = atof(argv[16]);
-    sdmu_phi = atof(argv[16]);
-	sdmu_psi = atof(argv[16]);
-    max_migration_cost = atof(argv[17]);
-	min_migration_cost = atof(argv[18]);
-    cost_power = atof(argv[19]);
-	twinter = atoi(argv[20]);
-	resource_max = atof(argv[21]);
-	min_offspring_cost = atof(argv[22]);
-	offspring_cost_magnifier = atof(argv[23]);
-	carryover_proportion = atof(argv[24]);
-	relative_mortality_risk_of_migration = atof(argv[25]);
-	socially_sensitive_mortality = atof(argv[26]);
-	capacity = atoi(argv[27]);
-	postequilibrialisation_experimental_runtime = atoi(argv[28]);
-	K_decline_factor = atof(argv[29]);
-	autumn_harvest = atof(argv[30]);
-    filename_costs = argv[31];
-	filename_risks = argv[32];
-    filename_output = argv[33];
+	init_omega_a = atof(argv[7]);   // Elevation of the reaction norm for resource-dependent migratory departure REASSESSMENT
+	init_omega_b = atof(argv[8]);   // Slope of the reaction norm for resource-dependent migratory departure REASSESSMENT
+	pmort = atof(argv[9]);
+    pgood = atof(argv[10]);
+	patch_consistency_factor = atof(argv[11]);
+    rgood_init = atof(argv[12]);
+    rbad_init = atof(argv[13]);
+	preparation_penalty = atof(argv[14]);
+    resource_reproduction_threshold = atof(argv[15]);
+    resource_starvation_threshold = atof(argv[16]);
+    mu_theta = atof(argv[17]);
+    mu_phi = atof(argv[17]);
+	mu_psi = atof(argv[17]);
+	mu_omega = atof(argv[17]);
+    sdmu_theta = atof(argv[18]);
+    sdmu_phi = atof(argv[18]);
+	sdmu_psi = atof(argv[18]);
+	sdmu_omega = atof(argv[18]);
+    max_migration_cost = atof(argv[19]);
+	min_migration_cost = atof(argv[20]);
+    cost_power = atof(argv[21]);
+	twinter = atoi(argv[22]);
+	resource_max = atof(argv[23]);
+	min_offspring_cost = atof(argv[24]);
+	offspring_cost_magnifier = atof(argv[25]);
+	carryover_proportion = atof(argv[26]);
+	relative_mortality_risk_of_migration = atof(argv[27]);
+	socially_sensitive_mortality = atof(argv[28]);
+	capacity = atoi(argv[29]);
+	postequilibrialisation_experimental_runtime = atoi(argv[30]);
+	K_decline_factor = atof(argv[31]);
+	autumn_harvest = atof(argv[32]);
+    filename_costs = argv[33];
+	filename_risks = argv[34];
+    filename_output = argv[35];
 
     // some bounds checking on parameters
     // probability of encountering a good environment
@@ -407,22 +417,24 @@ void init_arguments(int argc, char **argv)
 		initialize_flock_size_distribution(filename_risks);
 	}
 	
-	if (argc > 34) { seed = std::strtoul(argv[34], nullptr, 10); rng_r.seed(seed); }  // Protects against very large seed values, which will be beyond the capacity of atoi
-	if (argc > 35) n_sites = atoi(argv[35]);  // number of sites (defaults to 1)
+	if (argc > 36) { seed = std::strtoul(argv[36], nullptr, 10); rng_r.seed(seed); }  // Protects against very large seed values, which will be beyond the capacity of atoi
+	if (argc > 37) n_sites = atoi(argv[37]);  // number of sites (defaults to 1)
 		assert(n_sites >= 1);
 		
-	if (argc > 36) follow_scope = atoi(argv[36]);  // who may follow (default 0: nobody; 1: signallers; 2: anybody)
+	if (argc > 38) follow_scope = atoi(argv[38]);  // who may follow (default 0: nobody; 1: signallers; 2: anybody)
 	assert(follow_scope >= 0 && follow_scope <= 2);
 	
-	if (argc > 37) kappa = atof(argv[37]);  	   // expected recruits per departer
+	if (argc > 39) kappa = atof(argv[39]);  	   // expected recruits per departer
 	assert(kappa >= 0.0);
 	
 	// Changing mind
-	if (argc > 38) turn_back_on = atoi(argv[38]) != 0;  // can departers turn back? (default 0: no)
-	if (argc > 39) turn_back_cost = atof(argv[39]);  // resources lost on turning back (default 0)
+	if (argc > 40) turn_back_on = atoi(argv[40]) != 0;  // can departers turn back? (default 0: no)
+	if (argc > 41) turn_back_cost = atof(argv[41]);  // resources lost on turning back (default 0)
 	assert(turn_back_cost >= 0.0);
-	if (argc > 40) turn_back_cascade = atoi(argv[40]) != 0;  // switch: 0 = a single look; 1 = repeated looks
-	if (argc > 41) max_turn_backs = atoi(argv[41]);  // 'patience': the number of turn-backs allowed per bird per season (default -1: no limit)
+	if (argc > 42) turn_back_cascade = atoi(argv[42]) != 0;  // switch: 0 = a single look; 1 = repeated looks
+	if (argc > 43) max_turn_backs = atoi(argv[43]);  // 'patience': the number of turn-backs allowed per bird per season (default -1: no limit)
+	
+	if(argc > 44) separate_departure_reassessment_rule = atoi(argv[44]) !=0;  // switch: 1 = separate departure reassessment rule
 	
 } // end init_arguments
 
@@ -436,6 +448,8 @@ void write_parameters(std::ofstream &DataFile)  // at top of outputted file
             << "init_phi_b;" << init_phi_b << std::endl
 			<< "init_psi_a;" << init_psi_a << std::endl
 			<< "init_psi_b;" << init_psi_b << std::endl
+			<< "init_omega_a;" << init_omega_a << std::endl
+			<< "init_omega_b;" << init_omega_b << std::endl
             << "pmort;" << pmort << std::endl
             << "pgood;" << pgood << std::endl
             << "filename_costs;" << filename_costs << std::endl
@@ -450,9 +464,11 @@ void write_parameters(std::ofstream &DataFile)  // at top of outputted file
             << "mu_theta;" << mu_theta << std::endl
             << "mu_phi;" << mu_phi << std::endl
 			<< "mu_psi;" << mu_psi << std::endl
+			<< "mu_omega;" << mu_omega << std::endl
             << "sdmu_theta;" << sdmu_theta << std::endl
             << "sdmu_phi;" << sdmu_phi << std::endl
 			<< "sdmu_psi;" << sdmu_psi << std::endl
+			<< "sdmu_omega;" << sdmu_omega << std::endl
 			<< "twinter;" << twinter << std::endl
             << "N;" << N << std::endl
 			<< "number_years;" << number_years << std::endl
@@ -475,6 +491,7 @@ void write_parameters(std::ofstream &DataFile)  // at top of outputted file
 			<< "turn_back_cost;" << turn_back_cost << std::endl
 			<< "turn_back_cascade;" << turn_back_cascade << std::endl
 			<< "max_turn_backs;" << max_turn_backs << std::endl
+			<< "separate_departure_reassessment_rule" << separate_departure_reassessment_rule << std::endl
 			<< std::endl;
 }
 
@@ -507,6 +524,8 @@ void write_dist(std::ofstream &DataFile,
 	        << SummerPop[summer_idx].phi_b[0]*0.5 + SummerPop[summer_idx].phi_b[1]*0.5 << ";"
 		    << SummerPop[summer_idx].psi_a[0]*0.5 + SummerPop[summer_idx].psi_a[1]*0.5 << ";"
 		    << SummerPop[summer_idx].psi_b[0]*0.5 + SummerPop[summer_idx].psi_b[1]*0.5 << ";"
+			<< SummerPop[summer_idx].omega_a[0]*0.5 + SummerPop[summer_idx].omega_a[1]*0.5 << ";"
+			<< SummerPop[summer_idx].omega_b[0]*0.5 + SummerPop[summer_idx].omega_b[1]*0.5 << ";"
             << SummerPop[summer_idx].age << ";"
 			<< SummerPop[summer_idx].patch_quality << ";" << std::endl;
 	    }
@@ -531,6 +550,8 @@ void write_dist_data_headers(std::ofstream &DataFile)
         << "phi_b;"
 		<< "psi_a;"
 		<< "psi_b;"
+		<< "omega_a;"
+		<< "omega_b;"
         << "age;"
 		<< "patch_quality;" << std::endl;
 } // end write_dist_data_headers
@@ -619,6 +640,10 @@ void write_data_headers(std::ofstream &DataFile)
 		<< "var_psi_a_winter;"
 		<< "mean_psi_b_winter;"
 		<< "var_psi_b_winter;"
+		<< "mean_omega_a_winter;"
+		<< "var_omega_a_winter;"
+		<< "mean_omega_b_winter;"
+		<< "var_omega_b_winter;"
 		<< "mean_age;"
 		<< "var_age;"
 		<< "spring_recruited_signallers;"
@@ -889,6 +914,11 @@ void write_winter_stats(std::ofstream &DataFile)
     double ss_psi_a = 0.0;
     double mean_psi_b = 0.0;
     double ss_psi_b = 0.0;
+	
+    double mean_omega_a = 0.0;
+    double ss_omega_a = 0.0;
+    double mean_omega_b = 0.0;
+    double ss_omega_b = 0.0;
 
     double mean_resources = 0.0;
     double ss_resources = 0.0;
@@ -928,6 +958,14 @@ void write_winter_stats(std::ofstream &DataFile)
         val = 0.5 * (WinterPop[i].psi_b[0] + WinterPop[i].psi_b[1]);
         mean_psi_b += val;
         ss_psi_b += val * val;
+		
+        val = 0.5 * (WinterPop[i].omega_a[0] + WinterPop[i].omega_a[1]);
+        mean_omega_a += val;
+        ss_omega_a += val * val;
+
+        val = 0.5 * (WinterPop[i].omega_b[0] + WinterPop[i].omega_b[1]);
+        mean_omega_b += val;
+        ss_omega_b += val * val;
         
         val = WinterPop[i].resources;  // the resource level of individual i 
         mean_resources += val;
@@ -948,6 +986,8 @@ void write_winter_stats(std::ofstream &DataFile)
         mean_phi_b /=  winter_pop;
         mean_psi_a /=  winter_pop;
         mean_psi_b /=  winter_pop;
+        mean_omega_a /=  winter_pop;
+        mean_omega_b /=  winter_pop;
         mean_resources /=  winter_pop;
 		mean_age /= winter_pop;
          
@@ -957,6 +997,8 @@ void write_winter_stats(std::ofstream &DataFile)
         ss_phi_b /= winter_pop;
         ss_psi_a /= winter_pop; 
         ss_psi_b /= winter_pop;
+        ss_omega_a /= winter_pop; 
+        ss_omega_b /= winter_pop;
         ss_resources /= winter_pop; 
 		ss_age /= winter_pop;
     }
@@ -981,6 +1023,10 @@ void write_winter_stats(std::ofstream &DataFile)
 	    << (ss_psi_a - mean_psi_a * mean_psi_a) << ";"
 	    << mean_psi_b << ";"
 	    << (ss_psi_b - mean_psi_b * mean_psi_b) << ";"
+		<< mean_omega_a << ";"
+		<< (ss_omega_a - mean_omega_a * mean_omega_a) << ";"
+		<< mean_omega_b << ";"
+		<< (ss_omega_b - mean_omega_b * mean_omega_b) << ";"
 		<< mean_age << ";"
 		<< (ss_age - mean_age * mean_age) << ";"
 		<< spring_stats.recruited_signallers << ";"
@@ -1028,6 +1074,10 @@ void init_population()
             // initialize allelic values for psi elevation and slope
             WinterPop[i].psi_a[j] = init_psi_a;
             WinterPop[i].psi_b[j] = init_psi_b;
+			
+            // initialize allelic values for omega elevation and slope
+            WinterPop[i].omega_a[j] = init_omega_a;
+            WinterPop[i].omega_b[j] = init_omega_b;
 			
         }
 		
@@ -1399,8 +1449,15 @@ void turn_back(Individual *Origin, int &origin_pop,
             double fraction_left = (double) n_left[s] / (double) n_all[s];
 
             // the individual's own departure rule, applied to the fraction that left
-            double p_go_on = pow(1 + exp(-0.5 * (Dest[i].phi_b[0] + Dest[i].phi_b[1])
-                * (fraction_left - 0.5 * (Dest[i].phi_a[0] + Dest[i].phi_a[1]))), -1);
+			// if departure_reassesment is on, then this is a separate, also evolovable decision rule
+			double slope = 0.5 * (Dest[i].phi_b[0] + Dest[i].phi_b[1]);
+			double threshold = 0.5 * (Dest[i].phi_a[0] + Dest[i].phi_a[1]);
+			if (separate_departure_reassessment_rule)
+			{
+				slope = 0.5 * (Dest[i].omega_b[0] + Dest[i].omega_b[1]);
+			    threshold = 0.5 * (Dest[i].omega_a[0] + Dest[i].omega_a[1]);
+			}
+			double p_go_on = pow(1 + exp(-slope * (fraction_left - threshold)), -1);
             p_go_on = clamp(p_go_on, 0, 1);
 
             // A bird will be able to turn back unless it has exhausted its patience by having already turned back the maximum number of times
@@ -1769,6 +1826,21 @@ void create_offspring(
     offspring.phi_a[1] = mutation(father.phi_a[allele_sample(rng_r)], mu_phi, sdmu_phi);
     offspring.phi_b[0] = mutation(mother.phi_b[allele_sample(rng_r)], mu_phi, sdmu_phi);
     offspring.phi_b[1] = mutation(father.phi_b[allele_sample(rng_r)], mu_phi, sdmu_phi);
+	
+    if (separate_departure_reassessment_rule)
+	{
+		// inherit omega loci (condition-dependent departure reassessment)
+	    offspring.omega_a[0] = mutation(mother.omega_a[allele_sample(rng_r)], mu_omega, sdmu_omega);
+	    offspring.omega_a[1] = mutation(father.omega_a[allele_sample(rng_r)], mu_omega, sdmu_omega);
+	    offspring.omega_b[0] = mutation(mother.omega_b[allele_sample(rng_r)], mu_omega, sdmu_omega);
+	    offspring.omega_b[1] = mutation(father.omega_b[allele_sample(rng_r)], mu_omega, sdmu_omega);
+	} else {
+		for (int i = 0; i < 2; ++i)
+		{
+			offspring.omega_a[i] = 0;
+			offspring.omega_b[i] = 0;
+		}
+	}
 	
     // inherit psi loci (condition-dependent departure)
     offspring.psi_a[0] = mutation(mother.psi_a[allele_sample(rng_r)], mu_psi, sdmu_psi);
