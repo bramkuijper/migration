@@ -75,9 +75,11 @@ double individual_offspring_increment = 0.0;
 double mu_theta = 0.0;
 double mu_phi = 0.0;
 double mu_psi = 0.0;
+double mu_omega = 0.0;
 double sdmu_theta = 0.0;
 double sdmu_phi = 0.0;
 double sdmu_psi = 0.0;
+double sdmu_omega = 0.0;
 
 // migration cost function
 double cost_power = 0.0;
