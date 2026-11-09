@@ -44,8 +44,6 @@ double init_phi_a = 0.0;
 double init_phi_b = 0.0;
 double init_psi_a = 0.0;
 double init_psi_b = 0.0;
-double init_omega_a = 0.0;
-double init_omega_b = 0.0;
 
 // mortality probability 
 double pmort = 0.0;
@@ -342,9 +340,9 @@ void initialize_flock_size_distribution(std::string file_name)
 void init_arguments(int argc, char **argv)
 {
 	// Safety check first
-	if (argc < 36)
+	if (argc < 34)
 	    {
-	        std::cerr << "Expected at least 35 arguments but got " << argc - 1 << std::endl;
+	        std::cerr << "Expected at least 33 arguments but got " << argc - 1 << std::endl;
 	        exit(1);
 	    }
 	
@@ -1072,8 +1070,8 @@ void init_population()
             WinterPop[i].psi_b[j] = init_psi_b;
 			
             // initialize allelic values for omega elevation and slope
-            WinterPop[i].omega_a[j] = init_omega_a;
-            WinterPop[i].omega_b[j] = init_omega_b;
+            WinterPop[i].omega_a[j] = init_phi_a;
+            WinterPop[i].omega_b[j] = init_phi_b;
 			
         }
 		
